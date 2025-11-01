@@ -2893,3 +2893,38 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 **Next Immediate Goal**: Complete Contacts View (Phase 5) with full CRUD functionality using the same state-driven architecture pattern.
 
+---
+
+### Phase 5: Contacts View - IN PROGRESS 🚧
+
+**Status**: Starting implementation with DRY principles.
+
+**Strategy**: Build reusable internal components to avoid repetition across TsuryPhone views.
+
+**Planned Shared Components** (to avoid duplication):
+- `avatar-circle.ts` - Reusable avatar (contacts, call history, blocked)
+- `action-button.ts` - Standard button with icon + haptic feedback
+- `search-bar.ts` - Search input (contacts, potential future use)
+- `empty-state.ts` - Empty list message component
+- `shared-styles.ts` - Common CSS patterns (list items, modals, buttons)
+
+**Planned Utilities**:
+- `formatters.ts` - Phone numbers, dates, durations
+- `haptics.ts` - Centralized haptic feedback helper
+
+**Components to Build**:
+- ✅ Shared utilities and components (reusable within TsuryPhone)
+- [ ] `contacts-view.ts` - Main container
+- [ ] `contacts-search.ts` - Search functionality
+- [ ] `contacts-list.ts` - Contact list with virtualization
+- [ ] `contact-item.ts` - Individual contact card
+- [ ] `contact-modal.ts` - Add/Edit contact form
+
+**Services to Integrate**:
+- `tsuryphone.quick_dial_add` (code optional)
+- `tsuryphone.quick_dial_remove` (by ID)
+- `tsuryphone.dial` (tap to call)
+- `tsuryphone.priority_add/remove`
+
+**Version Target**: v0.1.23-alpha+
+
