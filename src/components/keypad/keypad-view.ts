@@ -22,16 +22,18 @@ export class TsuryPhoneKeypadView extends LitElement {
       const oldHass = changedProps.get("hass") as HomeAssistant;
       if (oldHass) {
         // Get the device prefix from the phone_state entity
-        // sensor.phone_state -> phone, sensor.tsuryphone_phone_state -> tsuryphone
+        // sensor.phone_state -> phone
+        // sensor.tsuryphone_phone_state -> tsuryphone
         const phoneStateEntityId = this._getPhoneStateEntityId();
-        const match = phoneStateEntityId.match(/^sensor\.(.+)_phone_state$/);
-        const devicePrefix = match ? match[1] : "tsuryphone";
+        const stripped = phoneStateEntityId.replace(/^sensor\./, ''); // Remove sensor. prefix
+        const devicePrefix = stripped.replace(/_phone_state$/, ''); // Remove _phone_state suffix
         const entityId = `sensor.${devicePrefix}_current_dialing_number`;
         const oldState = oldHass.states[entityId]?.state;
         const newState = this.hass.states[entityId]?.state;
 
         console.log("[KeypadView] shouldUpdate check:", {
           phoneStateEntityId,
+          stripped,
           devicePrefix,
           entityId,
           oldState,
@@ -224,16 +226,18 @@ export class TsuryPhoneKeypadView extends LitElement {
 
   private _getCurrentDialingNumber(): string {
     // Get the device prefix from the phone_state entity
-    // sensor.phone_state -> phone, sensor.tsuryphone_phone_state -> tsuryphone
+    // sensor.phone_state -> phone
+    // sensor.tsuryphone_phone_state -> tsuryphone
     const phoneStateEntityId = this._getPhoneStateEntityId();
-    const match = phoneStateEntityId.match(/^sensor\.(.+)_phone_state$/);
-    const devicePrefix = match ? match[1] : "tsuryphone";
+    const stripped = phoneStateEntityId.replace(/^sensor\./, ''); // Remove sensor. prefix
+    const devicePrefix = stripped.replace(/_phone_state$/, ''); // Remove _phone_state suffix
     const entityId = `sensor.${devicePrefix}_current_dialing_number`;
     const entity = this.hass?.states[entityId];
     const result =
       entity?.state && entity.state !== "unknown" ? entity.state : "";
     console.log("[KeypadView] _getCurrentDialingNumber:", {
       phoneStateEntityId,
+      stripped,
       devicePrefix,
       entityId,
       entityState: entity?.state,
