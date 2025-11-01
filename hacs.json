@@ -2,5 +2,5 @@
   "name": "TsuryPhone Card",
   "content_type": "plugin",
   "render_readme": true,
-  "filename": "dist/tsuryphone-card.js"
+  "filename": "tsuryphone-card.js"
 }

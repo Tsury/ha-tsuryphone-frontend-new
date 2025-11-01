@@ -67,6 +67,7 @@ jobs:
             exit 1
           fi
           echo "✅ Build artifact exists: $FILENAME"
+          ls -lh "$FILENAME"
 
       - name: Validate info.md exists
         run: |
@@ -90,4 +91,4 @@ jobs:
           echo "✅ All HACS validation checks passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Structure:** Lovelace plugin with hacs.json" >> $GITHUB_STEP_SUMMARY
-          echo "**Frontend bundle:** dist/tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend bundle:** tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY

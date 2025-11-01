@@ -75,14 +75,19 @@ jobs:
       - name: Build frontend bundle
         run: npm run build
 
+      - name: Copy bundle to root for HACS
+        run: |
+          cp dist/tsuryphone-card.js .
+          cp dist/tsuryphone-card.js.map .
+
       - name: Verify build output
         run: |
-          if [ ! -f "dist/tsuryphone-card.js" ]; then
-            echo "Build failed - dist/tsuryphone-card.js not found" >&2
+          if [ ! -f "tsuryphone-card.js" ]; then
+            echo "Build failed - tsuryphone-card.js not found" >&2
             exit 1
           fi
           echo "Build successful - bundle size:"
-          ls -lh dist/tsuryphone-card.js
+          ls -lh tsuryphone-card.js
 
       - name: Commit version bump
         run: |
@@ -101,8 +106,8 @@ jobs:
         run: |
           NEW='${{ steps.bump.outputs.new }}'
           mkdir -p release-package
-          cp dist/tsuryphone-card.js release-package/
-          cp dist/tsuryphone-card.js.map release-package/
+          cp tsuryphone-card.js release-package/
+          cp tsuryphone-card.js.map release-package/
           cp hacs.json release-package/
           cp info.md release-package/
           cp README.md release-package/
@@ -147,13 +152,13 @@ jobs:
           files: |
             tsuryphone-card-${{ steps.bump.outputs.new }}.zip
             tsuryphone-card-${{ steps.bump.outputs.new }}.zip.sha256
-            dist/tsuryphone-card.js
-            dist/tsuryphone-card.js.map
+            tsuryphone-card.js
+            tsuryphone-card.js.map
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summary
         run: |
           echo "Released v${{ steps.bump.outputs.new }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Built bundle: dist/tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY
+          echo "- Built bundle: tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY
           echo "- Created release package: tsuryphone-card-${{ steps.bump.outputs.new }}.zip" >> $GITHUB_STEP_SUMMARY
