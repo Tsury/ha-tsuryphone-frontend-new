@@ -16,6 +16,7 @@ import { haThemeVariables, haButtonStyles, haCardStyles, isDarkMode } from "./st
 import { commonStyles } from "./styles/common";
 import './components/navigation/tsuryphone-navigation';
 import './components/home/home-view';
+import './components/keypad/keypad-view';
 import type { NavigationTab, TabChangeEvent } from './components/navigation/tsuryphone-navigation';
 import type { CallHistoryEntry as CallHistoryEntryType } from './utils/call-history-grouping';
 
@@ -384,17 +385,15 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
-   * Render keypad view (placeholder for now)
+   * Render keypad view
    */
   private _renderKeypadView(): TemplateResult {
     return html`
       <div class="view keypad-view fade-in">
-        <div class="view-header">
-          <h2>Keypad</h2>
-        </div>
-        <div class="view-body">
-          <p class="placeholder-text">Keypad view will be implemented in Phase 4</p>
-        </div>
+        <tsuryphone-keypad-view
+          .hass=${this.hass}
+          .config=${this.config}
+        ></tsuryphone-keypad-view>
       </div>
     `;
   }

@@ -100,23 +100,41 @@ Modern, Android Pixel 8-style Phone + Contacts frontend for the TsuryPhone Home 
 
 **Status**: ✅ Card successfully installed and running in Home Assistant!
 
-### ⏭️ Phase 4: Keypad View (NEXT)
+### ✅ Phase 4: Keypad View (COMPLETED - Nov 1, 2025)
 
 **Objective**: Implement the dialing keypad interface
 
 **Tasks**:
-- [ ] Create `keypad-view.ts` component
-- [ ] Implement number display with formatting
-- [ ] Create keypad grid (0-9, *, #, +)
-- [ ] Add call button (green) and backspace
-- [ ] Integrate with `tsuryphone.dial_number` service
-- [ ] Add haptic feedback on button press
-- [ ] Support international dialing (+ prefix)
-- [ ] Show dialing state feedback
-- [ ] Handle error states (invalid number, etc.)
+- [x] Create `keypad-view.ts` component
+- [x] Implement number display with formatting
+- [x] Create keypad grid (0-9, *, #, +)
+- [x] Add call button (green) and backspace
+- [x] Integrate with `tsuryphone.dial_number` service
+- [x] Add haptic feedback on button press
+- [x] Support international dialing (+ prefix via long press on 0)
+- [x] Show dialing state feedback
+- [x] Handle error states (invalid number, etc.)
+
+**Implemented Components**:
+- `src/components/keypad/keypad-view.ts` - Main keypad container
+- `src/components/keypad/dialed-number-display.ts` - Number display with backspace
+- `src/components/keypad/keypad-grid.ts` - 3x4 button grid
+
+**Features**:
+- ✅ Dialed number display with spacing for readability
+- ✅ Backspace button (click to delete, right-click to clear all)
+- ✅ 3x4 keypad grid with proper labels (ABC, DEF, etc.)
+- ✅ Long press on 0 to insert "+" for international dialing
+- ✅ Haptic feedback on all button presses (light/medium vibrations)
+- ✅ Green call button with phone icon
+- ✅ Redial functionality (calls last number if no digits entered)
+- ✅ Integrated with `tsuryphone.dial_number` service
+- ✅ Touch-optimized with proper tap targets (72px minimum)
+- ✅ Responsive design for mobile and desktop
 
 **Dependencies**: Phase 3.5 complete ✅
-### ⏸️ Phase 5: Contacts View (PENDING)
+
+### ⏸️ Phase 5: Contacts View (NEXT)
 ### ⏸️ Phase 6: Blocked View (PENDING)
 ### ⏸️ Phase 7: Contact Modal (PENDING)
 ### ⏸️ Phase 8: Call Modal (PENDING)
@@ -141,11 +159,25 @@ ha-tsuryphone-frontend-new/
 ├── src/
 │   ├── tsuryphone-card.ts (main card)
 │   ├── components/
+│   │   ├── home/
+│   │   │   ├── home-view.ts
+│   │   │   ├── call-log-filters.ts
+│   │   │   ├── call-log-list.ts
+│   │   │   ├── call-log-item.ts
+│   │   │   └── frequent-contacts.ts
+│   │   ├── keypad/
+│   │   │   ├── keypad-view.ts
+│   │   │   ├── dialed-number-display.ts
+│   │   │   └── keypad-grid.ts
 │   │   └── navigation/
 │   │       └── tsuryphone-navigation.ts
 │   ├── styles/
 │   │   ├── theme.ts
 │   │   └── common.ts
+│   ├── utils/
+│   │   ├── avatar-color.ts
+│   │   ├── call-history-grouping.ts
+│   │   └── date-formatter.ts
 │   └── types/
 │       ├── homeassistant.d.ts
 │       └── tsuryphone.d.ts

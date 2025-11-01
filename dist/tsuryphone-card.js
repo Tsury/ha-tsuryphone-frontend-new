@@ -1576,6 +1576,545 @@ TsuryPhoneHomeView = __decorate([
 ], TsuryPhoneHomeView);
 
 /**
+ * Dialed Number Display Component
+ * Shows the currently dialed number with backspace functionality
+ */
+let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends i {
+    constructor() {
+        super(...arguments);
+        this.dialedNumber = '';
+    }
+    static get styles() {
+        return i$3 `
+      :host {
+        display: block;
+      }
+
+      .display-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 64px;
+        padding: 12px 16px;
+        background: var(--card-background-color);
+        border-bottom: 2px solid var(--divider-color);
+      }
+
+      .number-display {
+        flex: 1;
+        font-size: 32px;
+        font-weight: 300;
+        color: var(--primary-text-color);
+        letter-spacing: 2px;
+        text-align: center;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
+
+      .number-display.empty {
+        color: var(--secondary-text-color);
+        font-size: 18px;
+        font-weight: 400;
+        letter-spacing: normal;
+      }
+
+      .backspace-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+
+      .backspace-button:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .backspace-button:active {
+        background: var(--divider-color);
+      }
+
+      .backspace-button:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .backspace-button:disabled:hover {
+        background: transparent;
+      }
+
+      .backspace-icon {
+        width: 24px;
+        height: 24px;
+        fill: var(--primary-text-color);
+      }
+
+      .placeholder {
+        opacity: 0.5;
+      }
+    `;
+    }
+    _handleBackspace() {
+        this.dispatchEvent(new CustomEvent('backspace', { bubbles: true, composed: true }));
+    }
+    _handleLongPress() {
+        // Long press on backspace clears all
+        this.dispatchEvent(new CustomEvent('clear', { bubbles: true, composed: true }));
+    }
+    _formatDialedNumber(number) {
+        if (!number)
+            return '';
+        // Format the number with spaces for readability
+        // Simple formatting: add space every 3 digits (can be enhanced)
+        let formatted = '';
+        for (let i = 0; i < number.length; i++) {
+            if (i > 0 && i % 3 === 0) {
+                formatted += ' ';
+            }
+            formatted += number[i];
+        }
+        return formatted;
+    }
+    render() {
+        const hasNumber = this.dialedNumber.length > 0;
+        const formattedNumber = this._formatDialedNumber(this.dialedNumber);
+        return x `
+      <div class="display-container">
+        <div class="number-display ${!hasNumber ? 'empty' : ''}">
+          ${hasNumber
+            ? formattedNumber
+            : x `<span class="placeholder">Enter number</span>`}
+        </div>
+        <button
+          class="backspace-button"
+          @click=${this._handleBackspace}
+          @contextmenu=${(e) => {
+            e.preventDefault();
+            this._handleLongPress();
+        }}
+          ?disabled=${!hasNumber}
+          aria-label="Backspace"
+          title="Click to delete, right-click to clear all"
+        >
+          <svg class="backspace-icon" viewBox="0 0 24 24">
+            <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ type: String })
+], TsuryPhoneDialedNumberDisplay.prototype, "dialedNumber", void 0);
+TsuryPhoneDialedNumberDisplay = __decorate([
+    t('tsuryphone-dialed-number-display')
+], TsuryPhoneDialedNumberDisplay);
+
+/**
+ * Keypad Grid Component
+ * 3x4 grid of number buttons with *, 0, # on bottom row
+ */
+let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
+    constructor() {
+        super(...arguments);
+        this._longPressTimer = null;
+        this._longPressTriggered = false;
+        this._buttons = [
+            { digit: '1', letters: '' },
+            { digit: '2', letters: 'ABC' },
+            { digit: '3', letters: 'DEF' },
+            { digit: '4', letters: 'GHI' },
+            { digit: '5', letters: 'JKL' },
+            { digit: '6', letters: 'MNO' },
+            { digit: '7', letters: 'PQRS' },
+            { digit: '8', letters: 'TUV' },
+            { digit: '9', letters: 'WXYZ' },
+            { digit: '*', letters: '' },
+            { digit: '0', letters: '+', longPressDigit: '+' },
+            { digit: '#', letters: '' },
+        ];
+    }
+    static get styles() {
+        return i$3 `
+      :host {
+        display: block;
+      }
+
+      .keypad-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        max-width: 320px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      .keypad-button {
+        aspect-ratio: 1;
+        border: none;
+        background: var(--card-background-color);
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 300;
+        color: var(--primary-text-color);
+        transition: background 0.15s, transform 0.1s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        position: relative;
+        min-height: 72px;
+      }
+
+      .keypad-button:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .keypad-button:active {
+        transform: scale(0.95);
+        background: var(--divider-color);
+      }
+
+      .keypad-button.long-press-active {
+        background: var(--primary-color);
+        color: var(--text-primary-color);
+      }
+
+      .digit {
+        font-size: 32px;
+        font-weight: 400;
+        line-height: 1;
+      }
+
+      .letters {
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        margin-top: 4px;
+        opacity: 0.6;
+        text-transform: uppercase;
+      }
+
+      .long-press-hint {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 12px;
+        opacity: 0.5;
+      }
+
+      @media (max-width: 400px) {
+        .keypad-grid {
+          gap: 8px;
+          padding: 12px;
+        }
+
+        .keypad-button {
+          min-height: 64px;
+        }
+
+        .digit {
+          font-size: 28px;
+        }
+      }
+    `;
+    }
+    _handlePointerDown(button) {
+        this._longPressTriggered = false;
+        // Start long press timer if button supports it
+        if (button.longPressDigit) {
+            this._longPressTimer = window.setTimeout(() => {
+                this._longPressTriggered = true;
+                this._emitDigit(button.longPressDigit);
+                this._triggerHaptic('medium');
+            }, 500);
+        }
+    }
+    _handlePointerUp(button) {
+        // Clear long press timer
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = null;
+        }
+        // If long press was triggered, don't emit the regular digit
+        if (this._longPressTriggered) {
+            this._longPressTriggered = false;
+            return;
+        }
+        // Emit the regular digit
+        this._emitDigit(button.digit);
+        this._triggerHaptic('light');
+    }
+    _handlePointerCancel() {
+        // Clear long press timer if pointer is cancelled (e.g., scrolling)
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = null;
+        }
+        this._longPressTriggered = false;
+    }
+    _emitDigit(digit) {
+        this.dispatchEvent(new CustomEvent('digit-press', {
+            detail: { digit },
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    _triggerHaptic(type) {
+        if (!navigator.vibrate)
+            return;
+        const durations = {
+            light: 10,
+            medium: 20,
+        };
+        navigator.vibrate(durations[type]);
+    }
+    render() {
+        return x `
+      <div class="keypad-grid">
+        ${this._buttons.map((button) => x `
+            <button
+              class="keypad-button"
+              @pointerdown=${() => this._handlePointerDown(button)}
+              @pointerup=${() => this._handlePointerUp(button)}
+              @pointercancel=${() => this._handlePointerCancel()}
+              aria-label="${button.digit}${button.letters ? ` ${button.letters}` : ''}"
+              title="${button.longPressDigit ? `Long press for ${button.longPressDigit}` : ''}"
+            >
+              <span class="digit">${button.digit}</span>
+              ${button.letters
+            ? x `<span class="letters">${button.letters}</span>`
+            : ''}
+              ${button.longPressDigit && button.longPressDigit !== button.letters
+            ? x `<span class="long-press-hint">${button.longPressDigit}</span>`
+            : ''}
+            </button>
+          `)}
+      </div>
+    `;
+    }
+};
+TsuryPhoneKeypadGrid = __decorate([
+    t('tsuryphone-keypad-grid')
+], TsuryPhoneKeypadGrid);
+
+/**
+ * Keypad View Component
+ * Main container for the dialing keypad
+ */
+let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
+    constructor() {
+        super(...arguments);
+        this._dialedNumber = '';
+    }
+    static get styles() {
+        return i$3 `
+      :host {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: var(--card-background-color);
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .keypad-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .display-section {
+        flex: 0 0 auto;
+        margin-bottom: 24px;
+      }
+
+      .keypad-section {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .call-button-section {
+        flex: 0 0 auto;
+        margin-top: 24px;
+        padding: 0 16px;
+      }
+
+      .call-button {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--success-color, #4caf50);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        transition: transform 0.1s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+      }
+
+      .call-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+      }
+
+      .call-button:active {
+        transform: scale(0.95);
+      }
+
+      .call-button:disabled {
+        background: var(--disabled-color, #9e9e9e);
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .call-button:disabled:hover {
+        transform: none;
+      }
+
+      .call-icon {
+        width: 32px;
+        height: 32px;
+        fill: white;
+      }
+    `;
+    }
+    _handleDigitPress(digit) {
+        this._dialedNumber += digit;
+        this._triggerHaptic('light');
+    }
+    _handleBackspace() {
+        if (this._dialedNumber.length > 0) {
+            this._dialedNumber = this._dialedNumber.slice(0, -1);
+            this._triggerHaptic('light');
+        }
+    }
+    _handleClear() {
+        this._dialedNumber = '';
+        this._triggerHaptic('light');
+    }
+    async _handleCall() {
+        if (!this._canCall())
+            return;
+        const numberToDial = this._dialedNumber || this._getLastCalledNumber();
+        if (!numberToDial)
+            return;
+        this._triggerHaptic('medium');
+        try {
+            await this.hass.callService('tsuryphone', 'dial_number', {
+                number: numberToDial,
+            });
+            // Clear the dialed number after successful dial
+            this._dialedNumber = '';
+        }
+        catch (error) {
+            console.error('Failed to dial number:', error);
+            this._triggerHaptic('heavy');
+        }
+    }
+    _canCall() {
+        // Can call if we have a dialed number OR we have call history to redial
+        return this._dialedNumber.length > 0 || !!this._getLastCalledNumber();
+    }
+    _getLastCalledNumber() {
+        // Get the phone state entity
+        const deviceId = this.config?.device_id || 'tsuryphone';
+        let phoneStateEntityId;
+        if (this.config?.entity) {
+            phoneStateEntityId = this.config.entity.startsWith('sensor.')
+                ? this.config.entity
+                : `sensor.${this.config.entity}`;
+        }
+        else {
+            phoneStateEntityId = `sensor.${deviceId}_phone_state`;
+        }
+        const phoneState = this.hass?.states[phoneStateEntityId];
+        const callHistory = phoneState?.attributes?.call_log || [];
+        if (callHistory.length === 0)
+            return null;
+        // Get the most recent call
+        const lastCall = callHistory[0];
+        return lastCall.number || null;
+    }
+    _triggerHaptic(type) {
+        if (!navigator.vibrate)
+            return;
+        const durations = {
+            light: 10,
+            medium: 20,
+            heavy: 30,
+        };
+        navigator.vibrate(durations[type]);
+    }
+    render() {
+        return x `
+      <div class="keypad-container">
+        <div class="display-section">
+          <tsuryphone-dialed-number-display
+            .dialedNumber=${this._dialedNumber}
+            @backspace=${this._handleBackspace}
+            @clear=${this._handleClear}
+          ></tsuryphone-dialed-number-display>
+        </div>
+
+        <div class="keypad-section">
+          <tsuryphone-keypad-grid
+            @digit-press=${(e) => this._handleDigitPress(e.detail.digit)}
+          ></tsuryphone-keypad-grid>
+        </div>
+
+        <div class="call-button-section">
+          <button
+            class="call-button"
+            @click=${this._handleCall}
+            ?disabled=${!this._canCall()}
+            aria-label="Call"
+          >
+            <svg class="call-icon" viewBox="0 0 24 24">
+              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneKeypadView.prototype, "hass", void 0);
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneKeypadView.prototype, "config", void 0);
+__decorate([
+    r()
+], TsuryPhoneKeypadView.prototype, "_dialedNumber", void 0);
+TsuryPhoneKeypadView = __decorate([
+    t('tsuryphone-keypad-view')
+], TsuryPhoneKeypadView);
+
+/**
  * TsuryPhone Card - Main Component
  * A modern phone and contacts interface for Home Assistant
  */
@@ -1889,17 +2428,15 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         // TODO: Open call details modal in Phase 8
     }
     /**
-     * Render keypad view (placeholder for now)
+     * Render keypad view
      */
     _renderKeypadView() {
         return x `
       <div class="view keypad-view fade-in">
-        <div class="view-header">
-          <h2>Keypad</h2>
-        </div>
-        <div class="view-body">
-          <p class="placeholder-text">Keypad view will be implemented in Phase 4</p>
-        </div>
+        <tsuryphone-keypad-view
+          .hass=${this.hass}
+          .config=${this.config}
+        ></tsuryphone-keypad-view>
       </div>
     `;
     }
