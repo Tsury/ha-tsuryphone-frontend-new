@@ -124,7 +124,9 @@ export class TsuryPhoneKeypadView extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'dial_number', {
+      // Call the dial service
+      // Note: The service is device-targeted, HA will route it to the correct device
+      await this.hass.callService('tsuryphone', 'dial', {
         number: numberToDial,
       });
 
