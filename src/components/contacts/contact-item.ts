@@ -146,7 +146,7 @@ export class TsuryPhoneContactItem extends LitElement {
     const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
     const priorityCallers = phoneState?.attributes?.priority_callers || [];
     const isPriority = priorityCallers.some(
-      (p: any) => p.normalized_number === this.contact.normalized_number
+      (p: any) => p.number === this.contact.number  // Both are normalized E.164 format
     );
 
     return html`

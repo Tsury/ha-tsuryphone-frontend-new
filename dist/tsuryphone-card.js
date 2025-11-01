@@ -2859,7 +2859,8 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
         // Check if contact is priority by looking in priority_callers list
         const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
         const priorityCallers = phoneState?.attributes?.priority_callers || [];
-        const isPriority = priorityCallers.some((p) => p.normalized_number === this.contact.normalized_number);
+        const isPriority = priorityCallers.some((p) => p.number === this.contact.number // Both are normalized E.164 format
+        );
         return x `
       <div class="list-item" @click=${this._handleEdit}>
         <div class="contact-info">
