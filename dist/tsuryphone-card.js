@@ -1918,6 +1918,22 @@ TsuryPhoneKeypadGrid = __decorate([
  */
 let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
     // No local state - everything driven by entities
+    shouldUpdate(changedProps) {
+        if (changedProps.has('hass')) {
+            const oldHass = changedProps.get('hass');
+            if (oldHass) {
+                const deviceId = this.config?.device_id || 'tsuryphone';
+                const entityId = `sensor.${deviceId}_current_dialing_number`;
+                const oldState = oldHass.states[entityId]?.state;
+                const newState = this.hass.states[entityId]?.state;
+                // Force update if the dialing number changed
+                if (oldState !== newState) {
+                    return true;
+                }
+            }
+        }
+        return super.shouldUpdate(changedProps);
+    }
     static get styles() {
         return i$3 `
       :host {
@@ -1968,7 +1984,9 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         align-items: center;
         justify-content: center;
         margin: 0 auto;
-        transition: transform 0.1s, box-shadow 0.2s;
+        transition:
+          transform 0.1s,
+          box-shadow 0.2s;
         box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
       }
 
@@ -1999,18 +2017,18 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
     `;
     }
     async _handleDigitPress(digit) {
-        this._triggerHaptic('light');
+        this._triggerHaptic("light");
         try {
             // Send digit to backend - no optimistic update
-            await this.hass.callService('tsuryphone', 'dial_digit', {
+            await this.hass.callService("tsuryphone", "dial_digit", {
                 digit: parseInt(digit, 10),
             }, {
                 entity_id: this._getPhoneStateEntityId(),
             });
         }
         catch (err) {
-            console.error('Failed to dial digit:', err);
-            this._triggerHaptic('heavy');
+            console.error("Failed to dial digit:", err);
+            this._triggerHaptic("heavy");
         }
     }
     async _handleBackspace() {
@@ -2019,19 +2037,19 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             return;
         try {
             // Request delete from backend - no optimistic update
-            await this.hass.callService('tsuryphone', 'delete_last_digit', {}, {
+            await this.hass.callService("tsuryphone", "delete_last_digit", {}, {
                 entity_id: this._getPhoneStateEntityId(),
             });
-            this._triggerHaptic('light');
+            this._triggerHaptic("light");
         }
         catch (err) {
-            console.error('Failed to delete last digit:', err);
-            this._triggerHaptic('heavy');
+            console.error("Failed to delete last digit:", err);
+            this._triggerHaptic("heavy");
         }
     }
     _handleClear() {
         // Clear is just deleting all digits - let user delete one by one
-        this._triggerHaptic('light');
+        this._triggerHaptic("light");
     }
     async _handleCall() {
         if (!this._canCall())
@@ -2039,10 +2057,10 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         const numberToDial = this._getCurrentDialingNumber() || this._getLastCalledNumber();
         if (!numberToDial)
             return;
-        this._triggerHaptic('medium');
+        this._triggerHaptic("medium");
         try {
             // Call the dial service
-            await this.hass.callService('tsuryphone', 'dial', {
+            await this.hass.callService("tsuryphone", "dial", {
                 number: numberToDial,
             }, {
                 entity_id: this._getPhoneStateEntityId(),
@@ -2050,8 +2068,8 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             // The backend will clear the dialing number after successful dial
         }
         catch (error) {
-            console.error('Failed to dial number:', error);
-            this._triggerHaptic('heavy');
+            console.error("Failed to dial number:", error);
+            this._triggerHaptic("heavy");
         }
     }
     _canCall() {
@@ -2059,15 +2077,15 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         return !!this._getCurrentDialingNumber() || !!this._getLastCalledNumber();
     }
     _getCurrentDialingNumber() {
-        const deviceId = this.config?.device_id || 'tsuryphone';
+        const deviceId = this.config?.device_id || "tsuryphone";
         const entityId = `sensor.${deviceId}_current_dialing_number`;
         const entity = this.hass?.states[entityId];
-        return entity?.state && entity.state !== 'unknown' ? entity.state : '';
+        return entity?.state && entity.state !== "unknown" ? entity.state : "";
     }
     _getPhoneStateEntityId() {
-        const deviceId = this.config?.device_id || 'tsuryphone';
+        const deviceId = this.config?.device_id || "tsuryphone";
         if (this.config?.entity) {
-            return this.config.entity.startsWith('sensor.')
+            return this.config.entity.startsWith("sensor.")
                 ? this.config.entity
                 : `sensor.${this.config.entity}`;
         }
@@ -2119,7 +2137,9 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             aria-label="Call"
           >
             <svg class="call-icon" viewBox="0 0 24 24">
-              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+              <path
+                d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"
+              />
             </svg>
           </button>
         </div>
@@ -2134,7 +2154,7 @@ __decorate([
     n({ attribute: false })
 ], TsuryPhoneKeypadView.prototype, "config", void 0);
 TsuryPhoneKeypadView = __decorate([
-    t('tsuryphone-keypad-view')
+    t("tsuryphone-keypad-view")
 ], TsuryPhoneKeypadView);
 
 /**

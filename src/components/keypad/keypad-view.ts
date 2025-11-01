@@ -3,19 +3,37 @@
  * Main container for the dialing keypad
  */
 
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { HomeAssistant } from '../../types/homeassistant';
-import { TsuryPhoneCardConfig } from '../../types/tsuryphone';
-import './dialed-number-display';
-import './keypad-grid';
+import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { HomeAssistant } from "../../types/homeassistant";
+import { TsuryPhoneCardConfig } from "../../types/tsuryphone";
+import "./dialed-number-display";
+import "./keypad-grid";
 
-@customElement('tsuryphone-keypad-view')
+@customElement("tsuryphone-keypad-view")
 export class TsuryPhoneKeypadView extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: TsuryPhoneCardConfig;
 
   // No local state - everything driven by entities
+
+  protected shouldUpdate(changedProps: Map<string, any>): boolean {
+    if (changedProps.has('hass')) {
+      const oldHass = changedProps.get('hass') as HomeAssistant;
+      if (oldHass) {
+        const deviceId = this.config?.device_id || 'tsuryphone';
+        const entityId = `sensor.${deviceId}_current_dialing_number`;
+        const oldState = oldHass.states[entityId]?.state;
+        const newState = this.hass.states[entityId]?.state;
+        
+        // Force update if the dialing number changed
+        if (oldState !== newState) {
+          return true;
+        }
+      }
+    }
+    return super.shouldUpdate(changedProps);
+  }
 
   static get styles(): CSSResultGroup {
     return css`
@@ -67,7 +85,9 @@ export class TsuryPhoneKeypadView extends LitElement {
         align-items: center;
         justify-content: center;
         margin: 0 auto;
-        transition: transform 0.1s, box-shadow 0.2s;
+        transition:
+          transform 0.1s,
+          box-shadow 0.2s;
         box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
       }
 
@@ -99,18 +119,23 @@ export class TsuryPhoneKeypadView extends LitElement {
   }
 
   private async _handleDigitPress(digit: string): Promise<void> {
-    this._triggerHaptic('light');
-    
+    this._triggerHaptic("light");
+
     try {
       // Send digit to backend - no optimistic update
-      await this.hass.callService('tsuryphone', 'dial_digit', {
-        digit: parseInt(digit, 10),
-      }, {
-        entity_id: this._getPhoneStateEntityId(),
-      });
+      await this.hass.callService(
+        "tsuryphone",
+        "dial_digit",
+        {
+          digit: parseInt(digit, 10),
+        },
+        {
+          entity_id: this._getPhoneStateEntityId(),
+        }
+      );
     } catch (err) {
-      console.error('Failed to dial digit:', err);
-      this._triggerHaptic('heavy');
+      console.error("Failed to dial digit:", err);
+      this._triggerHaptic("heavy");
     }
   }
 
@@ -120,42 +145,53 @@ export class TsuryPhoneKeypadView extends LitElement {
 
     try {
       // Request delete from backend - no optimistic update
-      await this.hass.callService('tsuryphone', 'delete_last_digit', {}, {
-        entity_id: this._getPhoneStateEntityId(),
-      });
-      
-      this._triggerHaptic('light');
+      await this.hass.callService(
+        "tsuryphone",
+        "delete_last_digit",
+        {},
+        {
+          entity_id: this._getPhoneStateEntityId(),
+        }
+      );
+
+      this._triggerHaptic("light");
     } catch (err) {
-      console.error('Failed to delete last digit:', err);
-      this._triggerHaptic('heavy');
+      console.error("Failed to delete last digit:", err);
+      this._triggerHaptic("heavy");
     }
   }
 
   private _handleClear(): void {
     // Clear is just deleting all digits - let user delete one by one
-    this._triggerHaptic('light');
+    this._triggerHaptic("light");
   }
 
   private async _handleCall(): Promise<void> {
     if (!this._canCall()) return;
 
-    const numberToDial = this._getCurrentDialingNumber() || this._getLastCalledNumber();
+    const numberToDial =
+      this._getCurrentDialingNumber() || this._getLastCalledNumber();
     if (!numberToDial) return;
 
-    this._triggerHaptic('medium');
+    this._triggerHaptic("medium");
 
     try {
       // Call the dial service
-      await this.hass.callService('tsuryphone', 'dial', {
-        number: numberToDial,
-      }, {
-        entity_id: this._getPhoneStateEntityId(),
-      });
+      await this.hass.callService(
+        "tsuryphone",
+        "dial",
+        {
+          number: numberToDial,
+        },
+        {
+          entity_id: this._getPhoneStateEntityId(),
+        }
+      );
 
       // The backend will clear the dialing number after successful dial
     } catch (error) {
-      console.error('Failed to dial number:', error);
-      this._triggerHaptic('heavy');
+      console.error("Failed to dial number:", error);
+      this._triggerHaptic("heavy");
     }
   }
 
@@ -165,21 +201,21 @@ export class TsuryPhoneKeypadView extends LitElement {
   }
 
   private _getCurrentDialingNumber(): string {
-    const deviceId = this.config?.device_id || 'tsuryphone';
+    const deviceId = this.config?.device_id || "tsuryphone";
     const entityId = `sensor.${deviceId}_current_dialing_number`;
     const entity = this.hass?.states[entityId];
-    return entity?.state && entity.state !== 'unknown' ? entity.state : '';
+    return entity?.state && entity.state !== "unknown" ? entity.state : "";
   }
 
   private _getPhoneStateEntityId(): string {
-    const deviceId = this.config?.device_id || 'tsuryphone';
-    
+    const deviceId = this.config?.device_id || "tsuryphone";
+
     if (this.config?.entity) {
-      return this.config.entity.startsWith('sensor.') 
-        ? this.config.entity 
+      return this.config.entity.startsWith("sensor.")
+        ? this.config.entity
         : `sensor.${this.config.entity}`;
     }
-    
+
     return `sensor.${deviceId}_phone_state`;
   }
 
@@ -195,7 +231,7 @@ export class TsuryPhoneKeypadView extends LitElement {
     return lastCall.number || null;
   }
 
-  private _triggerHaptic(type: 'light' | 'medium' | 'heavy'): void {
+  private _triggerHaptic(type: "light" | "medium" | "heavy"): void {
     if (!navigator.vibrate) return;
 
     const durations = {
@@ -209,7 +245,7 @@ export class TsuryPhoneKeypadView extends LitElement {
 
   protected render(): TemplateResult {
     const dialedNumber = this._getCurrentDialingNumber();
-    
+
     return html`
       <div class="keypad-container">
         <div class="display-section">
@@ -222,7 +258,8 @@ export class TsuryPhoneKeypadView extends LitElement {
 
         <div class="keypad-section">
           <tsuryphone-keypad-grid
-            @digit-press=${(e: CustomEvent) => this._handleDigitPress(e.detail.digit)}
+            @digit-press=${(e: CustomEvent) =>
+              this._handleDigitPress(e.detail.digit)}
           ></tsuryphone-keypad-grid>
         </div>
 
@@ -234,7 +271,9 @@ export class TsuryPhoneKeypadView extends LitElement {
             aria-label="Call"
           >
             <svg class="call-icon" viewBox="0 0 24 24">
-              <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+              <path
+                d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"
+              />
             </svg>
           </button>
         </div>
@@ -245,6 +284,6 @@ export class TsuryPhoneKeypadView extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-keypad-view': TsuryPhoneKeypadView;
+    "tsuryphone-keypad-view": TsuryPhoneKeypadView;
   }
 }
