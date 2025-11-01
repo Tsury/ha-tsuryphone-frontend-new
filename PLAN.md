@@ -2895,36 +2895,123 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 ---
 
-### Phase 5: Contacts View - IN PROGRESS 🚧
+### Phase 5: Contacts View - ✅ COMPLETED (Nov 2, 2025)
 
-**Status**: Starting implementation with DRY principles.
+**Status**: Contacts view fully functional with all features working!
 
-**Strategy**: Build reusable internal components to avoid repetition across TsuryPhone views.
+**Strategy**: Built reusable internal components following DRY principles within TsuryPhone.
 
-**Planned Shared Components** (to avoid duplication):
-- `avatar-circle.ts` - Reusable avatar (contacts, call history, blocked)
-- `action-button.ts` - Standard button with icon + haptic feedback
-- `search-bar.ts` - Search input (contacts, potential future use)
-- `empty-state.ts` - Empty list message component
-- `shared-styles.ts` - Common CSS patterns (list items, modals, buttons)
+**Completed Shared Components**:
+- ✅ `utils/haptics.ts` - Centralized haptic feedback (light/medium/heavy)
+- ✅ `utils/formatters.ts` - Phone numbers, dates, durations, avatar colors
+- ✅ `utils/entity-discovery.ts` - Device-based entity resolution (future-proof)
+- ✅ `styles/shared-styles.ts` - Common CSS (avatars, lists, modals, forms, empty states)
+- ✅ `components/shared/avatar.ts` - Reusable letter avatars with color generation
+- ✅ `components/shared/empty-state.ts` - Empty state messages with actions
 
-**Planned Utilities**:
-- `formatters.ts` - Phone numbers, dates, durations
-- `haptics.ts` - Centralized haptic feedback helper
+**Completed Contact Components**:
+- ✅ `contacts-view.ts` - Main container with search, grouping, add button
+- ✅ `contact-item.ts` - Individual contact with avatar, name, number, call button, priority star
 
-**Components to Build**:
-- ✅ Shared utilities and components (reusable within TsuryPhone)
-- [ ] `contacts-view.ts` - Main container
-- [ ] `contacts-search.ts` - Search functionality
-- [ ] `contacts-list.ts` - Contact list with virtualization
-- [ ] `contact-item.ts` - Individual contact card
-- [ ] `contact-modal.ts` - Add/Edit contact form
+**Features Implemented**:
+- ✅ Display contacts from `phone_state.attributes.quick_dials`
+- ✅ Search/filter by name or number
+- ✅ Alphabetical grouping by first letter
+- ✅ Call button on each contact (with haptic feedback)
+- ✅ Priority star indicator for priority_numbers
+- ✅ Empty state with "Add Contact" action
+- ✅ Tap contact to edit (fires edit-contact event)
+- ✅ Reusable components prevent code duplication
 
-**Services to Integrate**:
+**Backend Integration** (v1.0.126):
+- ✅ Exposed `quick_dials` in `phone_state` sensor attributes
+- ✅ State-driven architecture - backend is single source of truth
+- ✅ No service calls needed for display (reactive updates)
+
+**Services Ready for Modal** (Phase 6):
 - `tsuryphone.quick_dial_add` (code optional)
 - `tsuryphone.quick_dial_remove` (by ID)
-- `tsuryphone.dial` (tap to call)
+- `tsuryphone.dial` (tap to call - working)
 - `tsuryphone.priority_add/remove`
 
-**Version Target**: v0.1.23-alpha+
+**Version Delivered**: v0.1.27-alpha
+**Backend Version**: v1.0.126
+
+**Next Phase**: Contact Modal (Add/Edit/Delete CRUD operations)
+
+
+### Phase 6: Contact Modal - NEXT 🎯
+
+**Objective**: Implement complete CRUD operations for contacts with modal UI.
+
+**Components to Build**:
+- [ ] `components/modals/contact-modal.ts` - Main modal container
+- [ ] Form UI with fields:
+  - [ ] Name field (required)
+  - [ ] Phone number field (required, validation)
+  - [ ] Code field (optional, auto-generated if empty)
+  - [ ] Priority toggle (checkbox/switch)
+- [ ] Modes:
+  - [ ] Add mode (triggered by "Add Contact" button)
+  - [ ] Edit mode (triggered by tapping contact)
+- [ ] Actions:
+  - [ ] Save button (calls backend service)
+  - [ ] Delete button (edit mode only, with confirmation)
+  - [ ] Cancel button
+
+**Form Validation**:
+- Name: Required, min 1 character
+- Number: Required, valid phone format
+- Code: Optional, if provided must be unique (check against existing quick_dials)
+- Priority: Boolean toggle
+
+**Service Calls**:
+- **Add**: `tsuryphone.quick_dial_add` with `{number, name, code?, priority?}`
+- **Edit**: Delete old + Add new (backend limitation workaround)
+  - First: `tsuryphone.quick_dial_remove` with `{id: oldId}`
+  - Then: `tsuryphone.quick_dial_add` with new values
+- **Delete**: `tsuryphone.quick_dial_remove` with `{id}`
+- **Priority**: 
+  - Add: `tsuryphone.priority_add` with `{number}`
+  - Remove: `tsuryphone.priority_remove` with `{id}` (from priority_callers list)
+
+**State Management**:
+- Modal open/close state
+- Current mode (add/edit)
+- Current contact data (for edit mode)
+- Form field values
+- Validation errors
+- Loading/saving state
+
+**UI/UX Details**:
+- Modal overlay (darkens background)
+- Modal centered on screen
+- Close button (X) in top-right
+- Title changes: "Add Contact" vs "Edit Contact"
+- Form fields with labels and error messages
+- Delete button in red (edit mode only)
+- Confirmation dialog for delete action
+- Success/error toast notifications
+- Haptic feedback on actions
+
+**Integration Points**:
+- Listen to `edit-contact` event from `contact-item.ts`
+- Listen to `action` event from `empty-state.ts` (Add Contact button)
+- Refresh contacts list after add/edit/delete
+- Use shared modal styles from `styles/shared-styles.ts`
+- Use shared button styles and haptic feedback
+
+**Edge Cases**:
+- Duplicate code detection (show error)
+- Invalid phone number format (show error)
+- Network errors during service calls (show error toast)
+- Concurrent edits (refresh after save)
+- Delete confirmation (prevent accidental deletion)
+
+**Version Target**: v0.1.28-alpha+
+
+**Dependencies**: Phase 5 complete ✅
+
+
+### Phase 6: Contact Modal - NEXT 🎯
 
