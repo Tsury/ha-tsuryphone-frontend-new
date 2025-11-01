@@ -103,7 +103,17 @@ export class TsuryPhoneContactsView extends LitElement {
   private _getContacts(): QuickDialEntry[] {
     const phoneStateEntityId = this._getPhoneStateEntityId();
     const phoneState = this.hass?.states[phoneStateEntityId];
-    return phoneState?.attributes?.quick_dials || [];
+    const contacts = phoneState?.attributes?.quick_dials || [];
+    
+    console.log("[ContactsView] Getting contacts:", {
+      phoneStateEntityId,
+      phoneState: phoneState?.state,
+      hasAttributes: !!phoneState?.attributes,
+      quick_dials: phoneState?.attributes?.quick_dials,
+      contactCount: contacts.length,
+    });
+    
+    return contacts;
   }
 
   private _getFilteredContacts(): QuickDialEntry[] {

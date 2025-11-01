@@ -460,7 +460,7 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
     render() {
         return x `
       <nav class="navigation ${this.disabled ? 'disabled' : ''}" role="tablist">
-        ${this._renderTab('home', 'mdi:history', 'Home')}
+        ${this._renderTab('home', 'mdi:home', 'Home')}
         ${this._renderTab('keypad', 'mdi:dialpad', 'Keypad')}
         ${this._renderTab('contacts', 'mdi:contacts', 'Contacts')}
       </nav>
@@ -3000,7 +3000,15 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
     _getContacts() {
         const phoneStateEntityId = this._getPhoneStateEntityId();
         const phoneState = this.hass?.states[phoneStateEntityId];
-        return phoneState?.attributes?.quick_dials || [];
+        const contacts = phoneState?.attributes?.quick_dials || [];
+        console.log("[ContactsView] Getting contacts:", {
+            phoneStateEntityId,
+            phoneState: phoneState?.state,
+            hasAttributes: !!phoneState?.attributes,
+            quick_dials: phoneState?.attributes?.quick_dials,
+            contactCount: contacts.length,
+        });
+        return contacts;
     }
     _getFilteredContacts() {
         const contacts = this._getContacts();
