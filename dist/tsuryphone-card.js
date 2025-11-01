@@ -2005,10 +2005,18 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         this._dialedNumber += digit;
         this._triggerHaptic('light');
     }
-    _handleBackspace() {
-        if (this._dialedNumber.length > 0) {
+    async _handleBackspace() {
+        if (this._dialedNumber.length === 0)
+            return;
+        try {
+            await this.hass.callService('tsuryphone', 'delete_last_digit', {});
+            // Optimistic update
             this._dialedNumber = this._dialedNumber.slice(0, -1);
             this._triggerHaptic('light');
+        }
+        catch (err) {
+            console.error('Failed to delete last digit:', err);
+            this._triggerHaptic('heavy');
         }
     }
     _handleClear() {
