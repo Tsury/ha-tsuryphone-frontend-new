@@ -80,6 +80,7 @@ export enum AppState {
 
 export interface TsuryPhoneCardConfig {
   type: "custom:tsuryphone-card";
+  entity?: string; // Optional: full entity ID (e.g., sensor.phone_state)
   device_id?: string; // Optional: defaults to 'tsuryphone'
   show_frequent_contacts?: boolean; // Optional: defaults to true
   frequent_contacts_refresh_hours?: number; // Optional: defaults to 24

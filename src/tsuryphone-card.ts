@@ -169,8 +169,20 @@ export class TsuryPhoneCard extends LitElement {
     this._isDarkMode = isDarkMode(this.hass);
     
     // Update cached data from coordinator state
+    // Support both direct entity config and device_id pattern
     const deviceId = this.config?.device_id || 'tsuryphone';
-    const phoneStateEntityId = `sensor.${deviceId}_phone_state`;
+    let phoneStateEntityId: string;
+    
+    if (this.config?.entity) {
+      // Use entity directly if provided
+      phoneStateEntityId = this.config.entity.startsWith('sensor.') 
+        ? this.config.entity 
+        : `sensor.${this.config.entity}`;
+    } else {
+      // Fall back to device_id pattern
+      phoneStateEntityId = `sensor.${deviceId}_phone_state`;
+    }
+    
     const phoneStateEntity = this.hass.states[phoneStateEntityId];
     
     if (!phoneStateEntity) {
