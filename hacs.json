@@ -1,9 +1,5 @@
 {
   "name": "TsuryPhone Card",
-  "content_in_root": false,
-  "filename": "dist/tsuryphone-card.js",
   "render_readme": true,
-  "homeassistant": "2024.12",
-  "zip_release": true,
-  "changelog": "CHANGELOG.md"
+  "filename": "dist/tsuryphone-card.js"
 }
