@@ -103,6 +103,7 @@ jobs:
           mkdir -p release-package
           cp dist/tsuryphone-card.js release-package/
           cp dist/tsuryphone-card.js.map release-package/
+          cp hacs.json release-package/
           cp info.md release-package/
           cp README.md release-package/
           cp LICENSE release-package/ || echo "No LICENSE file"

@@ -15,17 +15,58 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate Lovelace plugin structure
+      - name: Validate hacs.json
         run: |
-          echo "Validating Lovelace plugin structure..."
-          echo "ℹ️ Using minimal plugin structure (no hacs.json required)"
+          echo "Validating HACS configuration..."
           
-          # Check for built frontend file
-          if [ ! -f "dist/tsuryphone-card.js" ]; then
-            echo "❌ dist/tsuryphone-card.js not found"
+          # Check hacs.json exists and is valid JSON
+          if [ ! -f "hacs.json" ]; then
+            echo "❌ hacs.json file not found"
             exit 1
           fi
-          echo "✅ Frontend bundle exists: dist/tsuryphone-card.js"
+          
+          python3 -c "
+          import json
+          import sys
+          
+          try:
+              with open('hacs.json', 'r') as f:
+                  hacs_config = json.load(f)
+              print('✅ hacs.json is valid JSON')
+              
+              # Check required fields
+              if 'name' not in hacs_config:
+                  print('❌ Missing required \"name\" field')
+                  sys.exit(1)
+              print(f'✅ Name: {hacs_config[\"name\"]}')
+              
+              if 'content_type' not in hacs_config:
+                  print('❌ Missing required \"content_type\" field')
+                  sys.exit(1)
+              print(f'✅ Content type: {hacs_config[\"content_type\"]}')
+              
+              if 'filename' not in hacs_config:
+                  print('❌ Missing required \"filename\" field')
+                  sys.exit(1)
+              print(f'✅ Filename: {hacs_config[\"filename\"]}')
+              
+          except json.JSONDecodeError as e:
+              print(f'❌ Invalid JSON: {e}')
+              sys.exit(1)
+          except Exception as e:
+              print(f'❌ Error: {e}')
+              sys.exit(1)
+          "
+
+      - name: Validate built file exists
+        run: |
+          FILENAME=$(python3 -c "import json; print(json.load(open('hacs.json'))['filename'])")
+          
+          if [ ! -f "$FILENAME" ]; then
+            echo "❌ Build artifact $FILENAME not found"
+            exit 1
+          fi
+          echo "✅ Build artifact exists: $FILENAME"
 
       - name: Validate info.md exists
         run: |
@@ -43,26 +84,10 @@ jobs:
           fi
           echo "✅ README.md exists"
 
-      - name: Check for required files
-        run: |
-          echo "Checking for source and package files..."
-          
-          if [ ! -f "package.json" ]; then
-            echo "❌ package.json not found"
-            exit 1
-          fi
-          echo "✅ package.json exists"
-          
-          if [ ! -d "src" ]; then
-            echo "❌ src/ directory not found"
-            exit 1
-          fi
-          echo "✅ src/ directory exists"
-
       - name: Summary
         run: |
           echo "### HACS Validation Results" >> $GITHUB_STEP_SUMMARY
           echo "✅ All HACS validation checks passed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Structure:** Minimal Lovelace plugin (no hacs.json)" >> $GITHUB_STEP_SUMMARY
+          echo "**Structure:** Lovelace plugin with hacs.json" >> $GITHUB_STEP_SUMMARY
           echo "**Frontend bundle:** dist/tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY
