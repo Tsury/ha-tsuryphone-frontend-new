@@ -1922,11 +1922,15 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         if (changedProps.has('hass')) {
             const oldHass = changedProps.get('hass');
             if (oldHass) {
-                const deviceId = this.config?.device_id || 'tsuryphone';
-                const entityId = `sensor.${deviceId}_current_dialing_number`;
+                // Get the device prefix from the phone_state entity
+                const phoneStateEntityId = this._getPhoneStateEntityId();
+                const devicePrefix = phoneStateEntityId.replace('_phone_state', '').replace('sensor.', '');
+                const entityId = `sensor.${devicePrefix}_current_dialing_number`;
                 const oldState = oldHass.states[entityId]?.state;
                 const newState = this.hass.states[entityId]?.state;
                 console.log('[KeypadView] shouldUpdate check:', {
+                    phoneStateEntityId,
+                    devicePrefix,
                     entityId,
                     oldState,
                     newState,
@@ -2086,11 +2090,15 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         return !!this._getCurrentDialingNumber() || !!this._getLastCalledNumber();
     }
     _getCurrentDialingNumber() {
-        const deviceId = this.config?.device_id || "tsuryphone";
-        const entityId = `sensor.${deviceId}_current_dialing_number`;
+        // Get the device prefix from the phone_state entity
+        const phoneStateEntityId = this._getPhoneStateEntityId();
+        const devicePrefix = phoneStateEntityId.replace('_phone_state', '').replace('sensor.', '');
+        const entityId = `sensor.${devicePrefix}_current_dialing_number`;
         const entity = this.hass?.states[entityId];
         const result = entity?.state && entity.state !== "unknown" ? entity.state : "";
         console.log('[KeypadView] _getCurrentDialingNumber:', {
+            phoneStateEntityId,
+            devicePrefix,
             entityId,
             entityState: entity?.state,
             result
