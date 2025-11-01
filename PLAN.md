@@ -2934,8 +2934,18 @@ All backend prerequisites have been completed. We can now proceed with implement
 - `tsuryphone.dial` (tap to call - working)
 - `tsuryphone.priority_add/remove`
 
-**Version Delivered**: v0.1.27-alpha
-**Backend Version**: v1.0.126
+**Version Delivered**: v0.1.32-alpha
+**Backend Version**: v1.0.130
+
+**Major Refactor Completed** (Nov 2, 2025):
+- ✅ Eliminated `normalizedNumber` field from all contact entry structs (firmware/backend/frontend)
+- ✅ Simplified data model: `number` field IS the normalized E.164 format
+- ✅ Removed duplicate normalization logic across all layers
+- ✅ Breaking change: Old firmware/backend incompatible (no backward compatibility)
+- ✅ Call records still maintain separate `normalizedNumber` for matching (unchanged)
+- **Firmware**: Removed hasNormalized(), effectiveNumber(), matchesNormalized() helpers
+- **Backend**: Removed normalized_number from QuickDialEntry, BlockedNumberEntry, PriorityCallerEntry
+- **Frontend**: Updated TypeScript types, simplified priority comparison logic
 
 **Next Phase**: Contact Modal (Add/Edit/Delete CRUD operations)
 
