@@ -26,8 +26,16 @@ export class TsuryPhoneKeypadView extends LitElement {
         const oldState = oldHass.states[entityId]?.state;
         const newState = this.hass.states[entityId]?.state;
         
+        console.log('[KeypadView] shouldUpdate check:', {
+          entityId,
+          oldState,
+          newState,
+          changed: oldState !== newState
+        });
+        
         // Force update if the dialing number changed
         if (oldState !== newState) {
+          console.log('[KeypadView] Forcing update due to state change');
           return true;
         }
       }
@@ -121,6 +129,8 @@ export class TsuryPhoneKeypadView extends LitElement {
   private async _handleDigitPress(digit: string): Promise<void> {
     this._triggerHaptic("light");
 
+    console.log('[KeypadView] Dialing digit:', digit, 'to entity:', this._getPhoneStateEntityId());
+
     try {
       // Send digit to backend - no optimistic update
       await this.hass.callService(
@@ -133,8 +143,9 @@ export class TsuryPhoneKeypadView extends LitElement {
           entity_id: this._getPhoneStateEntityId(),
         }
       );
-    } catch (err) {
-      console.error("Failed to dial digit:", err);
+      console.log('[KeypadView] Digit dialed successfully');
+    } catch (error) {
+      console.error("Failed to dial digit:", error);
       this._triggerHaptic("heavy");
     }
   }
@@ -204,7 +215,13 @@ export class TsuryPhoneKeypadView extends LitElement {
     const deviceId = this.config?.device_id || "tsuryphone";
     const entityId = `sensor.${deviceId}_current_dialing_number`;
     const entity = this.hass?.states[entityId];
-    return entity?.state && entity.state !== "unknown" ? entity.state : "";
+    const result = entity?.state && entity.state !== "unknown" ? entity.state : "";
+    console.log('[KeypadView] _getCurrentDialingNumber:', {
+      entityId,
+      entityState: entity?.state,
+      result
+    });
+    return result;
   }
 
   private _getPhoneStateEntityId(): string {
