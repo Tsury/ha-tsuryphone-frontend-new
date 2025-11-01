@@ -2273,6 +2273,854 @@ TsuryPhoneKeypadView = __decorate([
 ], TsuryPhoneKeypadView);
 
 /**
+ * Shared Styles
+ * Reusable CSS patterns for TsuryPhone components
+ */
+/**
+ * Common avatar styles
+ */
+const avatarStyles = i$3 `
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 16px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .avatar.large {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .avatar.small {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+`;
+/**
+ * Common list item styles
+ */
+const listItemStyles = i$3 `
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    background: var(--card-background-color, #fff);
+    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .list-item:hover {
+    background: var(--secondary-background-color, #f5f5f5);
+  }
+
+  .list-item:active {
+    background: var(--divider-color, #e0e0e0);
+  }
+
+  .list-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .list-item-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .list-item-subtitle {
+    font-size: 14px;
+    color: var(--secondary-text-color, #666);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .list-item-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+`;
+/**
+ * Common button styles
+ */
+const buttonStyles = i$3 `
+  .action-button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary-color, #03a9f4);
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .action-button:hover {
+    background: var(--dark-primary-color, #0288d1);
+    transform: scale(1.02);
+  }
+
+  .action-button:active {
+    transform: scale(0.98);
+  }
+
+  .action-button:disabled {
+    background: var(--disabled-color, #9e9e9e);
+    cursor: not-allowed;
+  }
+
+  .action-button.secondary {
+    background: var(--secondary-background-color, #f5f5f5);
+    color: var(--primary-text-color, #000);
+  }
+
+  .action-button.danger {
+    background: var(--error-color, #f44336);
+  }
+
+  .icon-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--secondary-text-color, #666);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .icon-button:hover {
+    background: var(--secondary-background-color, #f5f5f5);
+  }
+
+  .icon-button:active {
+    background: var(--divider-color, #e0e0e0);
+    transform: scale(0.95);
+  }
+`;
+/**
+ * Common modal styles
+ */
+i$3 `
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+
+  .modal {
+    background: var(--card-background-color, #fff);
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+  }
+
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--divider-color, #e0e0e0);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+`;
+/**
+ * Common form styles
+ */
+i$3 `
+  .form-field {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--divider-color, #e0e0e0);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--primary-text-color, #000);
+    background: var(--card-background-color, #fff);
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #03a9f4);
+  }
+
+  .form-input::placeholder {
+    color: var(--secondary-text-color, #666);
+  }
+
+  .form-helper {
+    font-size: 12px;
+    color: var(--secondary-text-color, #666);
+    margin-top: 4px;
+  }
+
+  .form-error {
+    font-size: 12px;
+    color: var(--error-color, #f44336);
+    margin-top: 4px;
+  }
+`;
+/**
+ * Common empty state styles
+ */
+const emptyStateStyles = i$3 `
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--secondary-text-color, #666);
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-state-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+    margin-bottom: 8px;
+  }
+
+  .empty-state-message {
+    font-size: 14px;
+    color: var(--secondary-text-color, #666);
+    margin-bottom: 24px;
+  }
+`;
+
+/**
+ * Empty State Component
+ * Reusable empty state message
+ */
+let TsuryPhoneEmptyState = class TsuryPhoneEmptyState extends i {
+    constructor() {
+        super(...arguments);
+        this.icon = "mdi:alert-circle-outline";
+        this.title = "No items";
+        this.message = "";
+    }
+    static get styles() {
+        return [
+            emptyStateStyles,
+            i$3 `
+        :host {
+          display: block;
+        }
+      `,
+        ];
+    }
+    _handleAction() {
+        if (this.onAction) {
+            this.onAction();
+        }
+        this.dispatchEvent(new CustomEvent("action", { bubbles: true, composed: true }));
+    }
+    render() {
+        return x `
+      <div class="empty-state">
+        <ha-icon class="empty-state-icon" .icon=${this.icon}></ha-icon>
+        <div class="empty-state-title">${this.title}</div>
+        ${this.message
+            ? x `<div class="empty-state-message">${this.message}</div>`
+            : ""}
+        ${this.actionLabel
+            ? x `
+              <button class="action-button" @click=${this._handleAction}>
+                ${this.actionLabel}
+              </button>
+            `
+            : ""}
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "icon", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "title", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "message", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "actionLabel", void 0);
+__decorate([
+    n({ type: Function })
+], TsuryPhoneEmptyState.prototype, "onAction", void 0);
+TsuryPhoneEmptyState = __decorate([
+    t("tsuryphone-empty-state")
+], TsuryPhoneEmptyState);
+
+/**
+ * Formatting Utilities
+ * Reusable formatters for phone numbers, dates, durations
+ */
+/**
+ * Format phone number for display
+ */
+function formatPhoneNumber(number) {
+    if (!number)
+        return "";
+    // Remove non-digit characters
+    const digits = number.replace(/\D/g, "");
+    // Format based on length
+    if (digits.length === 10) {
+        // US format: (555) 123-4567
+        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    else if (digits.length === 11 && digits[0] === "1") {
+        // US format with country code: +1 (555) 123-4567
+        return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+    else if (digits.length > 11) {
+        // International format: +XX XXX XXX XXXX
+        return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+    }
+    // Default: return as-is
+    return number;
+}
+/**
+ * Generate consistent color from string (for avatars)
+ */
+function generateColor(input) {
+    if (!input)
+        return "hsl(200, 50%, 70%)"; // Default color
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+        hash = input.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash % 360);
+    return `hsl(${hue}, 50%, 70%)`; // Pastel colors
+}
+/**
+ * Get first letter of name for avatar
+ */
+function getAvatarLetter(name) {
+    if (!name)
+        return "?";
+    return name.trim()[0].toUpperCase();
+}
+
+/**
+ * Haptic Feedback Utility
+ * Centralized haptic feedback using browser Vibration API
+ */
+const HAPTIC_PATTERNS = {
+    light: 10,
+    medium: 20,
+    heavy: 30,
+};
+/**
+ * Trigger haptic feedback if supported
+ */
+function triggerHaptic(intensity = "light") {
+    if ("vibrate" in navigator) {
+        navigator.vibrate(HAPTIC_PATTERNS[intensity]);
+    }
+}
+
+/**
+ * Avatar Circle Component
+ * Reusable avatar with letter and color
+ */
+let TsuryPhoneAvatar = class TsuryPhoneAvatar extends i {
+    constructor() {
+        super(...arguments);
+        this.name = "";
+        this.size = "medium";
+    }
+    static get styles() {
+        return [
+            avatarStyles,
+            i$3 `
+        :host {
+          display: inline-block;
+        }
+      `,
+        ];
+    }
+    render() {
+        const letter = getAvatarLetter(this.name);
+        const backgroundColor = this.color || generateColor(this.name);
+        const sizeClass = this.size === "medium" ? "" : this.size;
+        return x `
+      <div
+        class="avatar ${sizeClass}"
+        style="background-color: ${backgroundColor}"
+      >
+        ${letter}
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ type: String })
+], TsuryPhoneAvatar.prototype, "name", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneAvatar.prototype, "size", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneAvatar.prototype, "color", void 0);
+TsuryPhoneAvatar = __decorate([
+    t("tsuryphone-avatar")
+], TsuryPhoneAvatar);
+
+/**
+ * Contact Item Component
+ * Individual contact list item
+ */
+let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
+    static get styles() {
+        return [
+            listItemStyles,
+            buttonStyles,
+            i$3 `
+        :host {
+          display: block;
+        }
+
+        .contact-info {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .contact-details {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .contact-name {
+          font-size: 16px;
+          font-weight: 500;
+          color: var(--primary-text-color, #000);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .contact-number {
+          font-size: 14px;
+          color: var(--secondary-text-color, #666);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .contact-actions {
+          display: flex;
+          gap: 8px;
+        }
+
+        .call-button {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: none;
+          background: var(--primary-color, #03a9f4);
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .call-button:hover {
+          background: var(--dark-primary-color, #0288d1);
+          transform: scale(1.05);
+        }
+
+        .call-button:active {
+          transform: scale(0.95);
+        }
+
+        .priority-star {
+          color: var(--warning-color, #ffa726);
+        }
+      `,
+        ];
+    }
+    _getPhoneStateEntityId() {
+        const deviceId = this.config?.device_id || "tsuryphone";
+        if (this.config?.entity) {
+            return this.config.entity.startsWith("sensor.")
+                ? this.config.entity
+                : `sensor.${this.config.entity}`;
+        }
+        return `sensor.${deviceId}_phone_state`;
+    }
+    async _handleCall() {
+        triggerHaptic("medium");
+        try {
+            await this.hass.callService("tsuryphone", "dial", {
+                number: this.contact.number,
+            }, {
+                entity_id: this._getPhoneStateEntityId(),
+            });
+        }
+        catch (error) {
+            console.error("[ContactItem] Failed to dial:", error);
+        }
+    }
+    _handleEdit() {
+        triggerHaptic("light");
+        this.dispatchEvent(new CustomEvent("edit-contact", {
+            detail: { contact: this.contact },
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    render() {
+        const formattedNumber = formatPhoneNumber(this.contact.display_number || this.contact.number);
+        // Check if contact is priority
+        const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
+        const priorityNumbers = phoneState?.attributes?.priority_numbers || [];
+        const isPriority = priorityNumbers.includes(this.contact.normalized_number);
+        return x `
+      <div class="list-item" @click=${this._handleEdit}>
+        <div class="contact-info">
+          <tsuryphone-avatar .name=${this.contact.name}></tsuryphone-avatar>
+          <div class="contact-details">
+            <div class="contact-name">
+              ${this.contact.name}
+              ${isPriority
+            ? x `<ha-icon
+                    class="priority-star"
+                    icon="mdi:star"
+                  ></ha-icon>`
+            : ""}
+            </div>
+            <div class="contact-number">${formattedNumber}</div>
+          </div>
+        </div>
+        <div class="contact-actions">
+          <button
+            class="call-button"
+            @click=${(e) => {
+            e.stopPropagation();
+            this._handleCall();
+        }}
+            title="Call ${this.contact.name}"
+          >
+            <ha-icon icon="mdi:phone"></ha-icon>
+          </button>
+        </div>
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneContactItem.prototype, "hass", void 0);
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneContactItem.prototype, "config", void 0);
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneContactItem.prototype, "contact", void 0);
+TsuryPhoneContactItem = __decorate([
+    t("tsuryphone-contact-item")
+], TsuryPhoneContactItem);
+
+/**
+ * Contacts View Component
+ * Main container for contacts management
+ */
+let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
+    constructor() {
+        super(...arguments);
+        this._searchQuery = "";
+        this._showAddModal = false;
+    }
+    static get styles() {
+        return i$3 `
+      :host {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: var(--card-background-color, #fff);
+      }
+
+      .contacts-header {
+        padding: 16px;
+        border-bottom: 1px solid var(--divider-color, #e0e0e0);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--secondary-background-color, #f5f5f5);
+        border-radius: 8px;
+      }
+
+      .search-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        color: var(--primary-text-color, #000);
+        outline: none;
+      }
+
+      .search-input::placeholder {
+        color: var(--secondary-text-color, #666);
+      }
+
+      .add-button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: var(--primary-color, #03a9f4);
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+
+      .add-button:hover {
+        background: var(--dark-primary-color, #0288d1);
+      }
+
+      .add-button:active {
+        transform: scale(0.98);
+      }
+
+      .contacts-list {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .section-header {
+        padding: 12px 16px;
+        background: var(--secondary-background-color, #f5f5f5);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--secondary-text-color, #666);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+    `;
+    }
+    _getContacts() {
+        const phoneStateEntityId = this._getPhoneStateEntityId();
+        const phoneState = this.hass?.states[phoneStateEntityId];
+        return phoneState?.attributes?.quick_dials || [];
+    }
+    _getFilteredContacts() {
+        const contacts = this._getContacts();
+        if (!this._searchQuery.trim()) {
+            return contacts;
+        }
+        const query = this._searchQuery.toLowerCase();
+        return contacts.filter((contact) => contact.name?.toLowerCase().includes(query) ||
+            contact.number?.toLowerCase().includes(query) ||
+            contact.code?.toLowerCase().includes(query));
+    }
+    _groupContactsByLetter() {
+        const contacts = this._getFilteredContacts();
+        const grouped = new Map();
+        contacts.forEach((contact) => {
+            const firstLetter = (contact.name?.[0] || "#").toUpperCase();
+            if (!grouped.has(firstLetter)) {
+                grouped.set(firstLetter, []);
+            }
+            grouped.get(firstLetter).push(contact);
+        });
+        // Sort groups alphabetically
+        return new Map([...grouped.entries()].sort());
+    }
+    _getPhoneStateEntityId() {
+        const deviceId = this.config?.device_id || "tsuryphone";
+        if (this.config?.entity) {
+            return this.config.entity.startsWith("sensor.")
+                ? this.config.entity
+                : `sensor.${this.config.entity}`;
+        }
+        return `sensor.${deviceId}_phone_state`;
+    }
+    _handleSearch(e) {
+        const input = e.target;
+        this._searchQuery = input.value;
+    }
+    _handleAddContact() {
+        this._showAddModal = true;
+    }
+    render() {
+        const contacts = this._getContacts();
+        const groupedContacts = this._groupContactsByLetter();
+        return x `
+      <div class="contacts-header">
+        <div class="search-bar">
+          <ha-icon icon="mdi:magnify"></ha-icon>
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Search contacts..."
+            .value=${this._searchQuery}
+            @input=${this._handleSearch}
+          />
+          ${this._searchQuery
+            ? x `
+                <ha-icon
+                  icon="mdi:close"
+                  @click=${() => (this._searchQuery = "")}
+                  style="cursor: pointer"
+                ></ha-icon>
+              `
+            : ""}
+        </div>
+        <button class="add-button" @click=${this._handleAddContact}>
+          <ha-icon icon="mdi:plus"></ha-icon>
+          Add Contact
+        </button>
+      </div>
+
+      <div class="contacts-list">
+        ${contacts.length === 0
+            ? x `
+              <tsuryphone-empty-state
+                icon="mdi:contacts-outline"
+                title="No contacts yet"
+                message="Add your first contact to get started"
+                actionLabel="Add Contact"
+                .onAction=${() => this._handleAddContact()}
+              ></tsuryphone-empty-state>
+            `
+            : groupedContacts.size === 0
+                ? x `
+                <tsuryphone-empty-state
+                  icon="mdi:magnify"
+                  title="No results"
+                  message="No contacts match your search"
+                ></tsuryphone-empty-state>
+              `
+                : Array.from(groupedContacts.entries()).map(([letter, contacts]) => x `
+                  <div class="section-header">${letter}</div>
+                  ${contacts.map((contact) => x `
+                      <tsuryphone-contact-item
+                        .hass=${this.hass}
+                        .config=${this.config}
+                        .contact=${contact}
+                      ></tsuryphone-contact-item>
+                    `)}
+                `)}
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneContactsView.prototype, "hass", void 0);
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneContactsView.prototype, "config", void 0);
+__decorate([
+    r()
+], TsuryPhoneContactsView.prototype, "_searchQuery", void 0);
+__decorate([
+    r()
+], TsuryPhoneContactsView.prototype, "_showAddModal", void 0);
+TsuryPhoneContactsView = __decorate([
+    t("tsuryphone-contacts-view")
+], TsuryPhoneContactsView);
+
+/**
  * TsuryPhone Card - Main Component
  * A modern phone and contacts interface for Home Assistant
  */
@@ -2599,18 +3447,15 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     `;
     }
     /**
-     * Render contacts view (placeholder for now)
+     * Render contacts view
      */
     _renderContactsView() {
         return x `
       <div class="view contacts-view fade-in">
-        <div class="view-header">
-          <h2>Contacts</h2>
-        </div>
-        <div class="view-body">
-          <p class="placeholder-text">Contacts view will be implemented in Phase 5</p>
-          <p class="placeholder-text">Contacts count: ${this._contactsCache.length}</p>
-        </div>
+        <tsuryphone-contacts-view
+          .hass=${this.hass}
+          .config=${this.config}
+        ></tsuryphone-contacts-view>
       </div>
     `;
     }

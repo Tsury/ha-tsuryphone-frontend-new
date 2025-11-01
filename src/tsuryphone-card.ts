@@ -17,6 +17,7 @@ import { commonStyles } from "./styles/common";
 import './components/navigation/tsuryphone-navigation';
 import './components/home/home-view';
 import './components/keypad/keypad-view';
+import './components/contacts/contacts-view';
 import type { NavigationTab, TabChangeEvent } from './components/navigation/tsuryphone-navigation';
 import type { CallHistoryEntry as CallHistoryEntryType } from './utils/call-history-grouping';
 
@@ -399,18 +400,15 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
-   * Render contacts view (placeholder for now)
+   * Render contacts view
    */
   private _renderContactsView(): TemplateResult {
     return html`
       <div class="view contacts-view fade-in">
-        <div class="view-header">
-          <h2>Contacts</h2>
-        </div>
-        <div class="view-body">
-          <p class="placeholder-text">Contacts view will be implemented in Phase 5</p>
-          <p class="placeholder-text">Contacts count: ${this._contactsCache.length}</p>
-        </div>
+        <tsuryphone-contacts-view
+          .hass=${this.hass}
+          .config=${this.config}
+        ></tsuryphone-contacts-view>
       </div>
     `;
   }
