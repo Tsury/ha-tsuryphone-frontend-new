@@ -15,6 +15,13 @@ This document outlines the complete plan for building a modern, Android Pixel 8-
 5. **Call History Sync**: Real-time via HA coordinator state updates (WebSocket-based)
 6. **Offline Behavior**: Show error overlay when HA unavailable
 7. **Single Device**: Focus on single TsuryPhone device for v1
+8. **Touch Gestures**: Comprehensive gesture system for mobile-first interaction
+   - Swipe left/right to answer/decline calls
+   - Swipe left/right to navigate between tabs
+   - Long press for context menus
+   - Double tap for quick actions
+   - Vertical swipe for list scrolling (native)
+   - Haptic feedback on all gesture activations
 
 ## Project Overview
 
@@ -88,6 +95,7 @@ tsuryphone-card (root)
 - Active state indication
 - Smooth transitions
 - Disabled when in-call modal is active
+- **Touch Gestures**: Swipe left/right to navigate between tabs (added in Phase 8.75)
 
 **HA Integration**:
 
@@ -100,6 +108,7 @@ tsuryphone-card (root)
 interface NavigationState {
   activeTab: "home" | "keypad" | "contacts";
   disabled: boolean;
+  gesturesEnabled: boolean; // Disable during modals/calls
 }
 ```
 
@@ -304,6 +313,11 @@ function getAvatarContent(
 - "Add Contact" → Opens contact modal with pre-filled number
 - "Block" → Opens block number modal with pre-filled number
 
+**Touch Gestures** (added in Phase 8.75):
+
+- **Long Press**: Show context menu with options (Call, Add Contact, Block, Copy Number)
+- **Double Tap**: Quick dial the number
+
 **Service Calls**:
 
 - Call button → `tsuryphone.dial` service with number
@@ -365,6 +379,11 @@ interface DialedNumberState {
 - Green color with phone icon
 - If no digits: Use last call log entry number
 - If digits exist: Dial entered number
+
+**Touch Gestures** (added in Phase 8.75):
+
+- **Long Press on 0**: Insert "+" for international dialing
+- **Double Tap on Call Button**: Redial last number (if no digits entered)
 
 **Service Integration**:
 
@@ -520,6 +539,12 @@ function groupContacts(contacts: QuickDialEntry[]): ContactGroup[] {
 - Avatar (first letter with color)
 - Name only (minimal)
 - Tap to open contact modal in edit mode
+
+**Touch Gestures** (added in Phase 8.75):
+
+- **Tap**: Open contact modal in edit mode
+- **Long Press**: Show context menu with quick actions (Call, Edit, Delete)
+- **Double Tap**: Quick dial the contact
 
 **Create Contact Button**:
 
@@ -1949,6 +1974,245 @@ export default {
 
 **Dependencies**: Phase 8 complete ✅
 
+### Phase 8.75: Touch Gesture System (Week 5.5)
+
+**Objective**: Implement comprehensive touch gesture support for mobile-first interaction
+
+#### Core Gesture Components
+
+**Component**: `src/utils/gesture-handler.ts`
+
+**Gesture Types**:
+
+1. **Horizontal Swipe (Answer/Decline Calls)**
+   - Already implemented in call modal slider
+   - Swipe right → Answer call
+   - Swipe left → Decline call
+   - 70% threshold activation
+   - Haptic feedback on activation
+
+2. **Vertical Swipe (List Scrolling)**
+   - Native scroll behavior (no custom handling needed)
+   - Momentum scrolling on iOS
+   - Overscroll bounce effect
+   - Pull-to-refresh consideration (optional)
+
+3. **Horizontal Swipe (Navigation Between Views)**
+   - Swipe left: Navigate to next tab (Home → Keypad → Contacts → Blocked)
+   - Swipe right: Navigate to previous tab
+   - Visual feedback during swipe (view slides partially)
+   - Snap to tab on release
+   - Minimum swipe distance: 50px
+   - Velocity threshold for quick swipes
+   - Disable during modals/active calls
+
+4. **Long Press (Context Actions)**
+   - Call log item: Long press → Show context menu (Call, Add Contact, Block, Copy Number)
+   - Contact item: Long press → Quick actions (Call, Edit, Delete)
+   - Keypad number: Long press 0 → Insert "+"
+   - Haptic feedback on activation (medium vibration)
+   - Visual feedback (item highlight)
+   - Minimum press duration: 500ms
+
+5. **Double Tap (Quick Actions)**
+   - Call log item: Double tap → Quick call
+   - Contact item: Double tap → Quick call
+   - Keypad: Double tap call button → Redial last number
+   - Time threshold between taps: 300ms
+
+6. **Pinch/Zoom (Optional - Future)**
+   - Not implemented in Phase 8.75
+   - Consideration for contact photo viewing
+
+**Implementation Tasks**:
+
+- [ ] Create `gesture-handler.ts` utility
+  - [ ] Swipe detection (horizontal/vertical)
+  - [ ] Long press detection
+  - [ ] Double tap detection
+  - [ ] Velocity calculation
+  - [ ] Distance calculation
+  - [ ] Direction determination
+
+- [ ] Implement view navigation swipe
+  - [ ] Add touch event listeners to card container
+  - [ ] Detect horizontal swipes
+  - [ ] Show visual preview during swipe
+  - [ ] Animate tab transitions
+  - [ ] Update navigation bar active state
+  - [ ] Disable during modals
+
+- [ ] Implement long press context menus
+  - [ ] Call log item long press menu
+  - [ ] Contact item long press menu
+  - [ ] Keypad long press (0 → +)
+  - [ ] Context menu component
+  - [ ] Positioning logic (above/below item)
+
+- [ ] Implement double tap quick actions
+  - [ ] Call log double tap → call
+  - [ ] Contact double tap → call
+  - [ ] Keypad double tap → redial
+  - [ ] Prevent single tap during double tap detection
+
+- [ ] Add haptic feedback
+  - [ ] Use existing `navigator.vibrate()` API
+  - [ ] Light: 10ms (tap feedback)
+  - [ ] Medium: 20ms (long press, selection)
+  - [ ] Heavy: 30ms (swipe activation, errors)
+
+- [ ] Edge case handling
+  - [ ] Disable gestures during modals
+  - [ ] Disable gestures during active calls
+  - [ ] Handle simultaneous touches
+  - [ ] Prevent accidental activations
+  - [ ] Handle interrupted gestures (finger leaves screen)
+
+**Gesture Configuration**:
+
+```typescript
+interface GestureConfig {
+  // Swipe configuration
+  swipe: {
+    minDistance: number; // 50px
+    maxDuration: number; // 800ms
+    velocityThreshold: number; // 0.5 px/ms
+    activationThreshold: number; // 70% for slider, 30% for nav
+  };
+  
+  // Long press configuration
+  longPress: {
+    duration: number; // 500ms
+    maxMovement: number; // 10px (allow slight finger drift)
+  };
+  
+  // Double tap configuration
+  doubleTap: {
+    maxDelay: number; // 300ms between taps
+    maxDistance: number; // 20px between tap locations
+  };
+  
+  // Haptic feedback
+  haptic: {
+    enabled: boolean; // Auto-detect support
+    light: number; // 10ms
+    medium: number; // 20ms
+    heavy: number; // 30ms
+  };
+}
+```
+
+**Touch Event Flow**:
+
+```typescript
+class GestureHandler {
+  private touchStart: TouchEvent | null = null;
+  private touchStartTime: number = 0;
+  private lastTap: { time: number; x: number; y: number } | null = null;
+  private longPressTimer: number | null = null;
+  
+  handleTouchStart(e: TouchEvent) {
+    this.touchStart = e;
+    this.touchStartTime = Date.now();
+    
+    // Check for double tap
+    if (this.lastTap) {
+      const timeSinceLast = Date.now() - this.lastTap.time;
+      const distance = this.getDistance(e, this.lastTap);
+      
+      if (timeSinceLast < 300 && distance < 20) {
+        this.onDoubleTap(e);
+        this.lastTap = null;
+        return;
+      }
+    }
+    
+    // Start long press timer
+    this.longPressTimer = window.setTimeout(() => {
+      if (this.isStillPressed(e)) {
+        this.onLongPress(e);
+      }
+    }, 500);
+  }
+  
+  handleTouchMove(e: TouchEvent) {
+    // Cancel long press if moved too much
+    if (this.touchStart && this.getDistance(e, this.touchStart) > 10) {
+      this.cancelLongPress();
+    }
+    
+    // Update swipe preview
+    this.updateSwipePreview(e);
+  }
+  
+  handleTouchEnd(e: TouchEvent) {
+    this.cancelLongPress();
+    
+    const duration = Date.now() - this.touchStartTime;
+    const distance = this.getDistance(e, this.touchStart);
+    const velocity = distance / duration;
+    
+    // Check for swipe
+    if (distance > 50 || velocity > 0.5) {
+      const direction = this.getDirection(e, this.touchStart);
+      this.onSwipe(direction, distance, velocity);
+    } else {
+      // Record tap for double tap detection
+      this.lastTap = {
+        time: Date.now(),
+        x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY
+      };
+      
+      this.onTap(e);
+    }
+    
+    this.touchStart = null;
+  }
+}
+```
+
+**Visual Feedback**:
+
+- **Swipe Navigation**: Show partial view slide (20% opacity of next/prev view)
+- **Long Press**: Ripple effect + item highlight
+- **Double Tap**: Brief flash/scale animation
+- **Context Menu**: Smooth fade-in from item position
+
+**Performance Considerations**:
+
+- Use `touch-action: pan-y` to prevent default horizontal scrolling during nav swipes
+- Use `will-change: transform` for animated elements
+- Debounce gesture detection (check every 16ms = 60fps)
+- Cancel gestures if touch moves outside card bounds
+
+**Accessibility**:
+
+- All gesture actions MUST have button/click alternatives
+- Screen reader announcements for gesture activations
+- Keyboard shortcuts for power users:
+  - Left/Right arrows: Navigate tabs
+  - Enter: Activate item
+  - Space: Toggle selection
+  - Escape: Close modal/menu
+
+**Testing Checklist**:
+
+- [ ] Swipe between tabs works on mobile
+- [ ] Swipe direction matches tab order
+- [ ] Long press shows context menu
+- [ ] Double tap quick-calls work
+- [ ] Gestures disabled during modals
+- [ ] Gestures disabled during calls
+- [ ] Haptic feedback works (if supported)
+- [ ] Visual feedback is smooth
+- [ ] No accidental activations
+- [ ] Works on iOS Safari
+- [ ] Works on Chrome Android
+- [ ] Keyboard alternatives work
+
+**Dependencies**: Phase 8.5 complete ✅
+
 ### Phase 9: Polish & Testing (Week 6-7)
 
 - [ ] Toast notifications
@@ -1961,7 +2225,7 @@ export default {
 - [ ] Cross-browser testing
 - [ ] Mobile testing
 
-**Dependencies**: Phase 8.5 complete ✅
+**Dependencies**: Phase 8.75 complete ✅
 
 ### Phase 10: Documentation & Release (Week 7)
 
