@@ -67,35 +67,55 @@ Modern, Android Pixel 8-style Phone + Contacts frontend for the TsuryPhone Home 
 **Files Created:**
 - `src/components/home/` (home view components)
 
-### 🚀 Phase 3.5: HACS Integration & First Smoke Test (IN PROGRESS)
+### ✅ Phase 3.5: HACS Integration (COMPLETED - Nov 1, 2025)
 
-**Status**: Setting up HACS integration for alpha release
+**HACS Setup:**
+- Created `hacs.json` with proper `content_type: plugin`
+- Created `info.md` for HACS listing
+- Moved built files to root (`tsuryphone-card.js`) for HACS compatibility
+- Created comprehensive GitHub Actions workflows
 
-- [x] Create `hacs.json` configuration file
-- [x] Create `info.md` for HACS listing
-- [x] Create `CHANGELOG.md` with version history
-- [x] Create `LICENSE` file (MIT)
-- [x] Set up GitHub Actions workflows:
-  - [x] `auto-release-on-push.yml` - Auto-bump version and create releases
-  - [x] `hacs-validation.yml` - Validate HACS configuration
-  - [x] `ci.yml` - Build validation on PRs and pushes
-- [x] Update `package.json` with version 0.1.0-alpha and repository info
-- [x] Update `package.json` with `"type": "module"` to fix Node warning
-- [x] Update `README.md` with installation instructions
-- [x] Update dependencies to latest versions (lit 3.3.1, rollup 4.52.5, etc.)
-- [x] Build frontend bundle successfully
-- [ ] Push to GitHub and trigger first auto-release
-- [ ] Test HACS installation process
-- [ ] **SMOKE TEST #1**: Install via HACS and verify:
-  - Card loads in HA
-  - Navigation between views works
-  - Home view displays call log
-  - Theming works in light/dark mode
-  - Responsive design on mobile/desktop
+**GitHub Actions:**
+- Auto-release workflow with version bumping and package creation
+- HACS validation workflow
+- CI workflow for builds and validation
+- Auto-versioning: patch bumps with suffix preservation (0.1.x-alpha)
 
-**Dependencies**: Phase 3 complete ✅
+**HACS Compatibility Fixes:**
+- Fixed filename path (root instead of dist/)
+- Added `content_type: plugin` to hacs.json
+- Validated repository structure
+- Successfully installed via HACS
 
-### ⏸️ Phase 4: Keypad View (PENDING)
+**Entity Configuration:**
+- Added direct `entity` config support
+- Fixed entity ID construction to support both patterns:
+  - Direct: `entity: sensor.phone_state`
+  - Device ID: `device_id: tsuryphone` → `sensor.tsuryphone_phone_state`
+
+**Releases:**
+- v0.1.1-alpha through v0.1.6-alpha created
+- All workflows tested and validated
+- HACS installation successful
+
+**Status**: ✅ Card successfully installed and running in Home Assistant!
+
+### ⏭️ Phase 4: Keypad View (NEXT)
+
+**Objective**: Implement the dialing keypad interface
+
+**Tasks**:
+- [ ] Create `keypad-view.ts` component
+- [ ] Implement number display with formatting
+- [ ] Create keypad grid (0-9, *, #, +)
+- [ ] Add call button (green) and backspace
+- [ ] Integrate with `tsuryphone.dial_number` service
+- [ ] Add haptic feedback on button press
+- [ ] Support international dialing (+ prefix)
+- [ ] Show dialing state feedback
+- [ ] Handle error states (invalid number, etc.)
+
+**Dependencies**: Phase 3.5 complete ✅
 ### ⏸️ Phase 5: Contacts View (PENDING)
 ### ⏸️ Phase 6: Blocked View (PENDING)
 ### ⏸️ Phase 7: Contact Modal (PENDING)
