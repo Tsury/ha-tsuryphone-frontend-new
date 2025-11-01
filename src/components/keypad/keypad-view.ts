@@ -7,6 +7,10 @@ import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import { TsuryPhoneCardConfig } from "../../types/tsuryphone";
+import {
+  getCachedTsuryPhoneEntities,
+  DeviceEntities,
+} from "../../utils/entity-discovery";
 import "./dialed-number-display";
 import "./keypad-grid";
 
@@ -15,26 +19,29 @@ export class TsuryPhoneKeypadView extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: TsuryPhoneCardConfig;
 
-  // No local state - everything driven by entities
+  // Discovered entities (populated asynchronously)
+  @state() private _entities: DeviceEntities | null = null;
+
+  protected async firstUpdated(): Promise<void> {
+    // Discover all entities from the device on first load
+    const phoneStateEntityId = this._getPhoneStateEntityId();
+    this._entities = await getCachedTsuryPhoneEntities(
+      this.hass,
+      phoneStateEntityId
+    );
+    console.log("[KeypadView] Entities discovered:", this._entities);
+    this.requestUpdate(); // Trigger re-render with discovered entities
+  }
 
   protected shouldUpdate(changedProps: Map<string, any>): boolean {
-    if (changedProps.has("hass")) {
+    if (changedProps.has("hass") && this._entities?.currentDialingNumber) {
       const oldHass = changedProps.get("hass") as HomeAssistant;
       if (oldHass) {
-        // Get the device prefix from the phone_state entity
-        // sensor.phone_state -> phone
-        // sensor.tsuryphone_phone_state -> tsuryphone
-        const phoneStateEntityId = this._getPhoneStateEntityId();
-        const stripped = phoneStateEntityId.replace(/^sensor\./, ''); // Remove sensor. prefix
-        const devicePrefix = stripped.replace(/_phone_state$/, ''); // Remove _phone_state suffix
-        const entityId = `sensor.${devicePrefix}_current_dialing_number`;
+        const entityId = this._entities.currentDialingNumber;
         const oldState = oldHass.states[entityId]?.state;
         const newState = this.hass.states[entityId]?.state;
 
         console.log("[KeypadView] shouldUpdate check:", {
-          phoneStateEntityId,
-          stripped,
-          devicePrefix,
           entityId,
           oldState,
           newState,
@@ -225,27 +232,25 @@ export class TsuryPhoneKeypadView extends LitElement {
   }
 
   private _getCurrentDialingNumber(): string {
-    // Get the device prefix from the phone_state entity
-    // sensor.phone_state -> phone
-    // sensor.tsuryphone_phone_state -> tsuryphone
-    const phoneStateEntityId = this._getPhoneStateEntityId();
-    const stripped = phoneStateEntityId.replace(/^sensor\./, ''); // Remove sensor. prefix
-    const devicePrefix = stripped.replace(/_phone_state$/, ''); // Remove _phone_state suffix
-    const entityId = `sensor.${devicePrefix}_current_dialing_number`;
+    // Use discovered entity if available
+    if (!this._entities?.currentDialingNumber) {
+      console.log(
+        "[KeypadView] _getCurrentDialingNumber: Entity not yet discovered"
+      );
+      return "";
+    }
+
+    const entityId = this._entities.currentDialingNumber;
     const entity = this.hass?.states[entityId];
     const result =
       entity?.state && entity.state !== "unknown" ? entity.state : "";
+
     console.log("[KeypadView] _getCurrentDialingNumber:", {
-      phoneStateEntityId,
-      stripped,
-      devicePrefix,
       entityId,
       entityState: entity?.state,
       result,
-      availableEntities: Object.keys(this.hass?.states || {}).filter((k) =>
-        k.includes("current_dialing")
-      ),
     });
+
     return result;
   }
 

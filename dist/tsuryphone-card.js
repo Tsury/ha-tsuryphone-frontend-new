@@ -1576,6 +1576,89 @@ TsuryPhoneHomeView = __decorate([
 ], TsuryPhoneHomeView);
 
 /**
+ * Entity Discovery Utilities
+ * Discover related entities from a device without hardcoded naming patterns
+ */
+/**
+ * Get the device ID from an entity using WebSocket API
+ */
+async function getDeviceIdFromEntity(hass, entityId) {
+    try {
+        const entities = await hass.callWS({
+            type: "config/entity_registry/list",
+        });
+        const entity = entities.find((e) => e.entity_id === entityId);
+        return entity?.device_id || null;
+    }
+    catch (error) {
+        console.error("[EntityDiscovery] Failed to get device ID:", error);
+        return null;
+    }
+}
+/**
+ * Get all entities belonging to a device
+ */
+async function getDeviceEntities(hass, deviceId) {
+    try {
+        const entities = await hass.callWS({
+            type: "config/entity_registry/list",
+        });
+        return entities
+            .filter((e) => e.device_id === deviceId)
+            .map((e) => e.entity_id);
+    }
+    catch (error) {
+        console.error("[EntityDiscovery] Failed to get device entities:", error);
+        return [];
+    }
+}
+/**
+ * Discover all TsuryPhone entities from a single phone_state entity
+ */
+async function discoverTsuryPhoneEntities(hass, phoneStateEntityId) {
+    console.log("[EntityDiscovery] Discovering entities from:", phoneStateEntityId);
+    // Get the device ID from the phone_state entity
+    const deviceId = await getDeviceIdFromEntity(hass, phoneStateEntityId);
+    if (!deviceId) {
+        console.error("[EntityDiscovery] Could not find device ID for entity:", phoneStateEntityId);
+        return {
+            phoneState: phoneStateEntityId,
+            currentDialingNumber: null,
+            callHistory: null,
+            currentCallNumber: null,
+        };
+    }
+    console.log("[EntityDiscovery] Found device ID:", deviceId);
+    // Get all entities for this device
+    const allEntityIds = await getDeviceEntities(hass, deviceId);
+    console.log("[EntityDiscovery] Device has", allEntityIds.length, "entities:", allEntityIds);
+    // Find specific entities by matching patterns in entity_id
+    const result = {
+        phoneState: phoneStateEntityId,
+        currentDialingNumber: allEntityIds.find((id) => id.includes("current_dialing_number")) || null,
+        callHistory: allEntityIds.find((id) => id.includes("call_history")) || null,
+        currentCallNumber: allEntityIds.find((id) => id.includes("current_call_number")) || null,
+    };
+    console.log("[EntityDiscovery] Discovered entities:", result);
+    return result;
+}
+/**
+ * Cache for discovered entities to avoid repeated WebSocket calls
+ */
+const entityCache = new Map();
+/**
+ * Get discovered entities with caching
+ */
+async function getCachedTsuryPhoneEntities(hass, phoneStateEntityId) {
+    if (entityCache.has(phoneStateEntityId)) {
+        return entityCache.get(phoneStateEntityId);
+    }
+    const entities = await discoverTsuryPhoneEntities(hass, phoneStateEntityId);
+    entityCache.set(phoneStateEntityId, entities);
+    return entities;
+}
+
+/**
  * Dialed Number Display Component
  * Shows the currently dialed number with backspace functionality
  */
@@ -1917,24 +2000,26 @@ TsuryPhoneKeypadGrid = __decorate([
  * Main container for the dialing keypad
  */
 let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
-    // No local state - everything driven by entities
+    constructor() {
+        super(...arguments);
+        // Discovered entities (populated asynchronously)
+        this._entities = null;
+    }
+    async firstUpdated() {
+        // Discover all entities from the device on first load
+        const phoneStateEntityId = this._getPhoneStateEntityId();
+        this._entities = await getCachedTsuryPhoneEntities(this.hass, phoneStateEntityId);
+        console.log("[KeypadView] Entities discovered:", this._entities);
+        this.requestUpdate(); // Trigger re-render with discovered entities
+    }
     shouldUpdate(changedProps) {
-        if (changedProps.has("hass")) {
+        if (changedProps.has("hass") && this._entities?.currentDialingNumber) {
             const oldHass = changedProps.get("hass");
             if (oldHass) {
-                // Get the device prefix from the phone_state entity
-                // sensor.phone_state -> phone
-                // sensor.tsuryphone_phone_state -> tsuryphone
-                const phoneStateEntityId = this._getPhoneStateEntityId();
-                const stripped = phoneStateEntityId.replace(/^sensor\./, ''); // Remove sensor. prefix
-                const devicePrefix = stripped.replace(/_phone_state$/, ''); // Remove _phone_state suffix
-                const entityId = `sensor.${devicePrefix}_current_dialing_number`;
+                const entityId = this._entities.currentDialingNumber;
                 const oldState = oldHass.states[entityId]?.state;
                 const newState = this.hass.states[entityId]?.state;
                 console.log("[KeypadView] shouldUpdate check:", {
-                    phoneStateEntityId,
-                    stripped,
-                    devicePrefix,
                     entityId,
                     oldState,
                     newState,
@@ -2094,23 +2179,18 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         return !!this._getCurrentDialingNumber() || !!this._getLastCalledNumber();
     }
     _getCurrentDialingNumber() {
-        // Get the device prefix from the phone_state entity
-        // sensor.phone_state -> phone
-        // sensor.tsuryphone_phone_state -> tsuryphone
-        const phoneStateEntityId = this._getPhoneStateEntityId();
-        const stripped = phoneStateEntityId.replace(/^sensor\./, ''); // Remove sensor. prefix
-        const devicePrefix = stripped.replace(/_phone_state$/, ''); // Remove _phone_state suffix
-        const entityId = `sensor.${devicePrefix}_current_dialing_number`;
+        // Use discovered entity if available
+        if (!this._entities?.currentDialingNumber) {
+            console.log("[KeypadView] _getCurrentDialingNumber: Entity not yet discovered");
+            return "";
+        }
+        const entityId = this._entities.currentDialingNumber;
         const entity = this.hass?.states[entityId];
         const result = entity?.state && entity.state !== "unknown" ? entity.state : "";
         console.log("[KeypadView] _getCurrentDialingNumber:", {
-            phoneStateEntityId,
-            stripped,
-            devicePrefix,
             entityId,
             entityState: entity?.state,
             result,
-            availableEntities: Object.keys(this.hass?.states || {}).filter((k) => k.includes("current_dialing")),
         });
         return result;
     }
@@ -2185,6 +2265,9 @@ __decorate([
 __decorate([
     n({ attribute: false })
 ], TsuryPhoneKeypadView.prototype, "config", void 0);
+__decorate([
+    r()
+], TsuryPhoneKeypadView.prototype, "_entities", void 0);
 TsuryPhoneKeypadView = __decorate([
     t("tsuryphone-keypad-view")
 ], TsuryPhoneKeypadView);
