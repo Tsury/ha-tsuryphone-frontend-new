@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript compiler
+        run: npx tsc --noEmit
+
+      - name: Run linter
+        run: npm run lint || echo "⚠️ Linting issues found (non-blocking)"
+
+      - name: Build bundle
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          if [ ! -f "dist/tsuryphone-card.js" ]; then
+            echo "❌ Build failed - dist/tsuryphone-card.js not found"
+            exit 1
+          fi
+          
+          if [ ! -f "dist/tsuryphone-card.js.map" ]; then
+            echo "⚠️ Source map not found (non-critical)"
+          fi
+          
+          echo "✅ Build successful"
+          echo "Bundle size:"
+          ls -lh dist/tsuryphone-card.js
+          
+          # Check bundle size
+          SIZE=$(stat -f%z dist/tsuryphone-card.js 2>/dev/null || stat -c%s dist/tsuryphone-card.js)
+          echo "Bundle size: $SIZE bytes"
+          
+          # Warn if bundle is too large (> 1MB)
+          if [ $SIZE -gt 1048576 ]; then
+            echo "⚠️ Bundle size exceeds 1MB"
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tsuryphone-card-build
+          path: dist/
+          retention-days: 7
+
+      - name: Summary
+        run: |
+          echo "### Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ TypeScript compilation successful" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Bundle built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Files:**" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dist/tsuryphone-card.js\`" >> $GITHUB_STEP_SUMMARY
+          if [ -f "dist/tsuryphone-card.js.map" ]; then
+            echo "- \`dist/tsuryphone-card.js.map\`" >> $GITHUB_STEP_SUMMARY
+          fi

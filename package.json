@@ -1,0 +1,50 @@
+{
+  "name": "tsuryphone-card",
+  "version": "0.1.0-alpha",
+  "type": "module",
+  "description": "Modern Android Pixel-style Phone + Contacts card for TsuryPhone Home Assistant integration",
+  "main": "dist/tsuryphone-card.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tsury/ha-tsuryphone-frontend-new.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tsury/ha-tsuryphone-frontend-new/issues"
+  },
+  "homepage": "https://github.com/Tsury/ha-tsuryphone-frontend-new#readme",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "home-assistant",
+    "custom-card",
+    "lovelace",
+    "hacs",
+    "tsuryphone",
+    "phone",
+    "contacts",
+    "call-log",
+    "dialer"
+  ],
+  "author": "Tsury",
+  "license": "MIT",
+  "dependencies": {
+    "lit": "^3.3.1",
+    "custom-card-helpers": "^1.9.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "rollup": "^4.52.5",
+    "rollup-plugin-serve": "^3.0.0",
+    "typescript": "^5.9.3"
+  }
+}

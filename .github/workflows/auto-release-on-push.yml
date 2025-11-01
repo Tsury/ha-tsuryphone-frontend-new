@@ -1,0 +1,159 @@
+name: Auto Release On Push
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: auto-release-main
+  cancel-in-progress: false
+
+jobs:
+  auto-release:
+    if: "!contains(github.event.head_commit.message, 'chore(auto-release)') && !contains(github.event.head_commit.message, '[skip-release]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to push tag & release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Read current version
+        id: ver
+        run: |
+          CURR=$(jq -r '.version' package.json)
+          if [ -z "$CURR" ] || [ "$CURR" = "null" ]; then
+            echo "Failed to read version from package.json" >&2
+            exit 1
+          fi
+          echo "current=$CURR" >> $GITHUB_OUTPUT
+          echo "Current version: $CURR"
+
+      - name: Bump patch version
+        id: bump
+        run: |
+          CURR='${{ steps.ver.outputs.current }}'
+          # Remove any pre-release suffix (e.g., -alpha)
+          BASE_VER=$(echo "$CURR" | sed 's/-.*$//')
+          SUFFIX=$(echo "$CURR" | grep -oP '(?<=-).*' || echo "")
+          
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VER"
+          if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+            echo "Invalid current version: $CURR" >&2
+            exit 1
+          fi
+          
+          NEW_PATCH=$((PATCH + 1))
+          NEW_BASE="$MAJOR.$MINOR.$NEW_PATCH"
+          
+          # Keep suffix if it exists
+          if [ -n "$SUFFIX" ]; then
+            NEW_VERSION="$NEW_BASE-$SUFFIX"
+          else
+            NEW_VERSION="$NEW_BASE"
+          fi
+          
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          tmpfile=$(mktemp)
+          jq --arg v "$NEW_VERSION" '.version=$v' package.json > "$tmpfile" && mv "$tmpfile" package.json
+          echo "Bumped to: $NEW_VERSION"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend bundle
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          if [ ! -f "dist/tsuryphone-card.js" ]; then
+            echo "Build failed - dist/tsuryphone-card.js not found" >&2
+            exit 1
+          fi
+          echo "Build successful - bundle size:"
+          ls -lh dist/tsuryphone-card.js
+
+      - name: Commit version bump
+        run: |
+          NEW='${{ steps.bump.outputs.new }}'
+          git config user.email "action@github.com"
+          git config user.name "auto-release"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(auto-release): bump version to $NEW"
+          git push origin HEAD:main
+
+      - name: Create release package
+        run: |
+          NEW='${{ steps.bump.outputs.new }}'
+          mkdir -p release-package
+          cp dist/tsuryphone-card.js release-package/
+          cp dist/tsuryphone-card.js.map release-package/
+          cp hacs.json release-package/
+          cp info.md release-package/
+          cp README.md release-package/
+          cp LICENSE release-package/ || echo "No LICENSE file"
+          cd release-package
+          zip -r ../tsuryphone-card-$NEW.zip .
+          cd ..
+          sha256sum tsuryphone-card-$NEW.zip > tsuryphone-card-$NEW.zip.sha256
+          echo "Package created:"
+          ls -lh tsuryphone-card-$NEW.zip*
+
+      - name: Create tag
+        run: |
+          NEW='${{ steps.bump.outputs.new }}'
+          git tag -a v$NEW -m "Auto release v$NEW"
+          git push origin v$NEW
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.new }}
+          name: v${{ steps.bump.outputs.new }}
+          body: |
+            Automated release for commit ${{ github.sha }}.
+            Version: v${{ steps.bump.outputs.new }}
+            
+            ## Installation
+            
+            ### HACS (Recommended)
+            1. Add this repository as a custom repository in HACS (Frontend category)
+            2. Install "TsuryPhone Card" from HACS
+            3. Add the card to your dashboard
+            
+            ### Manual
+            1. Download `tsuryphone-card.js` from this release
+            2. Copy to `config/www/` in your Home Assistant installation
+            3. Add as a resource in Lovelace dashboard
+            
+            ## Files
+            - `tsuryphone-card-${{ steps.bump.outputs.new }}.zip` - Complete package for HACS
+            - `tsuryphone-card.js` - Standalone bundle
+          files: |
+            tsuryphone-card-${{ steps.bump.outputs.new }}.zip
+            tsuryphone-card-${{ steps.bump.outputs.new }}.zip.sha256
+            dist/tsuryphone-card.js
+            dist/tsuryphone-card.js.map
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "Released v${{ steps.bump.outputs.new }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Built bundle: dist/tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY
+          echo "- Created release package: tsuryphone-card-${{ steps.bump.outputs.new }}.zip" >> $GITHUB_STEP_SUMMARY

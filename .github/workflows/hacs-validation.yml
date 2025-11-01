@@ -1,0 +1,102 @@
+name: HACS Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  hacs-validation:
+    name: HACS Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate HACS configuration
+        run: |
+          echo "Validating HACS configuration..."
+          
+          # Check hacs.json exists and is valid JSON
+          if [ ! -f "hacs.json" ]; then
+            echo "❌ hacs.json file not found"
+            exit 1
+          fi
+          
+          python3 -c "
+          import json
+          import sys
+          
+          try:
+              with open('hacs.json', 'r') as f:
+                  hacs_config = json.load(f)
+              print('✅ hacs.json is valid JSON')
+              
+              # Check required 'name' field
+              if 'name' not in hacs_config:
+                  print('❌ Missing required \"name\" field in hacs.json')
+                  sys.exit(1)
+              
+              print(f'✅ HACS name: {hacs_config[\"name\"]}')
+              
+              # Check filename field for frontend cards
+              if 'filename' not in hacs_config:
+                  print('❌ Missing required \"filename\" field in hacs.json')
+                  sys.exit(1)
+              
+              print(f'✅ Filename: {hacs_config[\"filename\"]}')
+              
+              # Validate optional fields
+              if 'homeassistant' in hacs_config:
+                  print(f'✅ Minimum HA version: {hacs_config[\"homeassistant\"]}')
+              
+              if 'content_in_root' in hacs_config:
+                  print(f'✅ Content in root: {hacs_config[\"content_in_root\"]}')
+                  
+              if 'zip_release' in hacs_config:
+                  print(f'✅ Zip release: {hacs_config[\"zip_release\"]}')
+                  
+          except json.JSONDecodeError as e:
+              print(f'❌ Invalid JSON in hacs.json: {e}')
+              sys.exit(1)
+          except Exception as e:
+              print(f'❌ Error validating hacs.json: {e}')
+              sys.exit(1)
+          "
+
+      - name: Validate info.md exists
+        run: |
+          if [ ! -f "info.md" ]; then
+            echo "⚠️ info.md file not found (recommended for HACS)"
+            exit 0
+          fi
+          echo "✅ info.md exists"
+
+      - name: Validate README exists
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "⚠️ README.md file not found (recommended)"
+            exit 0
+          fi
+          echo "✅ README.md exists"
+
+      - name: Check for required files
+        run: |
+          echo "Checking for required frontend files..."
+          
+          # Check if dist directory or built file exists
+          FILENAME=$(python3 -c "import json; print(json.load(open('hacs.json'))['filename'])")
+          
+          if [ ! -f "$FILENAME" ]; then
+            echo "⚠️ Build artifact $FILENAME not found (will be built in CI)"
+            exit 0
+          fi
+          
+          echo "✅ Build artifact exists: $FILENAME"
+
+      - name: Summary
+        run: |
+          echo "### HACS Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "✅ All HACS validation checks passed" >> $GITHUB_STEP_SUMMARY
