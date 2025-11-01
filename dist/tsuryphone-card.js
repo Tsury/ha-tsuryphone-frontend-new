@@ -1919,26 +1919,28 @@ TsuryPhoneKeypadGrid = __decorate([
 let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
     // No local state - everything driven by entities
     shouldUpdate(changedProps) {
-        if (changedProps.has('hass')) {
-            const oldHass = changedProps.get('hass');
+        if (changedProps.has("hass")) {
+            const oldHass = changedProps.get("hass");
             if (oldHass) {
                 // Get the device prefix from the phone_state entity
+                // sensor.phone_state -> phone, sensor.tsuryphone_phone_state -> tsuryphone
                 const phoneStateEntityId = this._getPhoneStateEntityId();
-                const devicePrefix = phoneStateEntityId.replace('_phone_state', '').replace('sensor.', '');
+                const match = phoneStateEntityId.match(/^sensor\.(.+)_phone_state$/);
+                const devicePrefix = match ? match[1] : "tsuryphone";
                 const entityId = `sensor.${devicePrefix}_current_dialing_number`;
                 const oldState = oldHass.states[entityId]?.state;
                 const newState = this.hass.states[entityId]?.state;
-                console.log('[KeypadView] shouldUpdate check:', {
+                console.log("[KeypadView] shouldUpdate check:", {
                     phoneStateEntityId,
                     devicePrefix,
                     entityId,
                     oldState,
                     newState,
-                    changed: oldState !== newState
+                    changed: oldState !== newState,
                 });
                 // Force update if the dialing number changed
                 if (oldState !== newState) {
-                    console.log('[KeypadView] Forcing update due to state change');
+                    console.log("[KeypadView] Forcing update due to state change");
                     return true;
                 }
             }
@@ -2029,7 +2031,7 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
     }
     async _handleDigitPress(digit) {
         this._triggerHaptic("light");
-        console.log('[KeypadView] Dialing digit:', digit, 'to entity:', this._getPhoneStateEntityId());
+        console.log("[KeypadView] Dialing digit:", digit, "to entity:", this._getPhoneStateEntityId());
         try {
             // Send digit to backend - no optimistic update
             await this.hass.callService("tsuryphone", "dial_digit", {
@@ -2037,7 +2039,7 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             }, {
                 entity_id: this._getPhoneStateEntityId(),
             });
-            console.log('[KeypadView] Digit dialed successfully');
+            console.log("[KeypadView] Digit dialed successfully");
         }
         catch (error) {
             console.error("Failed to dial digit:", error);
@@ -2091,17 +2093,20 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
     }
     _getCurrentDialingNumber() {
         // Get the device prefix from the phone_state entity
+        // sensor.phone_state -> phone, sensor.tsuryphone_phone_state -> tsuryphone
         const phoneStateEntityId = this._getPhoneStateEntityId();
-        const devicePrefix = phoneStateEntityId.replace('_phone_state', '').replace('sensor.', '');
+        const match = phoneStateEntityId.match(/^sensor\.(.+)_phone_state$/);
+        const devicePrefix = match ? match[1] : "tsuryphone";
         const entityId = `sensor.${devicePrefix}_current_dialing_number`;
         const entity = this.hass?.states[entityId];
         const result = entity?.state && entity.state !== "unknown" ? entity.state : "";
-        console.log('[KeypadView] _getCurrentDialingNumber:', {
+        console.log("[KeypadView] _getCurrentDialingNumber:", {
             phoneStateEntityId,
             devicePrefix,
             entityId,
             entityState: entity?.state,
-            result
+            result,
+            availableEntities: Object.keys(this.hass?.states || {}).filter((k) => k.includes("current_dialing")),
         });
         return result;
     }
