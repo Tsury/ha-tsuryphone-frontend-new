@@ -142,11 +142,12 @@ export class TsuryPhoneContactItem extends LitElement {
       this.contact.display_number || this.contact.number
     );
 
-    // Check if contact is priority
+    // Check if contact is priority by looking in priority_callers list
     const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
-    const priorityNumbers: string[] =
-      phoneState?.attributes?.priority_numbers || [];
-    const isPriority = priorityNumbers.includes(this.contact.normalized_number);
+    const priorityCallers = phoneState?.attributes?.priority_callers || [];
+    const isPriority = priorityCallers.some(
+      (p: any) => p.normalized_number === this.contact.normalized_number
+    );
 
     return html`
       <div class="list-item" @click=${this._handleEdit}>

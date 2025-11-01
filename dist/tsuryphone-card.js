@@ -2856,10 +2856,10 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
     }
     render() {
         const formattedNumber = formatPhoneNumber(this.contact.display_number || this.contact.number);
-        // Check if contact is priority
+        // Check if contact is priority by looking in priority_callers list
         const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
-        const priorityNumbers = phoneState?.attributes?.priority_numbers || [];
-        const isPriority = priorityNumbers.includes(this.contact.normalized_number);
+        const priorityCallers = phoneState?.attributes?.priority_callers || [];
+        const isPriority = priorityCallers.some((p) => p.normalized_number === this.contact.normalized_number);
         return x `
       <div class="list-item" @click=${this._handleEdit}>
         <div class="contact-info">
