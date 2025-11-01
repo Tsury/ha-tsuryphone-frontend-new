@@ -1917,10 +1917,7 @@ TsuryPhoneKeypadGrid = __decorate([
  * Main container for the dialing keypad
  */
 let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
-    constructor() {
-        super(...arguments);
-        this._dialedNumber = '';
-    }
+    // No local state - everything driven by entities
     static get styles() {
         return i$3 `
       :host {
@@ -2001,19 +1998,30 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
       }
     `;
     }
-    _handleDigitPress(digit) {
-        this._dialedNumber += digit;
+    async _handleDigitPress(digit) {
         this._triggerHaptic('light');
+        try {
+            // Send digit to backend - no optimistic update
+            await this.hass.callService('tsuryphone', 'dial_digit', {
+                digit: parseInt(digit, 10),
+            }, {
+                entity_id: this._getPhoneStateEntityId(),
+            });
+        }
+        catch (err) {
+            console.error('Failed to dial digit:', err);
+            this._triggerHaptic('heavy');
+        }
     }
     async _handleBackspace() {
-        if (this._dialedNumber.length === 0)
+        const currentNumber = this._getCurrentDialingNumber();
+        if (!currentNumber)
             return;
         try {
+            // Request delete from backend - no optimistic update
             await this.hass.callService('tsuryphone', 'delete_last_digit', {}, {
                 entity_id: this._getPhoneStateEntityId(),
             });
-            // Optimistic update
-            this._dialedNumber = this._dialedNumber.slice(0, -1);
             this._triggerHaptic('light');
         }
         catch (err) {
@@ -2022,26 +2030,24 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         }
     }
     _handleClear() {
-        this._dialedNumber = '';
+        // Clear is just deleting all digits - let user delete one by one
         this._triggerHaptic('light');
     }
     async _handleCall() {
         if (!this._canCall())
             return;
-        const numberToDial = this._dialedNumber || this._getLastCalledNumber();
+        const numberToDial = this._getCurrentDialingNumber() || this._getLastCalledNumber();
         if (!numberToDial)
             return;
         this._triggerHaptic('medium');
         try {
             // Call the dial service
-            // Note: The service is device-targeted, HA will route it to the correct device
             await this.hass.callService('tsuryphone', 'dial', {
                 number: numberToDial,
             }, {
                 entity_id: this._getPhoneStateEntityId(),
             });
-            // Clear the dialed number after successful dial
-            this._dialedNumber = '';
+            // The backend will clear the dialing number after successful dial
         }
         catch (error) {
             console.error('Failed to dial number:', error);
@@ -2050,7 +2056,13 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
     }
     _canCall() {
         // Can call if we have a dialed number OR we have call history to redial
-        return this._dialedNumber.length > 0 || !!this._getLastCalledNumber();
+        return !!this._getCurrentDialingNumber() || !!this._getLastCalledNumber();
+    }
+    _getCurrentDialingNumber() {
+        const deviceId = this.config?.device_id || 'tsuryphone';
+        const entityId = `sensor.${deviceId}_current_dialing_number`;
+        const entity = this.hass?.states[entityId];
+        return entity?.state && entity.state !== 'unknown' ? entity.state : '';
     }
     _getPhoneStateEntityId() {
         const deviceId = this.config?.device_id || 'tsuryphone';
@@ -2082,11 +2094,12 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         navigator.vibrate(durations[type]);
     }
     render() {
+        const dialedNumber = this._getCurrentDialingNumber();
         return x `
       <div class="keypad-container">
         <div class="display-section">
           <tsuryphone-dialed-number-display
-            .dialedNumber=${this._dialedNumber}
+            .dialedNumber=${dialedNumber}
             @backspace=${this._handleBackspace}
             @clear=${this._handleClear}
           ></tsuryphone-dialed-number-display>
@@ -2120,9 +2133,6 @@ __decorate([
 __decorate([
     n({ attribute: false })
 ], TsuryPhoneKeypadView.prototype, "config", void 0);
-__decorate([
-    r()
-], TsuryPhoneKeypadView.prototype, "_dialedNumber", void 0);
 TsuryPhoneKeypadView = __decorate([
     t('tsuryphone-keypad-view')
 ], TsuryPhoneKeypadView);

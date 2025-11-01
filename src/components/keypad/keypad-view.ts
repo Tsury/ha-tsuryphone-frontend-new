@@ -15,7 +15,7 @@ export class TsuryPhoneKeypadView extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: TsuryPhoneCardConfig;
 
-  @state() private _dialedNumber = '';
+  // No local state - everything driven by entities
 
   static get styles(): CSSResultGroup {
     return css`
@@ -98,21 +98,32 @@ export class TsuryPhoneKeypadView extends LitElement {
     `;
   }
 
-  private _handleDigitPress(digit: string): void {
-    this._dialedNumber += digit;
+  private async _handleDigitPress(digit: string): Promise<void> {
     this._triggerHaptic('light');
+    
+    try {
+      // Send digit to backend - no optimistic update
+      await this.hass.callService('tsuryphone', 'dial_digit', {
+        digit: parseInt(digit, 10),
+      }, {
+        entity_id: this._getPhoneStateEntityId(),
+      });
+    } catch (err) {
+      console.error('Failed to dial digit:', err);
+      this._triggerHaptic('heavy');
+    }
   }
 
   private async _handleBackspace(): Promise<void> {
-    if (this._dialedNumber.length === 0) return;
+    const currentNumber = this._getCurrentDialingNumber();
+    if (!currentNumber) return;
 
     try {
+      // Request delete from backend - no optimistic update
       await this.hass.callService('tsuryphone', 'delete_last_digit', {}, {
         entity_id: this._getPhoneStateEntityId(),
       });
       
-      // Optimistic update
-      this._dialedNumber = this._dialedNumber.slice(0, -1);
       this._triggerHaptic('light');
     } catch (err) {
       console.error('Failed to delete last digit:', err);
@@ -121,29 +132,27 @@ export class TsuryPhoneKeypadView extends LitElement {
   }
 
   private _handleClear(): void {
-    this._dialedNumber = '';
+    // Clear is just deleting all digits - let user delete one by one
     this._triggerHaptic('light');
   }
 
   private async _handleCall(): Promise<void> {
     if (!this._canCall()) return;
 
-    const numberToDial = this._dialedNumber || this._getLastCalledNumber();
+    const numberToDial = this._getCurrentDialingNumber() || this._getLastCalledNumber();
     if (!numberToDial) return;
 
     this._triggerHaptic('medium');
 
     try {
       // Call the dial service
-      // Note: The service is device-targeted, HA will route it to the correct device
       await this.hass.callService('tsuryphone', 'dial', {
         number: numberToDial,
       }, {
         entity_id: this._getPhoneStateEntityId(),
       });
 
-      // Clear the dialed number after successful dial
-      this._dialedNumber = '';
+      // The backend will clear the dialing number after successful dial
     } catch (error) {
       console.error('Failed to dial number:', error);
       this._triggerHaptic('heavy');
@@ -152,7 +161,14 @@ export class TsuryPhoneKeypadView extends LitElement {
 
   private _canCall(): boolean {
     // Can call if we have a dialed number OR we have call history to redial
-    return this._dialedNumber.length > 0 || !!this._getLastCalledNumber();
+    return !!this._getCurrentDialingNumber() || !!this._getLastCalledNumber();
+  }
+
+  private _getCurrentDialingNumber(): string {
+    const deviceId = this.config?.device_id || 'tsuryphone';
+    const entityId = `sensor.${deviceId}_current_dialing_number`;
+    const entity = this.hass?.states[entityId];
+    return entity?.state && entity.state !== 'unknown' ? entity.state : '';
   }
 
   private _getPhoneStateEntityId(): string {
@@ -192,11 +208,13 @@ export class TsuryPhoneKeypadView extends LitElement {
   }
 
   protected render(): TemplateResult {
+    const dialedNumber = this._getCurrentDialingNumber();
+    
     return html`
       <div class="keypad-container">
         <div class="display-section">
           <tsuryphone-dialed-number-display
-            .dialedNumber=${this._dialedNumber}
+            .dialedNumber=${dialedNumber}
             @backspace=${this._handleBackspace}
             @clear=${this._handleClear}
           ></tsuryphone-dialed-number-display>
