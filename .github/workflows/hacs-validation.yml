@@ -15,56 +15,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate HACS configuration
+      - name: Validate Lovelace plugin structure
         run: |
-          echo "Validating HACS configuration..."
+          echo "Validating Lovelace plugin structure..."
+          echo "ℹ️ Using minimal plugin structure (no hacs.json required)"
           
-          # Check hacs.json exists and is valid JSON
-          if [ ! -f "hacs.json" ]; then
-            echo "❌ hacs.json file not found"
+          # Check for built frontend file
+          if [ ! -f "dist/tsuryphone-card.js" ]; then
+            echo "❌ dist/tsuryphone-card.js not found"
             exit 1
           fi
-          
-          python3 -c "
-          import json
-          import sys
-          
-          try:
-              with open('hacs.json', 'r') as f:
-                  hacs_config = json.load(f)
-              print('✅ hacs.json is valid JSON')
-              
-              # Check required 'name' field
-              if 'name' not in hacs_config:
-                  print('❌ Missing required \"name\" field in hacs.json')
-                  sys.exit(1)
-              
-              print(f'✅ HACS name: {hacs_config[\"name\"]}')
-              
-              # Check filename field for frontend cards
-              if 'filename' not in hacs_config:
-                  print('❌ Missing required \"filename\" field in hacs.json')
-                  sys.exit(1)
-              
-              print(f'✅ Filename: {hacs_config[\"filename\"]}')
-              
-              # Validate optional fields
-              if 'homeassistant' in hacs_config:
-                  print(f'✅ Minimum HA version: {hacs_config[\"homeassistant\"]}')
-              
-              if 'content_in_root' in hacs_config:
-                  print(f'✅ Content in root: {hacs_config[\"content_in_root\"]}')
-                  
-              if 'zip_release' in hacs_config:
-                  print(f'✅ Zip release: {hacs_config[\"zip_release\"]}')
-                  
-          except json.JSONDecodeError as e:
-              print(f'❌ Invalid JSON in hacs.json: {e}')
-              sys.exit(1)
-          except Exception as e:
-              print(f'❌ Error validating hacs.json: {e}')
-              sys.exit(1)
-          "
+          echo "✅ Frontend bundle exists: dist/tsuryphone-card.js"
 
       - name: Validate info.md exists
         run: |
@@ -84,19 +45,24 @@ jobs:
 
       - name: Check for required files
         run: |
-          echo "Checking for required frontend files..."
+          echo "Checking for source and package files..."
           
-          # Check if dist directory or built file exists
-          FILENAME=$(python3 -c "import json; print(json.load(open('hacs.json'))['filename'])")
-          
-          if [ ! -f "$FILENAME" ]; then
-            echo "⚠️ Build artifact $FILENAME not found (will be built in CI)"
-            exit 0
+          if [ ! -f "package.json" ]; then
+            echo "❌ package.json not found"
+            exit 1
           fi
+          echo "✅ package.json exists"
           
-          echo "✅ Build artifact exists: $FILENAME"
+          if [ ! -d "src" ]; then
+            echo "❌ src/ directory not found"
+            exit 1
+          fi
+          echo "✅ src/ directory exists"
 
       - name: Summary
         run: |
           echo "### HACS Validation Results" >> $GITHUB_STEP_SUMMARY
           echo "✅ All HACS validation checks passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Structure:** Minimal Lovelace plugin (no hacs.json)" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend bundle:** dist/tsuryphone-card.js" >> $GITHUB_STEP_SUMMARY
