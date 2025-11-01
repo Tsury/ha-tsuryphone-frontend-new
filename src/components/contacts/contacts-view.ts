@@ -109,6 +109,7 @@ export class TsuryPhoneContactsView extends LitElement {
       phoneStateEntityId,
       phoneState: phoneState?.state,
       hasAttributes: !!phoneState?.attributes,
+      allAttributes: phoneState?.attributes,
       quick_dials: phoneState?.attributes?.quick_dials,
       contactCount: contacts.length,
     });
