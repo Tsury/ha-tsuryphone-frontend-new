@@ -2009,7 +2009,9 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         if (this._dialedNumber.length === 0)
             return;
         try {
-            await this.hass.callService('tsuryphone', 'delete_last_digit', {});
+            await this.hass.callService('tsuryphone', 'delete_last_digit', {}, {
+                entity_id: this._getPhoneStateEntityId(),
+            });
             // Optimistic update
             this._dialedNumber = this._dialedNumber.slice(0, -1);
             this._triggerHaptic('light');
@@ -2035,6 +2037,8 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             // Note: The service is device-targeted, HA will route it to the correct device
             await this.hass.callService('tsuryphone', 'dial', {
                 number: numberToDial,
+            }, {
+                entity_id: this._getPhoneStateEntityId(),
             });
             // Clear the dialed number after successful dial
             this._dialedNumber = '';
@@ -2048,18 +2052,17 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         // Can call if we have a dialed number OR we have call history to redial
         return this._dialedNumber.length > 0 || !!this._getLastCalledNumber();
     }
-    _getLastCalledNumber() {
-        // Get the phone state entity
+    _getPhoneStateEntityId() {
         const deviceId = this.config?.device_id || 'tsuryphone';
-        let phoneStateEntityId;
         if (this.config?.entity) {
-            phoneStateEntityId = this.config.entity.startsWith('sensor.')
+            return this.config.entity.startsWith('sensor.')
                 ? this.config.entity
                 : `sensor.${this.config.entity}`;
         }
-        else {
-            phoneStateEntityId = `sensor.${deviceId}_phone_state`;
-        }
+        return `sensor.${deviceId}_phone_state`;
+    }
+    _getLastCalledNumber() {
+        const phoneStateEntityId = this._getPhoneStateEntityId();
         const phoneState = this.hass?.states[phoneStateEntityId];
         const callHistory = phoneState?.attributes?.call_log || [];
         if (callHistory.length === 0)

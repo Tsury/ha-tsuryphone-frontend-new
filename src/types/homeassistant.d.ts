@@ -17,7 +17,7 @@ export interface HomeAssistant {
     domain: string,
     service: string,
     serviceData?: any,
-    returnResponse?: boolean
+    targetOrReturnResponse?: { entity_id?: string | string[]; device_id?: string | string[]; area_id?: string | string[] } | boolean
   ): Promise<any>;
   callWS<T>(msg: any): Promise<T>;
 }

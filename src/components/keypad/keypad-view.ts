@@ -107,7 +107,9 @@ export class TsuryPhoneKeypadView extends LitElement {
     if (this._dialedNumber.length === 0) return;
 
     try {
-      await this.hass.callService('tsuryphone', 'delete_last_digit', {});
+      await this.hass.callService('tsuryphone', 'delete_last_digit', {}, {
+        entity_id: this._getPhoneStateEntityId(),
+      });
       
       // Optimistic update
       this._dialedNumber = this._dialedNumber.slice(0, -1);
@@ -136,6 +138,8 @@ export class TsuryPhoneKeypadView extends LitElement {
       // Note: The service is device-targeted, HA will route it to the correct device
       await this.hass.callService('tsuryphone', 'dial', {
         number: numberToDial,
+      }, {
+        entity_id: this._getPhoneStateEntityId(),
       });
 
       // Clear the dialed number after successful dial
@@ -151,19 +155,20 @@ export class TsuryPhoneKeypadView extends LitElement {
     return this._dialedNumber.length > 0 || !!this._getLastCalledNumber();
   }
 
-  private _getLastCalledNumber(): string | null {
-    // Get the phone state entity
+  private _getPhoneStateEntityId(): string {
     const deviceId = this.config?.device_id || 'tsuryphone';
-    let phoneStateEntityId: string;
     
     if (this.config?.entity) {
-      phoneStateEntityId = this.config.entity.startsWith('sensor.') 
+      return this.config.entity.startsWith('sensor.') 
         ? this.config.entity 
         : `sensor.${this.config.entity}`;
-    } else {
-      phoneStateEntityId = `sensor.${deviceId}_phone_state`;
     }
+    
+    return `sensor.${deviceId}_phone_state`;
+  }
 
+  private _getLastCalledNumber(): string | null {
+    const phoneStateEntityId = this._getPhoneStateEntityId();
     const phoneState = this.hass?.states[phoneStateEntityId];
     const callHistory = phoneState?.attributes?.call_log || [];
 
