@@ -28,7 +28,7 @@ export interface WaitingCallInfo {
 @customElement('tsuryphone-call-modal')
 export class TsuryPhoneCallModal extends LitElement {
   @property({ type: Object }) hass!: HomeAssistant;
-  @property({ type: String }) deviceId?: string;
+  @property({ type: String }) entityId?: string; // Phone state entity ID for service targeting
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String }) mode: CallModalMode = 'incoming';
   @property({ type: Object }) callInfo?: CallInfo;
@@ -434,8 +434,10 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      const target = this.deviceId ? { device_id: this.deviceId } : {};
-      await this.hass.callService('tsuryphone', 'answer_call', {}, target);
+      if (!this.entityId) {
+        throw new Error('Entity ID is required');
+      }
+      await this.hass.callService('tsuryphone', 'answer_call', {}, { entity_id: this.entityId });
       this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to answer call:', error);
@@ -455,8 +457,10 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      const target = this.deviceId ? { device_id: this.deviceId } : {};
-      await this.hass.callService('tsuryphone', 'hangup', {}, target);
+      if (!this.entityId) {
+        throw new Error('Entity ID is required');
+      }
+      await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
       this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to decline call:', error);
@@ -475,8 +479,10 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      const target = this.deviceId ? { device_id: this.deviceId } : {};
-      await this.hass.callService('tsuryphone', 'hangup', {}, target);
+      if (!this.entityId) {
+        throw new Error('Entity ID is required');
+      }
+      await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
       this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to hang up:', error);
@@ -502,8 +508,10 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('light');
 
     try {
-      const target = this.deviceId ? { device_id: this.deviceId } : {};
-      await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, target);
+      if (!this.entityId) {
+        throw new Error('Entity ID is required');
+      }
+      await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, { entity_id: this.entityId });
     } catch (error) {
       console.error('Failed to toggle speaker:', error);
     }
@@ -519,8 +527,10 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      const target = this.deviceId ? { device_id: this.deviceId } : {};
-      await this.hass.callService('tsuryphone', 'swap_calls', {}, target);
+      if (!this.entityId) {
+        throw new Error('Entity ID is required');
+      }
+      await this.hass.callService('tsuryphone', 'swap_calls', {}, { entity_id: this.entityId });
     } catch (error) {
       console.error('Failed to swap calls:', error);
     }
@@ -530,8 +540,10 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      const target = this.deviceId ? { device_id: this.deviceId } : {};
-      await this.hass.callService('tsuryphone', 'merge_calls', {}, target);
+      if (!this.entityId) {
+        throw new Error('Entity ID is required');
+      }
+      await this.hass.callService('tsuryphone', 'merge_calls', {}, { entity_id: this.entityId });
     } catch (error) {
       console.error('Failed to merge calls:', error);
     }

@@ -664,11 +664,15 @@ export class TsuryPhoneCard extends LitElement {
    * Render call modal
    */
   private _renderCallModal(): TemplateResult {
-    const deviceId = this.config?.device_id || '';
+    const deviceIdPrefix = this.config?.device_id || '';
+    const phoneStateEntityId = deviceIdPrefix 
+      ? `sensor.${deviceIdPrefix}_phone_state`
+      : `sensor.phone_state`;
+      
     return html`
       <tsuryphone-call-modal
         .hass=${this.hass}
-        .deviceId=${deviceId}
+        .entityId=${phoneStateEntityId}
         .open=${this._callModalOpen}
         .mode=${this._callModalMode}
         .callInfo=${this._currentCallInfo}
@@ -699,10 +703,8 @@ export class TsuryPhoneCard extends LitElement {
       <div class="call-toast" @click=${this._handleCallToastClick}>
         <div class="call-toast-content">
           <div class="call-toast-icon">📞</div>
-          <div class="call-toast-info">
-            <div class="call-toast-name">${displayName}</div>
-            <div class="call-toast-duration">${durationText}</div>
-          </div>
+          <div class="call-toast-name">${displayName}</div>
+          <div class="call-toast-duration">${durationText}</div>
         </div>
         <div class="call-toast-action">Tap to return</div>
       </div>
@@ -895,18 +897,18 @@ export class TsuryPhoneCard extends LitElement {
         /* Call Toast (minimized call indicator) */
         .call-toast {
           position: absolute;
-          top: 16px;
-          left: 16px;
-          right: 16px;
+          top: 8px;
+          left: 12px;
+          right: 12px;
           z-index: 50;
           background: var(--primary-color);
           color: white;
-          padding: 12px 16px;
-          border-radius: 28px;
+          padding: 8px 12px;
+          border-radius: 20px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
           cursor: pointer;
           transition: transform 0.2s ease;
         }
@@ -922,32 +924,31 @@ export class TsuryPhoneCard extends LitElement {
         .call-toast-content {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
         }
 
         .call-toast-icon {
-          font-size: 24px;
-        }
-
-        .call-toast-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          font-size: 18px;
+          line-height: 1;
         }
 
         .call-toast-name {
           font-weight: 500;
           font-size: 14px;
+          line-height: 1;
         }
 
         .call-toast-duration {
           font-size: 12px;
           opacity: 0.9;
+          line-height: 1;
         }
 
         .call-toast-action {
-          font-size: 12px;
-          opacity: 0.9;
+          font-size: 11px;
+          opacity: 0.85;
+          line-height: 1;
+          white-space: nowrap;
         }
 
         /* Dark mode adjustments */

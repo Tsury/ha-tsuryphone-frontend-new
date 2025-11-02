@@ -3889,8 +3889,10 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         this._isAnswering = true;
         this._triggerHaptic('medium');
         try {
-            const target = this.deviceId ? { device_id: this.deviceId } : {};
-            await this.hass.callService('tsuryphone', 'answer_call', {}, target);
+            if (!this.entityId) {
+                throw new Error('Entity ID is required');
+            }
+            await this.hass.callService('tsuryphone', 'answer_call', {}, { entity_id: this.entityId });
             this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3910,8 +3912,10 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         this._isDeclining = true;
         this._triggerHaptic('medium');
         try {
-            const target = this.deviceId ? { device_id: this.deviceId } : {};
-            await this.hass.callService('tsuryphone', 'hangup', {}, target);
+            if (!this.entityId) {
+                throw new Error('Entity ID is required');
+            }
+            await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
             this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3930,8 +3934,10 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleHangup() {
         this._triggerHaptic('medium');
         try {
-            const target = this.deviceId ? { device_id: this.deviceId } : {};
-            await this.hass.callService('tsuryphone', 'hangup', {}, target);
+            if (!this.entityId) {
+                throw new Error('Entity ID is required');
+            }
+            await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
             this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3955,8 +3961,10 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleSpeaker() {
         this._triggerHaptic('light');
         try {
-            const target = this.deviceId ? { device_id: this.deviceId } : {};
-            await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, target);
+            if (!this.entityId) {
+                throw new Error('Entity ID is required');
+            }
+            await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, { entity_id: this.entityId });
         }
         catch (error) {
             console.error('Failed to toggle speaker:', error);
@@ -3970,8 +3978,10 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleSwapCalls() {
         this._triggerHaptic('medium');
         try {
-            const target = this.deviceId ? { device_id: this.deviceId } : {};
-            await this.hass.callService('tsuryphone', 'swap_calls', {}, target);
+            if (!this.entityId) {
+                throw new Error('Entity ID is required');
+            }
+            await this.hass.callService('tsuryphone', 'swap_calls', {}, { entity_id: this.entityId });
         }
         catch (error) {
             console.error('Failed to swap calls:', error);
@@ -3980,8 +3990,10 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleMergeCalls() {
         this._triggerHaptic('medium');
         try {
-            const target = this.deviceId ? { device_id: this.deviceId } : {};
-            await this.hass.callService('tsuryphone', 'merge_calls', {}, target);
+            if (!this.entityId) {
+                throw new Error('Entity ID is required');
+            }
+            await this.hass.callService('tsuryphone', 'merge_calls', {}, { entity_id: this.entityId });
         }
         catch (error) {
             console.error('Failed to merge calls:', error);
@@ -4410,7 +4422,7 @@ __decorate([
 ], TsuryPhoneCallModal.prototype, "hass", void 0);
 __decorate([
     n({ type: String })
-], TsuryPhoneCallModal.prototype, "deviceId", void 0);
+], TsuryPhoneCallModal.prototype, "entityId", void 0);
 __decorate([
     n({ type: Boolean, reflect: true })
 ], TsuryPhoneCallModal.prototype, "open", void 0);
@@ -5021,11 +5033,14 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
      * Render call modal
      */
     _renderCallModal() {
-        const deviceId = this.config?.device_id || '';
+        const deviceIdPrefix = this.config?.device_id || '';
+        const phoneStateEntityId = deviceIdPrefix
+            ? `sensor.${deviceIdPrefix}_phone_state`
+            : `sensor.phone_state`;
         return x `
       <tsuryphone-call-modal
         .hass=${this.hass}
-        .deviceId=${deviceId}
+        .entityId=${phoneStateEntityId}
         .open=${this._callModalOpen}
         .mode=${this._callModalMode}
         .callInfo=${this._currentCallInfo}
@@ -5054,10 +5069,8 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
       <div class="call-toast" @click=${this._handleCallToastClick}>
         <div class="call-toast-content">
           <div class="call-toast-icon">📞</div>
-          <div class="call-toast-info">
-            <div class="call-toast-name">${displayName}</div>
-            <div class="call-toast-duration">${durationText}</div>
-          </div>
+          <div class="call-toast-name">${displayName}</div>
+          <div class="call-toast-duration">${durationText}</div>
         </div>
         <div class="call-toast-action">Tap to return</div>
       </div>
@@ -5247,18 +5260,18 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         /* Call Toast (minimized call indicator) */
         .call-toast {
           position: absolute;
-          top: 16px;
-          left: 16px;
-          right: 16px;
+          top: 8px;
+          left: 12px;
+          right: 12px;
           z-index: 50;
           background: var(--primary-color);
           color: white;
-          padding: 12px 16px;
-          border-radius: 28px;
+          padding: 8px 12px;
+          border-radius: 20px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
           cursor: pointer;
           transition: transform 0.2s ease;
         }
@@ -5274,32 +5287,31 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         .call-toast-content {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
         }
 
         .call-toast-icon {
-          font-size: 24px;
-        }
-
-        .call-toast-info {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          font-size: 18px;
+          line-height: 1;
         }
 
         .call-toast-name {
           font-weight: 500;
           font-size: 14px;
+          line-height: 1;
         }
 
         .call-toast-duration {
           font-size: 12px;
           opacity: 0.9;
+          line-height: 1;
         }
 
         .call-toast-action {
-          font-size: 12px;
-          opacity: 0.9;
+          font-size: 11px;
+          opacity: 0.85;
+          line-height: 1;
+          white-space: nowrap;
         }
 
         /* Dark mode adjustments */
