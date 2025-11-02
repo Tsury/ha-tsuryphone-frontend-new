@@ -217,8 +217,8 @@ export class TsuryPhoneCard extends LitElement {
       }
       
       // Update call history
-      if (attrs.call_history && Array.isArray(attrs.call_history)) {
-        this._callHistoryCache = attrs.call_history;
+      if (attrs.entries && Array.isArray(attrs.entries)) {
+        this._callHistoryCache = attrs.entries;
       }
     }
     
