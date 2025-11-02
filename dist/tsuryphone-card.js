@@ -1312,6 +1312,365 @@ TsuryPhoneCallLogItem = __decorate([
     t('tsuryphone-call-log-item')
 ], TsuryPhoneCallLogItem);
 
+/**
+ * Shared Styles
+ * Reusable CSS patterns for TsuryPhone components
+ */
+/**
+ * Common avatar styles
+ */
+const avatarStyles = i$3 `
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 16px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .avatar.large {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .avatar.small {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+`;
+/**
+ * Common list item styles
+ */
+const listItemStyles = i$3 `
+  .list-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    background: var(--card-background-color, #fff);
+    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .list-item:hover {
+    background: var(--secondary-background-color, #f5f5f5);
+  }
+
+  .list-item:active {
+    background: var(--divider-color, #e0e0e0);
+  }
+
+  .list-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .list-item-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .list-item-subtitle {
+    font-size: 14px;
+    color: var(--secondary-text-color, #666);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .list-item-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+`;
+/**
+ * Common button styles
+ */
+const buttonStyles = i$3 `
+  .action-button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--primary-color, #03a9f4);
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+
+  .action-button:hover {
+    background: var(--dark-primary-color, #0288d1);
+    transform: scale(1.02);
+  }
+
+  .action-button:active {
+    transform: scale(0.98);
+  }
+
+  .action-button:disabled {
+    background: var(--disabled-color, #9e9e9e);
+    cursor: not-allowed;
+  }
+
+  .action-button.secondary {
+    background: var(--secondary-background-color, #f5f5f5);
+    color: var(--primary-text-color, #000);
+  }
+
+  .action-button.danger {
+    background: var(--error-color, #f44336);
+  }
+
+  .icon-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--secondary-text-color, #666);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .icon-button:hover {
+    background: var(--secondary-background-color, #f5f5f5);
+  }
+
+  .icon-button:active {
+    background: var(--divider-color, #e0e0e0);
+    transform: scale(0.95);
+  }
+`;
+/**
+ * Common modal styles
+ */
+i$3 `
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+  }
+
+  .modal {
+    background: var(--card-background-color, #fff);
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+  }
+
+  .modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--divider-color, #e0e0e0);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+`;
+/**
+ * Common form styles
+ */
+i$3 `
+  .form-field {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--divider-color, #e0e0e0);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--primary-text-color, #000);
+    background: var(--card-background-color, #fff);
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #03a9f4);
+  }
+
+  .form-input::placeholder {
+    color: var(--secondary-text-color, #666);
+  }
+
+  .form-helper {
+    font-size: 12px;
+    color: var(--secondary-text-color, #666);
+    margin-top: 4px;
+  }
+
+  .form-error {
+    font-size: 12px;
+    color: var(--error-color, #f44336);
+    margin-top: 4px;
+  }
+`;
+/**
+ * Common empty state styles
+ */
+const emptyStateStyles = i$3 `
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    color: var(--secondary-text-color, #666);
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  .empty-state-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--primary-text-color, #000);
+    margin-bottom: 8px;
+  }
+
+  .empty-state-message {
+    font-size: 14px;
+    color: var(--secondary-text-color, #666);
+    margin-bottom: 24px;
+  }
+`;
+
+/**
+ * Empty State Component
+ * Reusable empty state message
+ */
+let TsuryPhoneEmptyState = class TsuryPhoneEmptyState extends i {
+    constructor() {
+        super(...arguments);
+        this.icon = "mdi:alert-circle-outline";
+        this.title = "No items";
+        this.message = "";
+    }
+    static get styles() {
+        return [
+            emptyStateStyles,
+            i$3 `
+        :host {
+          display: block;
+        }
+      `,
+        ];
+    }
+    _handleAction() {
+        if (this.onAction) {
+            this.onAction();
+        }
+        this.dispatchEvent(new CustomEvent("action", { bubbles: true, composed: true }));
+    }
+    render() {
+        return x `
+      <div class="empty-state">
+        <ha-icon class="empty-state-icon" .icon=${this.icon}></ha-icon>
+        <div class="empty-state-title">${this.title}</div>
+        ${this.message
+            ? x `<div class="empty-state-message">${this.message}</div>`
+            : ""}
+        ${this.actionLabel
+            ? x `
+              <button class="action-button" @click=${this._handleAction}>
+                ${this.actionLabel}
+              </button>
+            `
+            : ""}
+      </div>
+    `;
+    }
+};
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "icon", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "title", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "message", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneEmptyState.prototype, "actionLabel", void 0);
+__decorate([
+    n({ type: Function })
+], TsuryPhoneEmptyState.prototype, "onAction", void 0);
+TsuryPhoneEmptyState = __decorate([
+    t("tsuryphone-empty-state")
+], TsuryPhoneEmptyState);
+
 let TsuryPhoneCallLogList = class TsuryPhoneCallLogList extends i {
     constructor() {
         super(...arguments);
@@ -1328,13 +1687,11 @@ let TsuryPhoneCallLogList = class TsuryPhoneCallLogList extends i {
         }
         if (this.groupedCalls.length === 0) {
             return x `
-        <div class="empty-state">
-          <div class="empty-icon">📞</div>
-          <div class="empty-title">No calls yet</div>
-          <div class="empty-text">
-            Your call history will appear here once you start making or receiving calls.
-          </div>
-        </div>
+        <tsuryphone-empty-state
+          icon="mdi:phone-outline"
+          title="No calls yet"
+          message="Your call history will appear here once you start making or receiving calls."
+        ></tsuryphone-empty-state>
       `;
         }
         return x `
@@ -1388,34 +1745,6 @@ TsuryPhoneCallLogList.styles = i$3 `
 
     .divider:last-child {
       display: none;
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 64px 32px;
-      text-align: center;
-      color: var(--secondary-text-color);
-    }
-
-    .empty-icon {
-      font-size: 64px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .empty-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--primary-text-color);
-    }
-
-    .empty-text {
-      font-size: 14px;
-      max-width: 300px;
     }
 
     .loading {
@@ -2272,365 +2601,6 @@ __decorate([
 TsuryPhoneKeypadView = __decorate([
     t("tsuryphone-keypad-view")
 ], TsuryPhoneKeypadView);
-
-/**
- * Shared Styles
- * Reusable CSS patterns for TsuryPhone components
- */
-/**
- * Common avatar styles
- */
-const avatarStyles = i$3 `
-  .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    font-size: 16px;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .avatar.large {
-    width: 56px;
-    height: 56px;
-    font-size: 24px;
-  }
-
-  .avatar.small {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-`;
-/**
- * Common list item styles
- */
-const listItemStyles = i$3 `
-  .list-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    gap: 12px;
-    background: var(--card-background-color, #fff);
-    border-bottom: 1px solid var(--divider-color, #e0e0e0);
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .list-item:hover {
-    background: var(--secondary-background-color, #f5f5f5);
-  }
-
-  .list-item:active {
-    background: var(--divider-color, #e0e0e0);
-  }
-
-  .list-item-content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .list-item-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--primary-text-color, #000);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .list-item-subtitle {
-    font-size: 14px;
-    color: var(--secondary-text-color, #666);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .list-item-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-`;
-/**
- * Common button styles
- */
-const buttonStyles = i$3 `
-  .action-button {
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: none;
-    background: var(--primary-color, #03a9f4);
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-  }
-
-  .action-button:hover {
-    background: var(--dark-primary-color, #0288d1);
-    transform: scale(1.02);
-  }
-
-  .action-button:active {
-    transform: scale(0.98);
-  }
-
-  .action-button:disabled {
-    background: var(--disabled-color, #9e9e9e);
-    cursor: not-allowed;
-  }
-
-  .action-button.secondary {
-    background: var(--secondary-background-color, #f5f5f5);
-    color: var(--primary-text-color, #000);
-  }
-
-  .action-button.danger {
-    background: var(--error-color, #f44336);
-  }
-
-  .icon-button {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: var(--secondary-text-color, #666);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .icon-button:hover {
-    background: var(--secondary-background-color, #f5f5f5);
-  }
-
-  .icon-button:active {
-    background: var(--divider-color, #e0e0e0);
-    transform: scale(0.95);
-  }
-`;
-/**
- * Common modal styles
- */
-i$3 `
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 16px;
-  }
-
-  .modal {
-    background: var(--card-background-color, #fff);
-    border-radius: 16px;
-    max-width: 500px;
-    width: 100%;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-
-  .modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--divider-color, #e0e0e0);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .modal-title {
-    font-size: 20px;
-    font-weight: 500;
-    color: var(--primary-text-color, #000);
-  }
-
-  .modal-body {
-    padding: 24px;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  .modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--divider-color, #e0e0e0);
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-  }
-`;
-/**
- * Common form styles
- */
-i$3 `
-  .form-field {
-    margin-bottom: 20px;
-  }
-
-  .form-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--primary-text-color, #000);
-    margin-bottom: 8px;
-  }
-
-  .form-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid var(--divider-color, #e0e0e0);
-    border-radius: 8px;
-    font-size: 16px;
-    font-family: inherit;
-    color: var(--primary-text-color, #000);
-    background: var(--card-background-color, #fff);
-    box-sizing: border-box;
-    transition: border-color 0.2s;
-  }
-
-  .form-input:focus {
-    outline: none;
-    border-color: var(--primary-color, #03a9f4);
-  }
-
-  .form-input::placeholder {
-    color: var(--secondary-text-color, #666);
-  }
-
-  .form-helper {
-    font-size: 12px;
-    color: var(--secondary-text-color, #666);
-    margin-top: 4px;
-  }
-
-  .form-error {
-    font-size: 12px;
-    color: var(--error-color, #f44336);
-    margin-top: 4px;
-  }
-`;
-/**
- * Common empty state styles
- */
-const emptyStateStyles = i$3 `
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 24px;
-    text-align: center;
-  }
-
-  .empty-state-icon {
-    width: 64px;
-    height: 64px;
-    color: var(--secondary-text-color, #666);
-    margin-bottom: 16px;
-    opacity: 0.5;
-  }
-
-  .empty-state-title {
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--primary-text-color, #000);
-    margin-bottom: 8px;
-  }
-
-  .empty-state-message {
-    font-size: 14px;
-    color: var(--secondary-text-color, #666);
-    margin-bottom: 24px;
-  }
-`;
-
-/**
- * Empty State Component
- * Reusable empty state message
- */
-let TsuryPhoneEmptyState = class TsuryPhoneEmptyState extends i {
-    constructor() {
-        super(...arguments);
-        this.icon = "mdi:alert-circle-outline";
-        this.title = "No items";
-        this.message = "";
-    }
-    static get styles() {
-        return [
-            emptyStateStyles,
-            i$3 `
-        :host {
-          display: block;
-        }
-      `,
-        ];
-    }
-    _handleAction() {
-        if (this.onAction) {
-            this.onAction();
-        }
-        this.dispatchEvent(new CustomEvent("action", { bubbles: true, composed: true }));
-    }
-    render() {
-        return x `
-      <div class="empty-state">
-        <ha-icon class="empty-state-icon" .icon=${this.icon}></ha-icon>
-        <div class="empty-state-title">${this.title}</div>
-        ${this.message
-            ? x `<div class="empty-state-message">${this.message}</div>`
-            : ""}
-        ${this.actionLabel
-            ? x `
-              <button class="action-button" @click=${this._handleAction}>
-                ${this.actionLabel}
-              </button>
-            `
-            : ""}
-      </div>
-    `;
-    }
-};
-__decorate([
-    n({ type: String })
-], TsuryPhoneEmptyState.prototype, "icon", void 0);
-__decorate([
-    n({ type: String })
-], TsuryPhoneEmptyState.prototype, "title", void 0);
-__decorate([
-    n({ type: String })
-], TsuryPhoneEmptyState.prototype, "message", void 0);
-__decorate([
-    n({ type: String })
-], TsuryPhoneEmptyState.prototype, "actionLabel", void 0);
-__decorate([
-    n({ type: Function })
-], TsuryPhoneEmptyState.prototype, "onAction", void 0);
-TsuryPhoneEmptyState = __decorate([
-    t("tsuryphone-empty-state")
-], TsuryPhoneEmptyState);
 
 /**
  * Formatting Utilities

@@ -2,6 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { GroupedCallHistory } from '../../utils/call-history-grouping';
 import './call-log-item';
+import '../shared/empty-state';
 
 @customElement('tsuryphone-call-log-list')
 export class TsuryPhoneCallLogList extends LitElement {
@@ -46,34 +47,6 @@ export class TsuryPhoneCallLogList extends LitElement {
       display: none;
     }
 
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 64px 32px;
-      text-align: center;
-      color: var(--secondary-text-color);
-    }
-
-    .empty-icon {
-      font-size: 64px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    .empty-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--primary-text-color);
-    }
-
-    .empty-text {
-      font-size: 14px;
-      max-width: 300px;
-    }
-
     .loading {
       display: flex;
       align-items: center;
@@ -109,13 +82,11 @@ export class TsuryPhoneCallLogList extends LitElement {
 
     if (this.groupedCalls.length === 0) {
       return html`
-        <div class="empty-state">
-          <div class="empty-icon">📞</div>
-          <div class="empty-title">No calls yet</div>
-          <div class="empty-text">
-            Your call history will appear here once you start making or receiving calls.
-          </div>
-        </div>
+        <tsuryphone-empty-state
+          icon="mdi:phone-outline"
+          title="No calls yet"
+          message="Your call history will appear here once you start making or receiving calls."
+        ></tsuryphone-empty-state>
       `;
     }
 
