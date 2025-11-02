@@ -65,7 +65,6 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _showCallModal = false;
   @state() private _showContactModal = false;
   @state() private _showBlockModal = false;
-  @state() private _showBlockedView = false;
   @state() private _isDarkMode = false;
 
   // Cached data from coordinator
@@ -723,16 +722,14 @@ export class TsuryPhoneCard extends LitElement {
           ${this._contactModalOpen ? this._renderContactModal() : ""}
           ${this._showBlockModal ? this._renderBlockModal() : ""}
           ${this._showCallToast ? this._renderCallToast() : ""}
-          ${this._showBlockedView
-            ? this._renderBlockedView()
-            : this._renderMainViews()}
+          ${this._renderMainViews()}
         </div>
       </ha-card>
     `;
   }
 
   /**
-   * Render main views (home, keypad, contacts)
+   * Render main views (home, keypad, contacts, blocked)
    */
   private _renderMainViews(): TemplateResult {
     return html`
@@ -741,6 +738,7 @@ export class TsuryPhoneCard extends LitElement {
           ${this._activeView === "home" ? this._renderHomeView() : ""}
           ${this._activeView === "keypad" ? this._renderKeypadView() : ""}
           ${this._activeView === "contacts" ? this._renderContactsView() : ""}
+          ${this._activeView === "blocked" ? this._renderBlockedView() : ""}
         </div>
 
         <tsuryphone-navigation

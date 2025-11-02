@@ -5173,7 +5173,6 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         this._showCallModal = false;
         this._showContactModal = false;
         this._showBlockModal = false;
-        this._showBlockedView = false;
         this._isDarkMode = false;
         // Cached data from coordinator
         this._contactsCache = [];
@@ -5726,15 +5725,13 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
           ${this._contactModalOpen ? this._renderContactModal() : ""}
           ${this._showBlockModal ? this._renderBlockModal() : ""}
           ${this._showCallToast ? this._renderCallToast() : ""}
-          ${this._showBlockedView
-            ? this._renderBlockedView()
-            : this._renderMainViews()}
+          ${this._renderMainViews()}
         </div>
       </ha-card>
     `;
     }
     /**
-     * Render main views (home, keypad, contacts)
+     * Render main views (home, keypad, contacts, blocked)
      */
     _renderMainViews() {
         return x `
@@ -5743,6 +5740,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
           ${this._activeView === "home" ? this._renderHomeView() : ""}
           ${this._activeView === "keypad" ? this._renderKeypadView() : ""}
           ${this._activeView === "contacts" ? this._renderContactsView() : ""}
+          ${this._activeView === "blocked" ? this._renderBlockedView() : ""}
         </div>
 
         <tsuryphone-navigation
@@ -6166,9 +6164,6 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_showBlockModal", void 0);
-__decorate([
-    r()
-], TsuryPhoneCard.prototype, "_showBlockedView", void 0);
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_isDarkMode", void 0);
