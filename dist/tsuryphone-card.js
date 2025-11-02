@@ -3789,6 +3789,657 @@ ContactModal = __decorate([
 ], ContactModal);
 
 /**
+ * Call Modal Component
+ * Full-screen in-card modal for incoming and active calls
+ * Similar to contact-modal - position: absolute, fills entire card
+ */
+let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
+    constructor() {
+        super(...arguments);
+        this.open = false;
+        this.mode = 'incoming';
+        this._isAnswering = false;
+        this._isDeclining = false;
+        this._isMuted = false;
+        this._showKeypad = false;
+        this._swipeStartX = 0;
+        this._swipeDistance = 0;
+        this._isSwipingLeft = false;
+        this._isSwipingRight = false;
+        this._currentDuration = 0;
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        if (this.mode === 'active' && this.callInfo?.duration !== undefined) {
+            this._currentDuration = this.callInfo.duration;
+            this._startDurationTimer();
+        }
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this._stopDurationTimer();
+    }
+    updated(changedProps) {
+        if (changedProps.has('mode')) {
+            if (this.mode === 'active') {
+                this._startDurationTimer();
+            }
+            else {
+                this._stopDurationTimer();
+            }
+        }
+    }
+    _startDurationTimer() {
+        this._stopDurationTimer();
+        this._durationInterval = window.setInterval(() => {
+            this._currentDuration++;
+            this.requestUpdate();
+        }, 1000);
+    }
+    _stopDurationTimer() {
+        if (this._durationInterval) {
+            clearInterval(this._durationInterval);
+            this._durationInterval = undefined;
+        }
+    }
+    _formatDuration(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    _handleClose() {
+        this._triggerHaptic('light');
+        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+    }
+    _handleSwipeStart(e) {
+        this._swipeStartX = e.touches[0].clientX;
+        this._swipeDistance = 0;
+    }
+    _handleSwipeMove(e) {
+        if (this._isAnswering || this._isDeclining)
+            return;
+        const currentX = e.touches[0].clientX;
+        this._swipeDistance = currentX - this._swipeStartX;
+        // Limit swipe distance
+        const maxDistance = 200;
+        this._swipeDistance = Math.max(-maxDistance, Math.min(maxDistance, this._swipeDistance));
+        // Update visual state
+        this._isSwipingLeft = this._swipeDistance < -50;
+        this._isSwipingRight = this._swipeDistance > 50;
+        this.requestUpdate();
+    }
+    _handleSwipeEnd() {
+        const threshold = 120;
+        if (this._swipeDistance < -threshold) {
+            // Swipe left to decline
+            this._handleDecline();
+        }
+        else if (this._swipeDistance > threshold) {
+            // Swipe right to answer
+            this._handleAnswer();
+        }
+        // Reset swipe state
+        this._swipeDistance = 0;
+        this._isSwipingLeft = false;
+        this._isSwipingRight = false;
+        this.requestUpdate();
+    }
+    async _handleAnswer() {
+        this._isAnswering = true;
+        this._triggerHaptic('medium');
+        try {
+            await this.hass.callService('tsuryphone', 'answer_call', {});
+            this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
+        }
+        catch (error) {
+            console.error('Failed to answer call:', error);
+            this._triggerHaptic('heavy');
+            this.dispatchEvent(new CustomEvent('error', {
+                detail: { message: 'Failed to answer call' },
+                bubbles: true,
+                composed: true
+            }));
+        }
+        finally {
+            this._isAnswering = false;
+        }
+    }
+    async _handleDecline() {
+        this._isDeclining = true;
+        this._triggerHaptic('medium');
+        try {
+            await this.hass.callService('tsuryphone', 'hangup_call', {});
+            this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
+        }
+        catch (error) {
+            console.error('Failed to decline call:', error);
+            this._triggerHaptic('heavy');
+            this.dispatchEvent(new CustomEvent('error', {
+                detail: { message: 'Failed to decline call' },
+                bubbles: true,
+                composed: true
+            }));
+        }
+        finally {
+            this._isDeclining = false;
+        }
+    }
+    async _handleHangup() {
+        this._triggerHaptic('medium');
+        try {
+            await this.hass.callService('tsuryphone', 'hangup_call', {});
+            this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
+        }
+        catch (error) {
+            console.error('Failed to hang up:', error);
+            this._triggerHaptic('heavy');
+        }
+    }
+    async _handleMute() {
+        this._triggerHaptic('light');
+        this._isMuted = !this._isMuted;
+        try {
+            await this.hass.callService('tsuryphone', 'toggle_mute', {});
+        }
+        catch (error) {
+            console.error('Failed to toggle mute:', error);
+            this._isMuted = !this._isMuted; // Revert on error
+        }
+    }
+    async _handleSpeaker() {
+        this._triggerHaptic('light');
+        try {
+            await this.hass.callService('tsuryphone', 'toggle_speaker', {});
+        }
+        catch (error) {
+            console.error('Failed to toggle speaker:', error);
+        }
+    }
+    _handleKeypad() {
+        this._triggerHaptic('light');
+        this._showKeypad = !this._showKeypad;
+        this.requestUpdate();
+    }
+    async _handleSwapCalls() {
+        this._triggerHaptic('medium');
+        try {
+            await this.hass.callService('tsuryphone', 'swap_calls', {});
+        }
+        catch (error) {
+            console.error('Failed to swap calls:', error);
+        }
+    }
+    async _handleMergeCalls() {
+        this._triggerHaptic('medium');
+        try {
+            await this.hass.callService('tsuryphone', 'merge_calls', {});
+        }
+        catch (error) {
+            console.error('Failed to merge calls:', error);
+        }
+    }
+    _triggerHaptic(type) {
+        if ('vibrate' in navigator) {
+            const patterns = {
+                light: 10,
+                medium: 20,
+                heavy: 30
+            };
+            navigator.vibrate(patterns[type]);
+        }
+    }
+    _renderIncomingCall() {
+        const { callInfo } = this;
+        if (!callInfo)
+            return x ``;
+        return x `
+      <div class="caller-info">
+        <div class="caller-name">${callInfo.name || callInfo.number}</div>
+        ${callInfo.name ? x `<div class="caller-number">${callInfo.number}</div>` : ''}
+        ${callInfo.isPriority ? x `
+          <div class="priority-badge">
+            ⭐ Priority Caller
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="call-status">Incoming call...</div>
+
+      <div class="swipe-slider"
+           @touchstart=${this._handleSwipeStart}
+           @touchmove=${this._handleSwipeMove}
+           @touchend=${this._handleSwipeEnd}>
+        <div class="swipe-track">
+          <span class="swipe-label">Decline</span>
+          <span class="swipe-label">Answer</span>
+        </div>
+        <div class="swipe-handle ${this._isSwipingLeft ? 'swiping-left' : ''} ${this._isSwipingRight ? 'swiping-right' : ''}"
+             style="transform: translateX(${this._swipeDistance}px)">
+          ${this._isSwipingLeft ? '✖' : this._isSwipingRight ? '✓' : '☎️'}
+        </div>
+      </div>
+    `;
+    }
+    _renderActiveCall() {
+        const { callInfo } = this;
+        if (!callInfo)
+            return x ``;
+        const isSpeaker = callInfo.audioOutput === 'speaker';
+        return x `
+      <div class="caller-info">
+        <div class="caller-name">${callInfo.name || callInfo.number}</div>
+        ${callInfo.name ? x `<div class="caller-number">${callInfo.number}</div>` : ''}
+      </div>
+
+      <div class="call-timer">${this._formatDuration(this._currentDuration)}</div>
+
+      ${this.waitingCall ? this._renderWaitingCall() : ''}
+
+      <div class="call-controls">
+        <button class="control-button ${this._isMuted ? 'muted' : ''}"
+                @click=${this._handleMute}
+                title="Mute">
+          ${this._isMuted ? '🔇' : '🔊'}
+        </button>
+
+        <button class="control-button ${this._showKeypad ? 'active' : ''}"
+                @click=${this._handleKeypad}
+                title="Keypad">
+          #
+        </button>
+
+        <button class="control-button ${isSpeaker ? 'active' : ''}"
+                @click=${this._handleSpeaker}
+                title="Speaker">
+          🔊
+        </button>
+
+        <button class="control-button hangup-button"
+                @click=${this._handleHangup}
+                title="Hang up">
+          📞
+        </button>
+      </div>
+    `;
+    }
+    _renderWaitingCall() {
+        const { waitingCall } = this;
+        if (!waitingCall)
+            return x ``;
+        return x `
+      <div class="waiting-call">
+        <div class="waiting-call-info">
+          <div class="waiting-call-name">${waitingCall.name || waitingCall.number}</div>
+          ${waitingCall.name ? x `<div class="waiting-call-number">${waitingCall.number}</div>` : ''}
+          ${waitingCall.isPriority ? x `<div class="priority-badge">⭐ Priority</div>` : ''}
+        </div>
+        <div class="waiting-actions">
+          <button class="waiting-action-button swap-button" @click=${this._handleSwapCalls}>
+            Swap
+          </button>
+          <button class="waiting-action-button merge-button" @click=${this._handleMergeCalls}>
+            Merge
+          </button>
+        </div>
+      </div>
+    `;
+    }
+    render() {
+        const titleMap = {
+            incoming: 'Incoming Call',
+            active: 'Active Call',
+            waiting: 'Call Waiting'
+        };
+        return x `
+      <div class="modal-header">
+        <h2 class="modal-title">${titleMap[this.mode]}</h2>
+        <button class="close-button" @click=${this._handleClose} title="Minimize">
+          −
+        </button>
+      </div>
+
+      <div class="modal-content ${this._isAnswering || this._isDeclining ? 'loading' : ''}">
+        ${this.mode === 'incoming' ? this._renderIncomingCall() : this._renderActiveCall()}
+      </div>
+    `;
+    }
+};
+TsuryPhoneCallModal.styles = i$3 `
+    :host {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+      background: var(--card-background-color, #fff);
+      box-sizing: border-box;
+    }
+
+    :host([open]) {
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--divider-color, #e0e0e0);
+      background: var(--card-background-color, #fff);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--primary-text-color, #000);
+    }
+
+    .close-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      color: var(--primary-text-color, #000);
+      font-size: 24px;
+      line-height: 1;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .close-button:hover {
+      opacity: 1;
+    }
+
+    .modal-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    /* Incoming Call UI */
+    .caller-info {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .caller-name {
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--primary-text-color, #000);
+      margin-bottom: 8px;
+    }
+
+    .caller-number {
+      font-size: 18px;
+      color: var(--secondary-text-color, #666);
+    }
+
+    .priority-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: var(--warning-color, #ff9800);
+      color: white;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 12px;
+    }
+
+    .call-status {
+      font-size: 16px;
+      color: var(--secondary-text-color, #666);
+      margin-bottom: 24px;
+    }
+
+    /* Swipe Slider */
+    .swipe-slider {
+      width: 100%;
+      max-width: 320px;
+      height: 72px;
+      background: var(--divider-color, #e0e0e0);
+      border-radius: 36px;
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .swipe-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    .swipe-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--secondary-text-color, #666);
+      pointer-events: none;
+    }
+
+    .swipe-handle {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      transition: transform 0.2s ease-out, background-color 0.2s;
+      z-index: 2;
+    }
+
+    .swipe-handle:active {
+      cursor: grabbing;
+    }
+
+    .swipe-handle.swiping-left {
+      background: var(--error-color, #f44336);
+    }
+
+    .swipe-handle.swiping-right {
+      background: var(--success-color, #4caf50);
+    }
+
+    /* Active Call Controls */
+    .call-timer {
+      font-size: 48px;
+      font-weight: 300;
+      color: var(--primary-text-color, #000);
+      margin-bottom: 48px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .call-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 24px;
+    }
+
+    .control-button {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: none;
+      background: var(--card-background-color, #f5f5f5);
+      color: var(--primary-text-color, #000);
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      justify-self: center;
+    }
+
+    .control-button:hover {
+      background: var(--divider-color, #e0e0e0);
+    }
+
+    .control-button:active {
+      transform: scale(0.95);
+    }
+
+    .control-button.active {
+      background: var(--primary-color, #03a9f4);
+      color: white;
+    }
+
+    .control-button.muted {
+      background: var(--error-color, #f44336);
+      color: white;
+    }
+
+    .hangup-button {
+      grid-column: 1 / -1;
+      width: 72px;
+      height: 72px;
+      background: var(--error-color, #f44336);
+      color: white;
+      justify-self: center;
+    }
+
+    .hangup-button:hover {
+      background: var(--error-color, #d32f2f);
+    }
+
+    /* Call Waiting */
+    .waiting-call {
+      width: 100%;
+      max-width: 400px;
+      padding: 16px;
+      background: var(--divider-color, #f5f5f5);
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .waiting-call-info {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .waiting-call-name {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--primary-text-color, #000);
+    }
+
+    .waiting-call-number {
+      font-size: 14px;
+      color: var(--secondary-text-color, #666);
+    }
+
+    .waiting-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .waiting-action-button {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .swap-button {
+      background: var(--primary-color, #03a9f4);
+      color: white;
+    }
+
+    .merge-button {
+      background: var(--success-color, #4caf50);
+      color: white;
+    }
+
+    /* Loading State */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  `;
+__decorate([
+    n({ type: Object })
+], TsuryPhoneCallModal.prototype, "hass", void 0);
+__decorate([
+    n({ type: Boolean, reflect: true })
+], TsuryPhoneCallModal.prototype, "open", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneCallModal.prototype, "mode", void 0);
+__decorate([
+    n({ type: Object })
+], TsuryPhoneCallModal.prototype, "callInfo", void 0);
+__decorate([
+    n({ type: Object })
+], TsuryPhoneCallModal.prototype, "waitingCall", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_isAnswering", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_isDeclining", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_isMuted", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_showKeypad", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_swipeStartX", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_swipeDistance", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_isSwipingLeft", void 0);
+__decorate([
+    r()
+], TsuryPhoneCallModal.prototype, "_isSwipingRight", void 0);
+TsuryPhoneCallModal = __decorate([
+    t('tsuryphone-call-modal')
+], TsuryPhoneCallModal);
+
+/**
  * TsuryPhone Card - Main Component
  * A modern phone and contacts interface for Home Assistant
  */
@@ -3815,9 +4466,12 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         // Connection state
         this._isConnected = true;
         this._errorMessage = "";
-        // Modal state
+        // Contact Modal state
         this._contactModalOpen = false;
         this._contactModalMode = "add";
+        // Call Modal state
+        this._callModalOpen = false;
+        this._callModalMode = "incoming";
         // Subscriptions
         this._unsubscribers = [];
     }
@@ -3999,16 +4653,77 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         this.requestUpdate();
     }
     /**
-     * Update call modal visibility based on phone state
+     * Update call modal visibility and data based on phone state
      */
     _updateCallModalState() {
         if (!this.hass)
             return;
-        const deviceId = this.config?.device_id || 'tsuryphone';
-        const phoneState = this.hass.states[`sensor.${deviceId}_phone_state`]?.state;
-        const inCall = this.hass.states[`binary_sensor.${deviceId}_in_call`]?.state === 'on';
-        // Show call modal if ringing or in call
-        this._showCallModal = phoneState === 'RINGING_IN' || inCall;
+        const deviceId = this.config?.device_id || '';
+        const phoneStateEntityId = deviceId
+            ? `sensor.${deviceId}_phone_state`
+            : `sensor.phone_state`;
+        const inCallEntityId = deviceId
+            ? `binary_sensor.${deviceId}_in_call`
+            : `binary_sensor.in_call`;
+        const phoneState = this.hass.states[phoneStateEntityId]?.state;
+        const inCall = this.hass.states[inCallEntityId]?.state === 'on';
+        // Determine call modal mode
+        if (phoneState === 'RINGING_IN') {
+            this._callModalMode = 'incoming';
+            this._callModalOpen = true;
+            // Get incoming call info
+            const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
+            if (currentCallEntity?.attributes) {
+                const attrs = currentCallEntity.attributes;
+                this._currentCallInfo = {
+                    number: attrs.number || 'Unknown',
+                    name: attrs.name,
+                    isPriority: attrs.is_priority || false,
+                    isIncoming: true,
+                };
+            }
+        }
+        else if (inCall) {
+            this._callModalMode = 'active';
+            // Keep modal open if it was already open, otherwise respect user's choice
+            if (!this._callModalOpen && phoneState !== 'IDLE') {
+                this._callModalOpen = true;
+            }
+            // Get active call info
+            const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
+            const durationEntity = this.hass.states[deviceId ? `sensor.${deviceId}_call_duration` : `sensor.call_duration`];
+            const audioOutputEntity = this.hass.states[deviceId ? `sensor.${deviceId}_call_audio_output` : `sensor.call_audio_output`];
+            if (currentCallEntity?.attributes) {
+                const attrs = currentCallEntity.attributes;
+                this._currentCallInfo = {
+                    number: attrs.number || 'Unknown',
+                    name: attrs.name,
+                    isPriority: attrs.is_priority || false,
+                    isIncoming: attrs.direction === 'incoming',
+                    duration: durationEntity ? parseInt(durationEntity.state) : 0,
+                    audioOutput: audioOutputEntity?.state || 'earpiece',
+                };
+            }
+            // Check for waiting call
+            const waitingCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_waiting_call` : `sensor.current_waiting_call`];
+            if (waitingCallEntity && waitingCallEntity.state !== 'None' && waitingCallEntity.state !== 'unavailable') {
+                const waitingAttrs = waitingCallEntity.attributes;
+                this._waitingCallInfo = {
+                    number: waitingAttrs.number || 'Unknown',
+                    name: waitingAttrs.name,
+                    isPriority: waitingAttrs.is_priority || false,
+                };
+            }
+            else {
+                this._waitingCallInfo = undefined;
+            }
+        }
+        else {
+            // No call - close modal and clear data
+            this._callModalOpen = false;
+            this._currentCallInfo = undefined;
+            this._waitingCallInfo = undefined;
+        }
     }
     /**
      * Refresh data from services
@@ -4076,6 +4791,51 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         }, 3000);
     }
     /**
+     * Handle call modal close (minimize to toast)
+     */
+    _handleCallModalClose() {
+        // Don't fully close during active call, just minimize
+        if (this._callModalMode === 'active' && this._currentCallInfo) {
+            this._callModalOpen = false;
+            // TODO: Show persistent toast
+        }
+        else {
+            this._callModalOpen = false;
+        }
+    }
+    /**
+     * Handle call answered
+     */
+    _handleCallAnswered(e) {
+        console.log("Call answered");
+        // Modal will update to active mode via state subscription
+    }
+    /**
+     * Handle call declined
+     */
+    _handleCallDeclined(e) {
+        console.log("Call declined");
+        this._callModalOpen = false;
+    }
+    /**
+     * Handle call ended
+     */
+    _handleCallEnded(e) {
+        console.log("Call ended");
+        this._callModalOpen = false;
+    }
+    /**
+     * Handle call modal error
+     */
+    _handleCallModalError(e) {
+        console.error("Call modal error:", e.detail);
+        this._errorMessage = e.detail.message;
+        // Show error for 3 seconds
+        setTimeout(() => {
+            this._errorMessage = "";
+        }, 3000);
+    }
+    /**
      * Handle edit contact (from contact item click)
      */
     _handleEditContact(e) {
@@ -4120,8 +4880,8 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         return x `
       <ha-card>
         <div class="tsuryphone-container ${this._isDarkMode ? 'dark-mode' : 'light-mode'}">
-          ${this._showCallModal ? this._renderCallModal() : ""}
-          ${this._showContactModal ? this._renderContactModal() : ""}
+          ${this._callModalOpen ? this._renderCallModal() : ""}
+          ${this._contactModalOpen ? this._renderContactModal() : ""}
           ${this._showBlockedView
             ? this._renderBlockedView()
             : this._renderMainViews()}
@@ -4221,10 +4981,23 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     `;
     }
     /**
-     * Render call modal (placeholder)
+     * Render call modal
      */
     _renderCallModal() {
-        return x `<div class="modal-placeholder">Call Modal</div>`;
+        return x `
+      <tsuryphone-call-modal
+        .hass=${this.hass}
+        .open=${this._callModalOpen}
+        .mode=${this._callModalMode}
+        .callInfo=${this._currentCallInfo}
+        .waitingCall=${this._waitingCallInfo}
+        @close=${this._handleCallModalClose}
+        @call-answered=${this._handleCallAnswered}
+        @call-declined=${this._handleCallDeclined}
+        @call-ended=${this._handleCallEnded}
+        @error=${this._handleCallModalError}
+      ></tsuryphone-call-modal>
+    `;
     }
     /**
      * Render contact modal
@@ -4467,6 +5240,18 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_contactModalData", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_callModalOpen", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_callModalMode", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_currentCallInfo", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_waitingCallInfo", void 0);
 TsuryPhoneCard = __decorate([
     t("tsuryphone-card")
 ], TsuryPhoneCard);
