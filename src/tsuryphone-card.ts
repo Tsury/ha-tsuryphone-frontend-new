@@ -20,7 +20,7 @@ import './components/keypad/keypad-view';
 import './components/contacts/contacts-view';
 import './components/modals/contact-modal';
 import type { NavigationTab, TabChangeEvent } from './components/navigation/tsuryphone-navigation';
-import type { CallHistoryEntry as CallHistoryEntryType } from './utils/call-history-grouping';
+import type { CallHistoryEntry as CallHistoryEntryType, CallType } from './utils/call-history-grouping';
 
 // Declare the card for Home Assistant
 declare global {
@@ -445,13 +445,13 @@ export class TsuryPhoneCard extends LitElement {
   private _renderHomeView(): TemplateResult {
     // Convert call history to the format expected by home-view
     const callHistory: CallHistoryEntryType[] = this._callHistoryCache.map((call: any) => ({
-      id: call.id || `${call.timestamp}-${call.phone_number}`,
-      contactName: call.contact_name || call.phone_number,
-      phoneNumber: call.phone_number,
-      timestamp: call.timestamp,
-      duration: call.duration || 0,
-      type: call.type || 'incoming',
-      isBlocked: call.is_blocked || false,
+      id: call.seq || `${call.received_ts}-${call.number}`,
+      contactName: call.name || call.number,
+      phoneNumber: call.number,
+      timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
+      duration: call.duration_s || 0,
+      type: call.call_type as CallType, // 'incoming', 'outgoing', 'missed', 'blocked'
+      isBlocked: call.call_type === 'blocked',
     }));
 
     return html`
