@@ -18,6 +18,7 @@ import './components/navigation/tsuryphone-navigation';
 import './components/home/home-view';
 import './components/keypad/keypad-view';
 import './components/contacts/contacts-view';
+import './components/modals/contact-modal';
 import type { NavigationTab, TabChangeEvent } from './components/navigation/tsuryphone-navigation';
 import type { CallHistoryEntry as CallHistoryEntryType } from './utils/call-history-grouping';
 
@@ -56,6 +57,11 @@ export class TsuryPhoneCard extends LitElement {
   // Connection state
   @state() private _isConnected = true;
   @state() private _errorMessage = "";
+
+  // Modal state
+  @state() private _contactModalOpen = false;
+  @state() private _contactModalMode: "add" | "edit" = "add";
+  @state() private _contactModalData?: QuickDialEntry;
 
   // Subscriptions
   private _unsubscribers: Array<() => void> = [];
@@ -282,6 +288,66 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
+   * Handle contact modal close
+   */
+  private _handleContactModalClose(): void {
+    this._contactModalOpen = false;
+    this._showContactModal = false;
+    this._contactModalData = undefined;
+  }
+
+  /**
+   * Handle contact saved
+   */
+  private _handleContactSaved(e: CustomEvent): void {
+    console.log("Contact saved:", e.detail);
+    this._handleContactModalClose();
+    // Data will update automatically via state subscription
+  }
+
+  /**
+   * Handle contact deleted
+   */
+  private _handleContactDeleted(e: CustomEvent): void {
+    console.log("Contact deleted:", e.detail);
+    this._handleContactModalClose();
+    // Data will update automatically via state subscription
+  }
+
+  /**
+   * Handle contact modal error
+   */
+  private _handleContactModalError(e: CustomEvent): void {
+    console.error("Contact modal error:", e.detail);
+    this._errorMessage = e.detail.message;
+    // Show error for 3 seconds
+    setTimeout(() => {
+      this._errorMessage = "";
+    }, 3000);
+  }
+
+  /**
+   * Handle edit contact (from contact item click)
+   */
+  private _handleEditContact(e: CustomEvent): void {
+    const contact = e.detail.contact as QuickDialEntry;
+    this._contactModalMode = "edit";
+    this._contactModalData = contact;
+    this._contactModalOpen = true;
+    this._showContactModal = true;
+  }
+
+  /**
+   * Handle add contact (from empty state action button)
+   */
+  private _handleAddContact(): void {
+    this._contactModalMode = "add";
+    this._contactModalData = undefined;
+    this._contactModalOpen = true;
+    this._showContactModal = true;
+  }
+
+  /**
    * Render the card
    */
   render(): TemplateResult {
@@ -404,7 +470,11 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _renderContactsView(): TemplateResult {
     return html`
-      <div class="view contacts-view fade-in">
+      <div
+        class="view contacts-view fade-in"
+        @edit-contact=${this._handleEditContact}
+        @action=${this._handleAddContact}
+      >
         <tsuryphone-contacts-view
           .hass=${this.hass}
           .config=${this.config}
@@ -421,10 +491,21 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
-   * Render contact modal (placeholder)
+   * Render contact modal
    */
   private _renderContactModal(): TemplateResult {
-    return html`<div class="modal-placeholder">Contact Modal</div>`;
+    return html`
+      <tsuryphone-contact-modal
+        .hass=${this.hass}
+        .open=${this._contactModalOpen}
+        .mode=${this._contactModalMode}
+        .contact=${this._contactModalData}
+        @close=${this._handleContactModalClose}
+        @contact-saved=${this._handleContactSaved}
+        @contact-deleted=${this._handleContactDeleted}
+        @error=${this._handleContactModalError}
+      ></tsuryphone-contact-modal>
+    `;
   }
 
   /**

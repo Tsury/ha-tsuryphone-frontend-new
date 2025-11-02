@@ -1721,6 +1721,7 @@ export default {
 ### Phase 0: Backend Prerequisites ✅ COMPLETED (Nov 1, 2025)
 
 **Initial Setup:**
+
 - [x] Make contact codes optional in backend
 - [x] Add ID-based contact identification in firmware
 - [x] Update backend service schemas
@@ -1728,6 +1729,7 @@ export default {
 - [x] Test backend/firmware integration
 
 **ID Migration (Code → ID) ✅ STABILIZED (Nov 1, 2025):**
+
 - [x] Migrate all entry types from code/number-based to ID-based operations
 - [x] Update coordinator selection fields (`selected_quick_dial_id`, `selected_blocked_number_id`, `selected_priority_number_id`)
 - [x] Update button entity availability checks to use ID fields
@@ -1743,6 +1745,7 @@ export default {
 - [x] Verify zero legacy code/number-based operations remain
 
 **Key Changes:**
+
 - All removal operations now require `id` parameter (quick_dial, blocked, priority)
 - Firmware HTTP endpoints (`HAWebServer.cpp`) now validate for `id` instead of `code`/`number`
 - Config delta WebSocket handlers process removals by ID
@@ -1818,6 +1821,7 @@ export default {
 **Status**: Setting up HACS integration for alpha release (Nov 1, 2025)
 
 **Completed:**
+
 - [x] Create `hacs.json` configuration file
 - [x] Create `info.md` for HACS listing with feature descriptions
 - [x] Create `CHANGELOG.md` with version history
@@ -1833,6 +1837,7 @@ export default {
 - [x] Build frontend bundle successfully
 
 **Next Steps:**
+
 - [ ] Commit all files to repository
 - [ ] Push to GitHub (will trigger auto-release workflow)
 - [ ] Verify GitHub Release created successfully with auto-bumped version
@@ -2079,19 +2084,19 @@ interface GestureConfig {
     velocityThreshold: number; // 0.5 px/ms
     activationThreshold: number; // 70% for slider, 30% for nav
   };
-  
+
   // Long press configuration
   longPress: {
     duration: number; // 500ms
     maxMovement: number; // 10px (allow slight finger drift)
   };
-  
+
   // Double tap configuration
   doubleTap: {
     maxDelay: number; // 300ms between taps
     maxDistance: number; // 20px between tap locations
   };
-  
+
   // Haptic feedback
   haptic: {
     enabled: boolean; // Auto-detect support
@@ -2110,23 +2115,23 @@ class GestureHandler {
   private touchStartTime: number = 0;
   private lastTap: { time: number; x: number; y: number } | null = null;
   private longPressTimer: number | null = null;
-  
+
   handleTouchStart(e: TouchEvent) {
     this.touchStart = e;
     this.touchStartTime = Date.now();
-    
+
     // Check for double tap
     if (this.lastTap) {
       const timeSinceLast = Date.now() - this.lastTap.time;
       const distance = this.getDistance(e, this.lastTap);
-      
+
       if (timeSinceLast < 300 && distance < 20) {
         this.onDoubleTap(e);
         this.lastTap = null;
         return;
       }
     }
-    
+
     // Start long press timer
     this.longPressTimer = window.setTimeout(() => {
       if (this.isStillPressed(e)) {
@@ -2134,24 +2139,24 @@ class GestureHandler {
       }
     }, 500);
   }
-  
+
   handleTouchMove(e: TouchEvent) {
     // Cancel long press if moved too much
     if (this.touchStart && this.getDistance(e, this.touchStart) > 10) {
       this.cancelLongPress();
     }
-    
+
     // Update swipe preview
     this.updateSwipePreview(e);
   }
-  
+
   handleTouchEnd(e: TouchEvent) {
     this.cancelLongPress();
-    
+
     const duration = Date.now() - this.touchStartTime;
     const distance = this.getDistance(e, this.touchStart);
     const velocity = distance / duration;
-    
+
     // Check for swipe
     if (distance > 50 || velocity > 0.5) {
       const direction = this.getDirection(e, this.touchStart);
@@ -2161,12 +2166,12 @@ class GestureHandler {
       this.lastTap = {
         time: Date.now(),
         x: e.changedTouches[0].clientX,
-        y: e.changedTouches[0].clientY
+        y: e.changedTouches[0].clientY,
       };
-      
+
       this.onTap(e);
     }
-    
+
     this.touchStart = null;
   }
 }
@@ -2715,6 +2720,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Status**: All foundation work completed. Card structure, build system, and navigation implemented.
 
 **Completed Tasks**:
+
 - ✅ Project setup with Lit + TypeScript + Rollup
 - ✅ Created `tsuryphone-card.ts` root component
 - ✅ Implemented `tsuryphone-navigation.ts` bottom navigation (3 tabs)
@@ -2731,6 +2737,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Status**: Home view structure implemented with placeholder content.
 
 **Completed Tasks**:
+
 - ✅ Created `home-view.ts` component
 - ✅ Implemented view switching in main card
 - ✅ Added call-log-filters component (All/Missed/Contacts/Blocked)
@@ -2747,6 +2754,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Status**: Contacts view fully implemented (placeholder for now).
 
 **Completed Tasks**:
+
 - ✅ Created contacts-view.ts skeleton
 - ✅ Added to navigation routing
 - ✅ Basic layout structure
@@ -2762,8 +2770,9 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Completed Tasks**:
 
 **Frontend (v0.1.8-alpha through v0.1.21-alpha)**:
+
 - ✅ Created `keypad-view.ts` container component
-- ✅ Implemented `keypad-grid.ts` with 0-9, *, # buttons
+- ✅ Implemented `keypad-grid.ts` with 0-9, \*, # buttons
 - ✅ Implemented `dialed-number-display.ts` with live state
 - ✅ Added backspace/delete button to keypad grid
 - ✅ **CRITICAL REFACTOR**: Removed ALL local state - now 100% backend-driven
@@ -2787,6 +2796,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Fully responsive layout
 
 **Backend Integration (Python - v1.0.124)**:
+
 - ✅ Added `SERVICE_DELETE_LAST_DIGIT = "delete_last_digit"`
 - ✅ Created service handler `async_delete_last_digit()`
 - ✅ Added service schema validation
@@ -2794,12 +2804,14 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Added to services.yaml
 
 **Button Entity (Python)**:
+
 - ✅ Created "Call - Delete Last Digit" button entity
 - ✅ Added button description with icon `mdi:backspace-outline`
 - ✅ Implemented availability logic (enabled when digits exist and phone idle)
 - ✅ Linked to delete service handler
 
 **Firmware Implementation (C++ - manual_override branch, commit 18ee112)**:
+
 - ✅ Added `handleIntegrationDeleteLastDigitRequest()` in main.cpp
 - ✅ Implemented callback registration in `setupTsuryPhoneCallbacks()` (13 parameters)
 - ✅ Created `TsuryPhoneIntegrationHandlers.cpp` with delete logic
@@ -2813,11 +2825,13 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Clean architecture maintained throughout
 
 **Build Status**:
+
 - ✅ Frontend: Compiles successfully (TypeScript)
 - ✅ Backend: All services registered
 - ✅ Firmware: 84.4% flash, 16.8% RAM usage
 
 **Testing Results**:
+
 - ✅ **VERIFIED WORKING**: Can dial digits from card UI
 - ✅ Digits appear in real-time on card display
 - ✅ Numbers dial on actual phone device
@@ -2826,6 +2840,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Delete last digit fully functional
 
 **Architecture Achievement**:
+
 - ✅ **Single source of truth**: Backend state drives everything
 - ✅ **No double state**: UI is pure reflection of backend
 - ✅ **Future-proof**: Entity discovery eliminates brittle name matching
@@ -2839,6 +2854,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 ### What's Next?
 
 **Phase 5: Contacts View Implementation**
+
 - Implement contact list rendering
 - Add contact search functionality
 - Create contact modal (add/edit)
@@ -2846,18 +2862,21 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Apply same state-driven architecture
 
 **Phase 6: Call History Integration**
+
 - Connect home view to real call_history data
 - Implement grouping by date
 - Add call-back functionality
 - Integrate frequent contacts calculation
 
 **Phase 7: Call Modal**
+
 - Incoming call UI with swipe gestures
 - In-call controls (hangup, speaker, mute)
 - Persistent call toast
 - Call state management
 
 **Phase 8: Polish & Testing**
+
 - Error handling and edge cases
 - Loading states and animations
 - Accessibility improvements
@@ -2869,6 +2888,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 ## Current State Summary
 
 ✅ **Working Features**:
+
 - Navigation between 3 views (Home, Keypad, Contacts)
 - Fully functional keypad with backend integration
 - Real-time digit dialing with device synchronization
@@ -2880,10 +2900,12 @@ All backend prerequisites have been completed. We can now proceed with implement
 - HACS distribution with auto-releases
 
 🚧 **In Progress**:
+
 - Contacts view (skeleton only)
 - Home view (placeholder data)
 
 📋 **Not Started**:
+
 - Call modals and toasts
 - Real call history integration
 - Contact management (CRUD)
@@ -2902,6 +2924,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Strategy**: Built reusable internal components following DRY principles within TsuryPhone.
 
 **Completed Shared Components**:
+
 - ✅ `utils/haptics.ts` - Centralized haptic feedback (light/medium/heavy)
 - ✅ `utils/formatters.ts` - Phone numbers, dates, durations, avatar colors
 - ✅ `utils/entity-discovery.ts` - Device-based entity resolution (future-proof)
@@ -2910,10 +2933,12 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ `components/shared/empty-state.ts` - Empty state messages with actions
 
 **Completed Contact Components**:
+
 - ✅ `contacts-view.ts` - Main container with search, grouping, add button
 - ✅ `contact-item.ts` - Individual contact with avatar, name, number, call button, priority star
 
 **Features Implemented**:
+
 - ✅ Display contacts from `phone_state.attributes.quick_dials`
 - ✅ Search/filter by name or number
 - ✅ Alphabetical grouping by first letter
@@ -2924,11 +2949,13 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Reusable components prevent code duplication
 
 **Backend Integration** (v1.0.126):
+
 - ✅ Exposed `quick_dials` in `phone_state` sensor attributes
 - ✅ State-driven architecture - backend is single source of truth
 - ✅ No service calls needed for display (reactive updates)
 
 **Services Ready for Modal** (Phase 6):
+
 - `tsuryphone.quick_dial_add` (code optional)
 - `tsuryphone.quick_dial_remove` (by ID)
 - `tsuryphone.dial` (tap to call - working)
@@ -2938,6 +2965,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Backend Version**: v1.0.130
 
 **Major Refactor Completed** (Nov 2, 2025):
+
 - ✅ Eliminated `normalizedNumber` field from all contact entry structs (firmware/backend/frontend)
 - ✅ Simplified data model: `number` field IS the normalized E.164 format
 - ✅ Removed duplicate normalization logic across all layers
@@ -2947,14 +2975,89 @@ All backend prerequisites have been completed. We can now proceed with implement
 - **Backend**: Removed normalized_number from QuickDialEntry, BlockedNumberEntry, PriorityCallerEntry
 - **Frontend**: Updated TypeScript types, simplified priority comparison logic
 
-**Next Phase**: Contact Modal (Add/Edit/Delete CRUD operations)
+---
 
+### Phase 6: Contact Modal ✅ COMPLETED (Nov 2, 2025)
 
-### Phase 6: Contact Modal - NEXT 🎯
+**Objective**: Implement complete CRUD operations for contacts with modal UI.
+
+**Status**: All features implemented and tested!
+
+**Component Created**: `components/modals/contact-modal.ts`
+
+**Features Implemented**:
+- ✅ Modal UI with overlay and centered dialog
+- ✅ Name field (required validation)
+- ✅ Phone number field (required + format validation)
+- ✅ Code field (optional, with uniqueness validation)
+- ✅ Priority toggle (checkbox with star icon)
+- ✅ Add mode (triggered by "Add Contact" button)
+- ✅ Edit mode (triggered by tapping contact)
+- ✅ Save button (calls backend service)
+- ✅ Delete button (edit mode only, with confirmation dialog)
+- ✅ Cancel button
+- ✅ Form validation with error messages
+- ✅ Loading states during service calls
+- ✅ Haptic feedback on all actions
+- ✅ Auto-close on success
+- ✅ Error handling and notifications
+
+**Service Integration**:
+- ✅ **Add**: `tsuryphone.quick_dial_add` with `{number, name, code?, priority?}`
+- ✅ **Edit**: Delete old + Add new workaround (backend limitation)
+  - First: `tsuryphone.quick_dial_remove {id: oldId}`
+  - Then: `tsuryphone.quick_dial_add` with new values
+- ✅ **Delete**: `tsuryphone.quick_dial_remove {id}` + confirmation
+- ✅ **Priority**: 
+  - Add: `tsuryphone.priority_add {number}`
+  - Remove: `tsuryphone.priority_remove {id}` (finds priority entry ID)
+
+**Event Flow**:
+- ✅ Contact item click → fires `edit-contact` event → opens modal in edit mode
+- ✅ Empty state action → fires `action` event → opens modal in add mode
+- ✅ Save → fires `contact-saved` event → closes modal, data refreshes automatically
+- ✅ Delete → fires `contact-deleted` event → closes modal, data refreshes automatically
+- ✅ Error → fires `error` event → displays error message for 3 seconds
+
+**Validation**:
+- ✅ Name: Required, min 1 character
+- ✅ Number: Required, regex validation for phone format
+- ✅ Code: Optional, uniqueness check against existing quick_dials
+- ✅ Real-time error display as user types
+
+**UI/UX Features**:
+- ✅ Modal overlay (darkens background, click to close)
+- ✅ Modal centered with slide-up animation
+- ✅ Close button (X) in top-right
+- ✅ Title changes: "Add Contact" vs "Edit Contact"
+- ✅ Form fields with labels and inline error messages
+- ✅ Delete button in red (edit mode only)
+- ✅ Confirmation dialog for delete (inline, with cancel/confirm buttons)
+- ✅ Loading spinner during save/delete
+- ✅ Disabled state prevents double-submission
+- ✅ Haptic feedback: light (close), medium (save/delete start), heavy (errors)
+
+**Edge Cases Handled**:
+- ✅ Duplicate code detection (shows error)
+- ✅ Invalid phone number format (shows error)
+- ✅ Priority caller state sync (auto-detects current priority status)
+- ✅ Delete confirmation prevents accidental deletion
+- ✅ Loading state prevents concurrent operations
+- ✅ Modal state cleanup on close
+
+**Version Delivered**: v0.1.33-alpha
+**Backend Version**: v1.0.130 (no changes needed)
+
+**Dependencies**: Phase 5 complete ✅
+
+---
+
+### Phase 7: Call Modal - NEXT 🎯
 
 **Objective**: Implement complete CRUD operations for contacts with modal UI.
 
 **Components to Build**:
+
 - [ ] `components/modals/contact-modal.ts` - Main modal container
 - [ ] Form UI with fields:
   - [ ] Name field (required)
@@ -2970,22 +3073,25 @@ All backend prerequisites have been completed. We can now proceed with implement
   - [ ] Cancel button
 
 **Form Validation**:
+
 - Name: Required, min 1 character
 - Number: Required, valid phone format
 - Code: Optional, if provided must be unique (check against existing quick_dials)
 - Priority: Boolean toggle
 
 **Service Calls**:
+
 - **Add**: `tsuryphone.quick_dial_add` with `{number, name, code?, priority?}`
 - **Edit**: Delete old + Add new (backend limitation workaround)
   - First: `tsuryphone.quick_dial_remove` with `{id: oldId}`
   - Then: `tsuryphone.quick_dial_add` with new values
 - **Delete**: `tsuryphone.quick_dial_remove` with `{id}`
-- **Priority**: 
+- **Priority**:
   - Add: `tsuryphone.priority_add` with `{number}`
   - Remove: `tsuryphone.priority_remove` with `{id}` (from priority_callers list)
 
 **State Management**:
+
 - Modal open/close state
 - Current mode (add/edit)
 - Current contact data (for edit mode)
@@ -2994,6 +3100,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Loading/saving state
 
 **UI/UX Details**:
+
 - Modal overlay (darkens background)
 - Modal centered on screen
 - Close button (X) in top-right
@@ -3005,6 +3112,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Haptic feedback on actions
 
 **Integration Points**:
+
 - Listen to `edit-contact` event from `contact-item.ts`
 - Listen to `action` event from `empty-state.ts` (Add Contact button)
 - Refresh contacts list after add/edit/delete
@@ -3012,6 +3120,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Use shared button styles and haptic feedback
 
 **Edge Cases**:
+
 - Duplicate code detection (show error)
 - Invalid phone number format (show error)
 - Network errors during service calls (show error toast)
@@ -3022,6 +3131,4 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 **Dependencies**: Phase 5 complete ✅
 
-
 ### Phase 6: Contact Modal - NEXT 🎯
-
