@@ -3510,6 +3510,7 @@ ContactModal.styles = i$3 `
       width: 100%;
       height: 100%;
       z-index: 100;
+      box-sizing: border-box;
     }
 
     :host([open]) {
@@ -3526,6 +3527,7 @@ ContactModal.styles = i$3 `
       padding: 24px;
       overflow-y: auto;
       animation: slideUp 0.3s ease-out;
+      box-sizing: border-box;
     }
 
     @keyframes slideUp {
@@ -4235,7 +4237,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         .tsuryphone-container {
           display: flex;
           flex-direction: column;
-          height: 750px;
+          height: 761px;
           background: var(--tsury-card-background-color);
           color: var(--tsury-primary-text-color);
           font-family: var(--tsury-font-family);

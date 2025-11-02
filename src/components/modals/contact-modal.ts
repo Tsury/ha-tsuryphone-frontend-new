@@ -46,6 +46,7 @@ export class ContactModal extends LitElement {
       width: 100%;
       height: 100%;
       z-index: 100;
+      box-sizing: border-box;
     }
 
     :host([open]) {
@@ -62,6 +63,7 @@ export class ContactModal extends LitElement {
       padding: 24px;
       overflow-y: auto;
       animation: slideUp 0.3s ease-out;
+      box-sizing: border-box;
     }
 
     @keyframes slideUp {
