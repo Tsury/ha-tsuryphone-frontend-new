@@ -28,6 +28,7 @@ export interface WaitingCallInfo {
 @customElement('tsuryphone-call-modal')
 export class TsuryPhoneCallModal extends LitElement {
   @property({ type: Object }) hass!: HomeAssistant;
+  @property({ type: String }) deviceId?: string;
   @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String }) mode: CallModalMode = 'incoming';
   @property({ type: Object }) callInfo?: CallInfo;
@@ -433,7 +434,8 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'answer_call', {});
+      const target = this.deviceId ? { device_id: this.deviceId } : {};
+      await this.hass.callService('tsuryphone', 'answer_call', {}, target);
       this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to answer call:', error);
@@ -453,7 +455,8 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'hangup_call', {});
+      const target = this.deviceId ? { device_id: this.deviceId } : {};
+      await this.hass.callService('tsuryphone', 'hangup', {}, target);
       this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to decline call:', error);
@@ -472,7 +475,8 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'hangup', {});
+      const target = this.deviceId ? { device_id: this.deviceId } : {};
+      await this.hass.callService('tsuryphone', 'hangup', {}, target);
       this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to hang up:', error);
@@ -498,7 +502,8 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('light');
 
     try {
-      await this.hass.callService('tsuryphone', 'call_toggle_speaker_mode', {});
+      const target = this.deviceId ? { device_id: this.deviceId } : {};
+      await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, target);
     } catch (error) {
       console.error('Failed to toggle speaker:', error);
     }
@@ -514,7 +519,8 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'swap_calls', {});
+      const target = this.deviceId ? { device_id: this.deviceId } : {};
+      await this.hass.callService('tsuryphone', 'swap_calls', {}, target);
     } catch (error) {
       console.error('Failed to swap calls:', error);
     }
@@ -524,7 +530,8 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'merge_calls', {});
+      const target = this.deviceId ? { device_id: this.deviceId } : {};
+      await this.hass.callService('tsuryphone', 'merge_calls', {}, target);
     } catch (error) {
       console.error('Failed to merge calls:', error);
     }

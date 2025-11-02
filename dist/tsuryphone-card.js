@@ -3889,7 +3889,8 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         this._isAnswering = true;
         this._triggerHaptic('medium');
         try {
-            await this.hass.callService('tsuryphone', 'answer_call', {});
+            const target = this.deviceId ? { device_id: this.deviceId } : {};
+            await this.hass.callService('tsuryphone', 'answer_call', {}, target);
             this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3909,7 +3910,8 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         this._isDeclining = true;
         this._triggerHaptic('medium');
         try {
-            await this.hass.callService('tsuryphone', 'hangup_call', {});
+            const target = this.deviceId ? { device_id: this.deviceId } : {};
+            await this.hass.callService('tsuryphone', 'hangup', {}, target);
             this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3928,7 +3930,8 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleHangup() {
         this._triggerHaptic('medium');
         try {
-            await this.hass.callService('tsuryphone', 'hangup', {});
+            const target = this.deviceId ? { device_id: this.deviceId } : {};
+            await this.hass.callService('tsuryphone', 'hangup', {}, target);
             this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3952,7 +3955,8 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleSpeaker() {
         this._triggerHaptic('light');
         try {
-            await this.hass.callService('tsuryphone', 'call_toggle_speaker_mode', {});
+            const target = this.deviceId ? { device_id: this.deviceId } : {};
+            await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, target);
         }
         catch (error) {
             console.error('Failed to toggle speaker:', error);
@@ -3966,7 +3970,8 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleSwapCalls() {
         this._triggerHaptic('medium');
         try {
-            await this.hass.callService('tsuryphone', 'swap_calls', {});
+            const target = this.deviceId ? { device_id: this.deviceId } : {};
+            await this.hass.callService('tsuryphone', 'swap_calls', {}, target);
         }
         catch (error) {
             console.error('Failed to swap calls:', error);
@@ -3975,7 +3980,8 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleMergeCalls() {
         this._triggerHaptic('medium');
         try {
-            await this.hass.callService('tsuryphone', 'merge_calls', {});
+            const target = this.deviceId ? { device_id: this.deviceId } : {};
+            await this.hass.callService('tsuryphone', 'merge_calls', {}, target);
         }
         catch (error) {
             console.error('Failed to merge calls:', error);
@@ -4403,6 +4409,9 @@ __decorate([
     n({ type: Object })
 ], TsuryPhoneCallModal.prototype, "hass", void 0);
 __decorate([
+    n({ type: String })
+], TsuryPhoneCallModal.prototype, "deviceId", void 0);
+__decorate([
     n({ type: Boolean, reflect: true })
 ], TsuryPhoneCallModal.prototype, "open", void 0);
 __decorate([
@@ -4479,6 +4488,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         this._callModalOpen = false;
         this._callModalMode = "incoming";
         this._callWaitingAvailable = false;
+        this._showCallToast = false;
         this._callModalMinimized = false;
         // Subscriptions
         this._unsubscribers = [];
@@ -4734,6 +4744,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             // No call - close modal and clear data
             this._callModalOpen = false;
             this._callModalMinimized = false; // Reset when call ends
+            this._showCallToast = false; // Hide toast when call ends
             this._currentCallInfo = undefined;
             this._waitingCallInfo = undefined;
             this._callWaitingAvailable = false;
@@ -4812,7 +4823,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         if (this._callModalMode === 'active' && this._currentCallInfo) {
             this._callModalOpen = false;
             this._callModalMinimized = true; // Track manual minimize
-            // TODO: Show persistent toast
+            this._showCallToast = true; // Show persistent toast
         }
         else {
             this._callModalOpen = false;
@@ -4839,6 +4850,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     _handleCallEnded(e) {
         console.log("Call ended");
         this._callModalOpen = false;
+        this._showCallToast = false;
     }
     /**
      * Handle call modal error
@@ -4850,6 +4862,14 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         setTimeout(() => {
             this._errorMessage = "";
         }, 3000);
+    }
+    /**
+     * Handle click on call toast to reopen modal
+     */
+    _handleCallToastClick() {
+        this._callModalOpen = true;
+        this._showCallToast = false;
+        this._callModalMinimized = false;
     }
     /**
      * Handle edit contact (from contact item click)
@@ -4898,6 +4918,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         <div class="tsuryphone-container ${this._isDarkMode ? 'dark-mode' : 'light-mode'}">
           ${this._callModalOpen ? this._renderCallModal() : ""}
           ${this._contactModalOpen ? this._renderContactModal() : ""}
+          ${this._showCallToast ? this._renderCallToast() : ""}
           ${this._showBlockedView
             ? this._renderBlockedView()
             : this._renderMainViews()}
@@ -5000,9 +5021,11 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
      * Render call modal
      */
     _renderCallModal() {
+        const deviceId = this.config?.device_id || '';
         return x `
       <tsuryphone-call-modal
         .hass=${this.hass}
+        .deviceId=${deviceId}
         .open=${this._callModalOpen}
         .mode=${this._callModalMode}
         .callInfo=${this._currentCallInfo}
@@ -5014,6 +5037,30 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         @call-ended=${this._handleCallEnded}
         @error=${this._handleCallModalError}
       ></tsuryphone-call-modal>
+    `;
+    }
+    /**
+     * Render call toast (minimized call indicator)
+     */
+    _renderCallToast() {
+        if (!this._currentCallInfo)
+            return x ``;
+        const displayName = this._currentCallInfo.name || this._currentCallInfo.number;
+        const duration = this._currentCallInfo.duration || 0;
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        return x `
+      <div class="call-toast" @click=${this._handleCallToastClick}>
+        <div class="call-toast-content">
+          <div class="call-toast-icon">📞</div>
+          <div class="call-toast-info">
+            <div class="call-toast-name">${displayName}</div>
+            <div class="call-toast-duration">${durationText}</div>
+          </div>
+        </div>
+        <div class="call-toast-action">Tap to return</div>
+      </div>
     `;
     }
     /**
@@ -5197,6 +5244,64 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
           filter: brightness(0.9);
         }
 
+        /* Call Toast (minimized call indicator) */
+        .call-toast {
+          position: absolute;
+          top: 16px;
+          left: 16px;
+          right: 16px;
+          z-index: 50;
+          background: var(--primary-color);
+          color: white;
+          padding: 12px 16px;
+          border-radius: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+          transition: transform 0.2s ease;
+        }
+
+        .call-toast:hover {
+          transform: scale(1.02);
+        }
+
+        .call-toast:active {
+          transform: scale(0.98);
+        }
+
+        .call-toast-content {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .call-toast-icon {
+          font-size: 24px;
+        }
+
+        .call-toast-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .call-toast-name {
+          font-weight: 500;
+          font-size: 14px;
+        }
+
+        .call-toast-duration {
+          font-size: 12px;
+          opacity: 0.9;
+        }
+
+        .call-toast-action {
+          font-size: 12px;
+          opacity: 0.9;
+        }
+
         /* Dark mode adjustments */
         .tsuryphone-container.dark-mode {
           /* Dark mode specific overrides if needed */
@@ -5272,6 +5377,9 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_callWaitingAvailable", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_showCallToast", void 0);
 TsuryPhoneCard = __decorate([
     t("tsuryphone-card")
 ], TsuryPhoneCard);
