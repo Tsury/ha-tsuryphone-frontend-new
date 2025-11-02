@@ -3950,10 +3950,23 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             if (attrs.priority_numbers && Array.isArray(attrs.priority_numbers)) {
                 this._priorityNumbers = new Set(attrs.priority_numbers);
             }
-            // Update call history
-            if (attrs.entries && Array.isArray(attrs.entries)) {
-                this._callHistoryCache = attrs.entries;
+        }
+        // Update call history from call_history_size sensor
+        const callHistoryEntityId = `sensor.${deviceId}_call_history_size`;
+        const callHistoryEntity = this.hass.states[callHistoryEntityId];
+        if (callHistoryEntity?.attributes) {
+            const historyAttrs = callHistoryEntity.attributes;
+            console.log('[TsuryPhone] Call history sensor attributes:', historyAttrs);
+            if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
+                console.log('[TsuryPhone] Found call history entries:', historyAttrs.entries.length);
+                this._callHistoryCache = historyAttrs.entries;
             }
+            else {
+                console.log('[TsuryPhone] No entries found in call history sensor');
+            }
+        }
+        else {
+            console.log('[TsuryPhone] Call history sensor not found or has no attributes');
         }
         // Update call modal state
         this._updateCallModalState();
