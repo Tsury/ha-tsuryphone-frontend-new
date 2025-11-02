@@ -362,7 +362,7 @@ const commonStyles = i$3 `
   }
 
   .scrollable::-webkit-scrollbar {
-    width: 8px;
+    width: 4px;
   }
 
   .scrollable::-webkit-scrollbar-track {
@@ -370,12 +370,12 @@ const commonStyles = i$3 `
   }
 
   .scrollable::-webkit-scrollbar-thumb {
-    background-color: rgba(128, 128, 128, 0.3);
-    border-radius: 4px;
+    background-color: rgba(128, 128, 128, 0.2);
+    border-radius: 2px;
   }
 
   .scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(128, 128, 128, 0.5);
+    background-color: rgba(128, 128, 128, 0.4);
   }
 
   /* Fade animations */
@@ -3389,7 +3389,7 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
 
         /* Scrollbar styling */
         .blocked-list::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
 
         .blocked-list::-webkit-scrollbar-track {
@@ -3397,12 +3397,12 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
         }
 
         .blocked-list::-webkit-scrollbar-thumb {
-          background: var(--tsury-scrollbar-thumb-color);
-          border-radius: 3px;
+          background: rgba(128, 128, 128, 0.2);
+          border-radius: 2px;
         }
 
         .blocked-list::-webkit-scrollbar-thumb:hover {
-          background: var(--tsury-scrollbar-thumb-hover-color);
+          background: rgba(128, 128, 128, 0.4);
         }
       `,
         ];

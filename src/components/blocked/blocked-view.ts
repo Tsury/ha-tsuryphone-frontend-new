@@ -182,7 +182,7 @@ export class TsuryPhoneBlockedView extends LitElement {
 
         /* Scrollbar styling */
         .blocked-list::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
 
         .blocked-list::-webkit-scrollbar-track {
@@ -190,12 +190,12 @@ export class TsuryPhoneBlockedView extends LitElement {
         }
 
         .blocked-list::-webkit-scrollbar-thumb {
-          background: var(--tsury-scrollbar-thumb-color);
-          border-radius: 3px;
+          background: rgba(128, 128, 128, 0.2);
+          border-radius: 2px;
         }
 
         .blocked-list::-webkit-scrollbar-thumb:hover {
-          background: var(--tsury-scrollbar-thumb-hover-color);
+          background: rgba(128, 128, 128, 0.4);
         }
       `,
     ];

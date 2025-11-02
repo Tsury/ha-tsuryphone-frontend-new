@@ -58,7 +58,7 @@ export const commonStyles = css`
   }
 
   .scrollable::-webkit-scrollbar {
-    width: 8px;
+    width: 4px;
   }
 
   .scrollable::-webkit-scrollbar-track {
@@ -66,12 +66,12 @@ export const commonStyles = css`
   }
 
   .scrollable::-webkit-scrollbar-thumb {
-    background-color: rgba(128, 128, 128, 0.3);
-    border-radius: 4px;
+    background-color: rgba(128, 128, 128, 0.2);
+    border-radius: 2px;
   }
 
   .scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(128, 128, 128, 0.5);
+    background-color: rgba(128, 128, 128, 0.4);
   }
 
   /* Fade animations */
