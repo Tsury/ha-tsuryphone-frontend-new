@@ -3798,6 +3798,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         super(...arguments);
         this.open = false;
         this.mode = 'incoming';
+        this.callWaitingAvailable = false;
         this._isAnswering = false;
         this._isDeclining = false;
         this._isMuted = false;
@@ -3927,7 +3928,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleHangup() {
         this._triggerHaptic('medium');
         try {
-            await this.hass.callService('tsuryphone', 'hangup_call', {});
+            await this.hass.callService('tsuryphone', 'hangup', {});
             this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
         }
         catch (error) {
@@ -3939,7 +3940,9 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         this._triggerHaptic('light');
         this._isMuted = !this._isMuted;
         try {
-            await this.hass.callService('tsuryphone', 'toggle_mute', {});
+            // TODO: Backend doesn't have toggle_mute service yet
+            // await this.hass.callService('tsuryphone', 'toggle_mute', {});
+            console.warn('Mute functionality not yet implemented in backend');
         }
         catch (error) {
             console.error('Failed to toggle mute:', error);
@@ -3949,7 +3952,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     async _handleSpeaker() {
         this._triggerHaptic('light');
         try {
-            await this.hass.callService('tsuryphone', 'toggle_speaker', {});
+            await this.hass.callService('tsuryphone', 'call_toggle_speaker_mode', {});
         }
         catch (error) {
             console.error('Failed to toggle speaker:', error);
@@ -4033,7 +4036,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
 
       <div class="call-timer">${this._formatDuration(this._currentDuration)}</div>
 
-      ${this.waitingCall ? this._renderWaitingCall() : ''}
+      ${this.callWaitingAvailable && this.waitingCall ? this._renderWaitingCall() : ''}
 
       <div class="call-controls">
         <button class="control-button ${this._isMuted ? 'muted' : ''}"
@@ -4045,19 +4048,19 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         <button class="control-button ${this._showKeypad ? 'active' : ''}"
                 @click=${this._handleKeypad}
                 title="Keypad">
-          #
+          <ha-icon icon="mdi:dialpad"></ha-icon>
         </button>
 
         <button class="control-button ${isSpeaker ? 'active' : ''}"
                 @click=${this._handleSpeaker}
                 title="Speaker">
-          🔊
+          �
         </button>
 
         <button class="control-button hangup-button"
                 @click=${this._handleHangup}
                 title="Hang up">
-          📞
+          <ha-icon icon="mdi:phone-hangup"></ha-icon>
         </button>
       </div>
     `;
@@ -4412,6 +4415,9 @@ __decorate([
     n({ type: Object })
 ], TsuryPhoneCallModal.prototype, "waitingCall", void 0);
 __decorate([
+    n({ type: Boolean })
+], TsuryPhoneCallModal.prototype, "callWaitingAvailable", void 0);
+__decorate([
     r()
 ], TsuryPhoneCallModal.prototype, "_isAnswering", void 0);
 __decorate([
@@ -4472,6 +4478,8 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         // Call Modal state
         this._callModalOpen = false;
         this._callModalMode = "incoming";
+        this._callWaitingAvailable = false;
+        this._callModalMinimized = false;
         // Subscriptions
         this._unsubscribers = [];
     }
@@ -4671,6 +4679,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         if (phoneState === 'RINGING_IN') {
             this._callModalMode = 'incoming';
             this._callModalOpen = true;
+            this._callModalMinimized = false; // Reset on new incoming call
             // Get incoming call info
             const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
             if (currentCallEntity?.attributes) {
@@ -4685,8 +4694,8 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         }
         else if (inCall) {
             this._callModalMode = 'active';
-            // Keep modal open if it was already open, otherwise respect user's choice
-            if (!this._callModalOpen && phoneState !== 'IDLE') {
+            // Keep modal open if it was already open, or if not manually minimized
+            if (!this._callModalOpen && !this._callModalMinimized && phoneState !== 'IDLE') {
                 this._callModalOpen = true;
             }
             // Get active call info
@@ -4717,12 +4726,17 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             else {
                 this._waitingCallInfo = undefined;
             }
+            // Check if call waiting is available
+            const callWaitingAvailableEntity = this.hass.states[deviceId ? `binary_sensor.${deviceId}_call_waiting_available` : `binary_sensor.call_waiting_available`];
+            this._callWaitingAvailable = callWaitingAvailableEntity?.state === 'on';
         }
         else {
             // No call - close modal and clear data
             this._callModalOpen = false;
+            this._callModalMinimized = false; // Reset when call ends
             this._currentCallInfo = undefined;
             this._waitingCallInfo = undefined;
+            this._callWaitingAvailable = false;
         }
     }
     /**
@@ -4797,10 +4811,12 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         // Don't fully close during active call, just minimize
         if (this._callModalMode === 'active' && this._currentCallInfo) {
             this._callModalOpen = false;
+            this._callModalMinimized = true; // Track manual minimize
             // TODO: Show persistent toast
         }
         else {
             this._callModalOpen = false;
+            this._callModalMinimized = true;
         }
     }
     /**
@@ -4991,6 +5007,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         .mode=${this._callModalMode}
         .callInfo=${this._currentCallInfo}
         .waitingCall=${this._waitingCallInfo}
+        .callWaitingAvailable=${this._callWaitingAvailable}
         @close=${this._handleCallModalClose}
         @call-answered=${this._handleCallAnswered}
         @call-declined=${this._handleCallDeclined}
@@ -5252,6 +5269,9 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_waitingCallInfo", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_callWaitingAvailable", void 0);
 TsuryPhoneCard = __decorate([
     t("tsuryphone-card")
 ], TsuryPhoneCard);

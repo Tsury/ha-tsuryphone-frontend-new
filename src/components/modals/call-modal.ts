@@ -32,6 +32,7 @@ export class TsuryPhoneCallModal extends LitElement {
   @property({ type: String }) mode: CallModalMode = 'incoming';
   @property({ type: Object }) callInfo?: CallInfo;
   @property({ type: Object }) waitingCall?: WaitingCallInfo;
+  @property({ type: Boolean }) callWaitingAvailable = false;
 
   @state() private _isAnswering = false;
   @state() private _isDeclining = false;
@@ -471,7 +472,7 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('medium');
 
     try {
-      await this.hass.callService('tsuryphone', 'hangup_call', {});
+      await this.hass.callService('tsuryphone', 'hangup', {});
       this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
     } catch (error) {
       console.error('Failed to hang up:', error);
@@ -484,7 +485,9 @@ export class TsuryPhoneCallModal extends LitElement {
     this._isMuted = !this._isMuted;
 
     try {
-      await this.hass.callService('tsuryphone', 'toggle_mute', {});
+      // TODO: Backend doesn't have toggle_mute service yet
+      // await this.hass.callService('tsuryphone', 'toggle_mute', {});
+      console.warn('Mute functionality not yet implemented in backend');
     } catch (error) {
       console.error('Failed to toggle mute:', error);
       this._isMuted = !this._isMuted; // Revert on error
@@ -495,7 +498,7 @@ export class TsuryPhoneCallModal extends LitElement {
     this._triggerHaptic('light');
 
     try {
-      await this.hass.callService('tsuryphone', 'toggle_speaker', {});
+      await this.hass.callService('tsuryphone', 'call_toggle_speaker_mode', {});
     } catch (error) {
       console.error('Failed to toggle speaker:', error);
     }
@@ -585,7 +588,7 @@ export class TsuryPhoneCallModal extends LitElement {
 
       <div class="call-timer">${this._formatDuration(this._currentDuration)}</div>
 
-      ${this.waitingCall ? this._renderWaitingCall() : ''}
+      ${this.callWaitingAvailable && this.waitingCall ? this._renderWaitingCall() : ''}
 
       <div class="call-controls">
         <button class="control-button ${this._isMuted ? 'muted' : ''}"
@@ -597,19 +600,19 @@ export class TsuryPhoneCallModal extends LitElement {
         <button class="control-button ${this._showKeypad ? 'active' : ''}"
                 @click=${this._handleKeypad}
                 title="Keypad">
-          #
+          <ha-icon icon="mdi:dialpad"></ha-icon>
         </button>
 
         <button class="control-button ${isSpeaker ? 'active' : ''}"
                 @click=${this._handleSpeaker}
                 title="Speaker">
-          🔊
+          �
         </button>
 
         <button class="control-button hangup-button"
                 @click=${this._handleHangup}
                 title="Hang up">
-          📞
+          <ha-icon icon="mdi:phone-hangup"></ha-icon>
         </button>
       </div>
     `;

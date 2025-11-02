@@ -70,6 +70,8 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _callModalMode: CallModalMode = "incoming";
   @state() private _currentCallInfo?: CallInfo;
   @state() private _waitingCallInfo?: WaitingCallInfo;
+  @state() private _callWaitingAvailable = false;
+  private _callModalMinimized = false;
 
   // Subscriptions
   private _unsubscribers: Array<() => void> = [];
@@ -297,6 +299,7 @@ export class TsuryPhoneCard extends LitElement {
     if (phoneState === 'RINGING_IN') {
       this._callModalMode = 'incoming';
       this._callModalOpen = true;
+      this._callModalMinimized = false; // Reset on new incoming call
       
       // Get incoming call info
       const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
@@ -311,8 +314,8 @@ export class TsuryPhoneCard extends LitElement {
       }
     } else if (inCall) {
       this._callModalMode = 'active';
-      // Keep modal open if it was already open, otherwise respect user's choice
-      if (!this._callModalOpen && phoneState !== 'IDLE') {
+      // Keep modal open if it was already open, or if not manually minimized
+      if (!this._callModalOpen && !this._callModalMinimized && phoneState !== 'IDLE') {
         this._callModalOpen = true;
       }
       
@@ -345,11 +348,17 @@ export class TsuryPhoneCard extends LitElement {
       } else {
         this._waitingCallInfo = undefined;
       }
+
+      // Check if call waiting is available
+      const callWaitingAvailableEntity = this.hass.states[deviceId ? `binary_sensor.${deviceId}_call_waiting_available` : `binary_sensor.call_waiting_available`];
+      this._callWaitingAvailable = callWaitingAvailableEntity?.state === 'on';
     } else {
       // No call - close modal and clear data
       this._callModalOpen = false;
+      this._callModalMinimized = false; // Reset when call ends
       this._currentCallInfo = undefined;
       this._waitingCallInfo = undefined;
+      this._callWaitingAvailable = false;
     }
   }
 
@@ -437,9 +446,11 @@ export class TsuryPhoneCard extends LitElement {
     // Don't fully close during active call, just minimize
     if (this._callModalMode === 'active' && this._currentCallInfo) {
       this._callModalOpen = false;
+      this._callModalMinimized = true; // Track manual minimize
       // TODO: Show persistent toast
     } else {
       this._callModalOpen = false;
+      this._callModalMinimized = true;
     }
   }
 
@@ -647,6 +658,7 @@ export class TsuryPhoneCard extends LitElement {
         .mode=${this._callModalMode}
         .callInfo=${this._currentCallInfo}
         .waitingCall=${this._waitingCallInfo}
+        .callWaitingAvailable=${this._callWaitingAvailable}
         @close=${this._handleCallModalClose}
         @call-answered=${this._handleCallAnswered}
         @call-declined=${this._handleCallDeclined}
