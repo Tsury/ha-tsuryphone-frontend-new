@@ -3105,10 +3105,106 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Loading state prevents concurrent operations
 - ✅ Modal state cleanup on close
 
-**Version Delivered**: v0.1.33-alpha
-**Backend Version**: v1.0.130 (no changes needed)
+**Version Delivered**: v0.1.46-alpha
+**Backend Version**: v1.0.132 (fixed call history attributes)
 
 **Dependencies**: Phase 5 complete ✅
+
+---
+
+### Phase 6.5: Call History Integration ✅ COMPLETED (Nov 2, 2025)
+
+**Objective**: Connect backend call history data to frontend home view display.
+
+**Status**: Working! Call history now displays in home view ✅
+
+**Version**: Frontend v0.1.46-alpha, Backend v1.0.132
+
+**Issues Fixed**:
+
+**Backend Fixes**:
+- ✅ Added `entries` attribute to `sensor.call_history_size` sensor
+- ✅ Fixed AttributeError: Used correct `CallHistoryEntry` model attributes
+  - Changed from: `entry.result`, `entry.is_priority` (don't exist)
+  - Changed to: `entry.call_type`, `entry.is_incoming`, `entry.reason`, `entry.seq`
+- ✅ Sensor entity category set to DIAGNOSTIC (disabled by default, needs manual enable)
+
+**Frontend Fixes**:
+- ✅ Extract device ID from entity name for multi-sensor lookup
+  - Parse `entity: sensor.phone_state` → look for `sensor.call_history_size`
+- ✅ Read from correct sensor (`call_history_size` not `phone_state`)
+- ✅ Map backend data format to frontend format:
+  - `received_ts` (Unix seconds) → `timestamp` (ISO string)
+  - `number` → `phoneNumber`
+  - `name` → `contactName`
+  - `duration_s` → `duration`
+  - `call_type` → `type`
+  - `seq` → `id`
+- ✅ Convert Unix timestamp to JavaScript Date for grouping functions
+
+**Data Flow**:
+1. Backend: `sensor.call_history_size` exposes `attributes.entries[]` 
+2. Frontend: Card reads from `call_history_size` sensor
+3. Frontend: Maps backend format → frontend `CallHistoryEntry` format
+4. Frontend: Passes to `home-view` component
+5. Frontend: Groups by date (Today, Yesterday, This Week, etc.)
+
+**Backend Entry Format**:
+```python
+{
+  "number": "+972546662771",
+  "name": "Amit",
+  "call_type": "outgoing",  # incoming/outgoing/missed/blocked
+  "is_incoming": False,
+  "duration_s": 6,
+  "received_ts": 1730556234.567,  # Unix timestamp
+  "reason": None,
+  "seq": 42
+}
+```
+
+**Frontend Entry Format**:
+```typescript
+{
+  id: "42",
+  contactName: "Amit",
+  phoneNumber: "+972546662771",
+  timestamp: "2025-11-02T15:30:34.567Z",  // ISO string
+  duration: 6,
+  type: "outgoing",  // CallType
+  isBlocked: false
+}
+```
+
+**User Action Required**:
+- ⚠️ Must manually enable `sensor.call_history_size` (Settings → Devices → TsuryPhone → Enable entity)
+- This is because backend sets `entity_category=EntityCategory.DIAGNOSTIC`
+
+**Dependencies**: Phase 6 complete ✅
+
+---
+
+### Phase 6.75: UI/UX Polish Pass - DEFERRED ⏸️
+
+**Note**: Several discrepancies exist between the current implementation and the design document. A comprehensive polish session is required to align all UI elements with the design specifications.
+
+**Items Requiring Polish**:
+- Call history item layout and styling
+- Contact card design and spacing
+- Typography consistency (font sizes, weights)
+- Color scheme alignment with design
+- Icon sizing and positioning
+- Animation timing and easing
+- Touch target sizes
+- Spacing and padding consistency
+- Modal transitions
+- Error state designs
+- Empty state designs
+- Loading state designs
+
+**Decision**: Defer polish pass until after Phase 7 (Call Modal) and Phase 8 (Blocked View) are complete. This allows us to polish all views together in a single comprehensive pass.
+
+**Dependencies**: Phases 6, 6.5, 7, 8 complete
 
 ---
 
