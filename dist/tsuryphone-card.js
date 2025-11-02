@@ -3510,12 +3510,12 @@ let ContactModal = class ContactModal extends i {
 ContactModal.styles = i$3 `
     :host {
       display: none;
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1000;
+      z-index: 100;
     }
 
     :host([open]) {
@@ -3550,10 +3550,11 @@ ContactModal.styles = i$3 `
       padding: 24px;
       max-width: 400px;
       width: 90%;
-      max-height: 90vh;
+      max-height: 80%;
       overflow-y: auto;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       animation: slideUp 0.3s ease-out;
+      z-index: 1;
     }
 
     @keyframes slideUp {
@@ -4265,8 +4266,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         .tsuryphone-container {
           display: flex;
           flex-direction: column;
-          height: 600px;
-          max-height: 80vh;
+          height: 450px;
           background: var(--tsury-card-background-color);
           color: var(--tsury-primary-text-color);
           font-family: var(--tsury-font-family);

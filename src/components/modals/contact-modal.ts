@@ -40,12 +40,12 @@ export class ContactModal extends LitElement {
   static styles = css`
     :host {
       display: none;
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1000;
+      z-index: 100;
     }
 
     :host([open]) {
@@ -80,10 +80,11 @@ export class ContactModal extends LitElement {
       padding: 24px;
       max-width: 400px;
       width: 90%;
-      max-height: 90vh;
+      max-height: 80%;
       overflow-y: auto;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       animation: slideUp 0.3s ease-out;
+      z-index: 1;
     }
 
     @keyframes slideUp {

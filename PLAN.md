@@ -2979,14 +2979,20 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 ### Phase 6: Contact Modal ✅ COMPLETED (Nov 2, 2025)
 
-**Objective**: Implement complete CRUD operations for contacts with modal UI.
+**Objective**: Implement complete CRUD operations for contacts with in-card modal overlay.
 
 **Status**: All features implemented and tested!
 
 **Component Created**: `components/modals/contact-modal.ts`
 
+**Design Clarification**: 
+- ✅ Modal is contained **within the card**, not a full-screen HA modal
+- ✅ Uses `position: absolute` to overlay content inside the card boundaries
+- ✅ Navigation remains visible beneath the overlay
+- ✅ z-index: 100 (sits on top of card content but within card)
+
 **Features Implemented**:
-- ✅ Modal UI with overlay and centered dialog
+- ✅ Modal UI with overlay and centered dialog (within card)
 - ✅ Name field (required validation)
 - ✅ Phone number field (required + format validation)
 - ✅ Code field (optional, with uniqueness validation)
@@ -3001,6 +3007,12 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Haptic feedback on all actions
 - ✅ Auto-close on success
 - ✅ Error handling and notifications
+
+**Fixes Applied (Nov 2, 2025)**:
+- ✅ Added `reflect: true` to `open` property - fixes modal not opening
+- ✅ Changed from `position: fixed` to `position: absolute` - modal now contained in card
+- ✅ Reduced `max-height: 90vh` → `80%` - respects card boundaries
+- ✅ Card height set to 450px to eliminate scrolling in keypad view
 
 **Service Integration**:
 - ✅ **Add**: `tsuryphone.quick_dial_add` with `{number, name, code?, priority?}`
