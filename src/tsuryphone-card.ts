@@ -19,8 +19,10 @@ import './components/home/home-view';
 import './components/keypad/keypad-view';
 import './components/contacts/contacts-view';
 import './components/modals/contact-modal';
+import './components/modals/call-modal';
 import type { NavigationTab, TabChangeEvent } from './components/navigation/tsuryphone-navigation';
 import type { CallHistoryEntry as CallHistoryEntryType, CallType } from './utils/call-history-grouping';
+import type { CallModalMode, CallInfo, WaitingCallInfo } from './components/modals/call-modal';
 
 // Declare the card for Home Assistant
 declare global {
@@ -58,10 +60,16 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _isConnected = true;
   @state() private _errorMessage = "";
 
-  // Modal state
+  // Contact Modal state
   @state() private _contactModalOpen = false;
   @state() private _contactModalMode: "add" | "edit" = "add";
   @state() private _contactModalData?: QuickDialEntry;
+
+  // Call Modal state
+  @state() private _callModalOpen = false;
+  @state() private _callModalMode: CallModalMode = "incoming";
+  @state() private _currentCallInfo?: CallInfo;
+  @state() private _waitingCallInfo?: WaitingCallInfo;
 
   // Subscriptions
   private _unsubscribers: Array<() => void> = [];
@@ -269,17 +277,80 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
-   * Update call modal visibility based on phone state
+   * Update call modal visibility and data based on phone state
    */
   private _updateCallModalState(): void {
     if (!this.hass) return;
     
-    const deviceId = this.config?.device_id || 'tsuryphone';
-    const phoneState = this.hass.states[`sensor.${deviceId}_phone_state`]?.state;
-    const inCall = this.hass.states[`binary_sensor.${deviceId}_in_call`]?.state === 'on';
+    const deviceId = this.config?.device_id || '';
+    const phoneStateEntityId = deviceId 
+      ? `sensor.${deviceId}_phone_state`
+      : `sensor.phone_state`;
+    const inCallEntityId = deviceId
+      ? `binary_sensor.${deviceId}_in_call`
+      : `binary_sensor.in_call`;
+
+    const phoneState = this.hass.states[phoneStateEntityId]?.state;
+    const inCall = this.hass.states[inCallEntityId]?.state === 'on';
     
-    // Show call modal if ringing or in call
-    this._showCallModal = phoneState === 'RINGING_IN' || inCall;
+    // Determine call modal mode
+    if (phoneState === 'RINGING_IN') {
+      this._callModalMode = 'incoming';
+      this._callModalOpen = true;
+      
+      // Get incoming call info
+      const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
+      if (currentCallEntity?.attributes) {
+        const attrs = currentCallEntity.attributes as any;
+        this._currentCallInfo = {
+          number: attrs.number || 'Unknown',
+          name: attrs.name,
+          isPriority: attrs.is_priority || false,
+          isIncoming: true,
+        };
+      }
+    } else if (inCall) {
+      this._callModalMode = 'active';
+      // Keep modal open if it was already open, otherwise respect user's choice
+      if (!this._callModalOpen && phoneState !== 'IDLE') {
+        this._callModalOpen = true;
+      }
+      
+      // Get active call info
+      const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
+      const durationEntity = this.hass.states[deviceId ? `sensor.${deviceId}_call_duration` : `sensor.call_duration`];
+      const audioOutputEntity = this.hass.states[deviceId ? `sensor.${deviceId}_call_audio_output` : `sensor.call_audio_output`];
+      
+      if (currentCallEntity?.attributes) {
+        const attrs = currentCallEntity.attributes as any;
+        this._currentCallInfo = {
+          number: attrs.number || 'Unknown',
+          name: attrs.name,
+          isPriority: attrs.is_priority || false,
+          isIncoming: attrs.direction === 'incoming',
+          duration: durationEntity ? parseInt(durationEntity.state) : 0,
+          audioOutput: audioOutputEntity?.state as any || 'earpiece',
+        };
+      }
+
+      // Check for waiting call
+      const waitingCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_waiting_call` : `sensor.current_waiting_call`];
+      if (waitingCallEntity && waitingCallEntity.state !== 'None' && waitingCallEntity.state !== 'unavailable') {
+        const waitingAttrs = waitingCallEntity.attributes as any;
+        this._waitingCallInfo = {
+          number: waitingAttrs.number || 'Unknown',
+          name: waitingAttrs.name,
+          isPriority: waitingAttrs.is_priority || false,
+        };
+      } else {
+        this._waitingCallInfo = undefined;
+      }
+    } else {
+      // No call - close modal and clear data
+      this._callModalOpen = false;
+      this._currentCallInfo = undefined;
+      this._waitingCallInfo = undefined;
+    }
   }
 
   /**
@@ -360,6 +431,55 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
+   * Handle call modal close (minimize to toast)
+   */
+  private _handleCallModalClose(): void {
+    // Don't fully close during active call, just minimize
+    if (this._callModalMode === 'active' && this._currentCallInfo) {
+      this._callModalOpen = false;
+      // TODO: Show persistent toast
+    } else {
+      this._callModalOpen = false;
+    }
+  }
+
+  /**
+   * Handle call answered
+   */
+  private _handleCallAnswered(e: CustomEvent): void {
+    console.log("Call answered");
+    // Modal will update to active mode via state subscription
+  }
+
+  /**
+   * Handle call declined
+   */
+  private _handleCallDeclined(e: CustomEvent): void {
+    console.log("Call declined");
+    this._callModalOpen = false;
+  }
+
+  /**
+   * Handle call ended
+   */
+  private _handleCallEnded(e: CustomEvent): void {
+    console.log("Call ended");
+    this._callModalOpen = false;
+  }
+
+  /**
+   * Handle call modal error
+   */
+  private _handleCallModalError(e: CustomEvent): void {
+    console.error("Call modal error:", e.detail);
+    this._errorMessage = e.detail.message;
+    // Show error for 3 seconds
+    setTimeout(() => {
+      this._errorMessage = "";
+    }, 3000);
+  }
+
+  /**
    * Handle edit contact (from contact item click)
    */
   private _handleEditContact(e: CustomEvent): void {
@@ -408,8 +528,8 @@ export class TsuryPhoneCard extends LitElement {
     return html`
       <ha-card>
         <div class="tsuryphone-container ${this._isDarkMode ? 'dark-mode' : 'light-mode'}">
-          ${this._showCallModal ? this._renderCallModal() : ""}
-          ${this._showContactModal ? this._renderContactModal() : ""}
+          ${this._callModalOpen ? this._renderCallModal() : ""}
+          ${this._contactModalOpen ? this._renderContactModal() : ""}
           ${this._showBlockedView
             ? this._renderBlockedView()
             : this._renderMainViews()}
@@ -517,10 +637,23 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
-   * Render call modal (placeholder)
+   * Render call modal
    */
   private _renderCallModal(): TemplateResult {
-    return html`<div class="modal-placeholder">Call Modal</div>`;
+    return html`
+      <tsuryphone-call-modal
+        .hass=${this.hass}
+        .open=${this._callModalOpen}
+        .mode=${this._callModalMode}
+        .callInfo=${this._currentCallInfo}
+        .waitingCall=${this._waitingCallInfo}
+        @close=${this._handleCallModalClose}
+        @call-answered=${this._handleCallAnswered}
+        @call-declined=${this._handleCallDeclined}
+        @call-ended=${this._handleCallEnded}
+        @error=${this._handleCallModalError}
+      ></tsuryphone-call-modal>
+    `;
   }
 
   /**
