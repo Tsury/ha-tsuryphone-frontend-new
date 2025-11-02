@@ -3041,7 +3041,10 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
         this._searchQuery = input.value;
     }
     _handleAddContact() {
-        this._showAddModal = true;
+        this.dispatchEvent(new CustomEvent("action", {
+            bubbles: true,
+            composed: true,
+        }));
     }
     render() {
         const contacts = this._getContacts();

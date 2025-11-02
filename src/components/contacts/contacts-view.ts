@@ -158,7 +158,12 @@ export class TsuryPhoneContactsView extends LitElement {
   }
 
   private _handleAddContact(): void {
-    this._showAddModal = true;
+    this.dispatchEvent(
+      new CustomEvent("action", {
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
   protected render(): TemplateResult {
