@@ -100,7 +100,7 @@ export class TsuryPhoneFrequentContacts extends LitElement {
     }
 
     .empty-icon {
-      font-size: 48px;
+      --mdc-icon-size: 48px;
       margin-bottom: 12px;
       opacity: 0.5;
     }
@@ -126,7 +126,7 @@ export class TsuryPhoneFrequentContacts extends LitElement {
         <div class="frequent-contacts">
           <div class="section-header">Frequent Contacts</div>
           <div class="empty-state">
-            <div class="empty-icon">📞</div>
+            <ha-icon class="empty-icon" icon="mdi:account-multiple-outline"></ha-icon>
             <div class="empty-text">No frequent contacts yet</div>
           </div>
         </div>

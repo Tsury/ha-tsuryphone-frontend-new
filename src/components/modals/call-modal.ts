@@ -240,7 +240,6 @@ export class TsuryPhoneCallModal extends LitElement {
       border: none;
       background: var(--card-background-color, #f5f5f5);
       color: var(--primary-text-color, #000);
-      font-size: 28px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -248,6 +247,10 @@ export class TsuryPhoneCallModal extends LitElement {
       transition: all 0.2s;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       justify-self: center;
+    }
+
+    .control-button ha-icon {
+      --mdc-icon-size: 28px;
     }
 
     .control-button:hover {
@@ -587,7 +590,11 @@ export class TsuryPhoneCallModal extends LitElement {
         </div>
         <div class="swipe-handle ${this._isSwipingLeft ? 'swiping-left' : ''} ${this._isSwipingRight ? 'swiping-right' : ''}"
              style="transform: translateX(${this._swipeDistance}px)">
-          ${this._isSwipingLeft ? '✖' : this._isSwipingRight ? '✓' : '☎️'}
+          ${this._isSwipingLeft 
+            ? html`<ha-icon icon="mdi:close"></ha-icon>` 
+            : this._isSwipingRight 
+              ? html`<ha-icon icon="mdi:check"></ha-icon>` 
+              : html`<ha-icon icon="mdi:phone"></ha-icon>`}
         </div>
       </div>
     `;
@@ -613,7 +620,7 @@ export class TsuryPhoneCallModal extends LitElement {
         <button class="control-button ${this._isMuted ? 'muted' : ''}"
                 @click=${this._handleMute}
                 title="Mute">
-          ${this._isMuted ? '🔇' : '🔊'}
+          <ha-icon icon="${this._isMuted ? 'mdi:microphone-off' : 'mdi:microphone'}"></ha-icon>
         </button>
 
         <button class="control-button ${this._showKeypad ? 'active' : ''}"

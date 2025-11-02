@@ -995,7 +995,7 @@ let TsuryPhoneFrequentContacts = class TsuryPhoneFrequentContacts extends i {
         <div class="frequent-contacts">
           <div class="section-header">Frequent Contacts</div>
           <div class="empty-state">
-            <div class="empty-icon">📞</div>
+            <ha-icon class="empty-icon" icon="mdi:account-multiple-outline"></ha-icon>
             <div class="empty-text">No frequent contacts yet</div>
           </div>
         </div>
@@ -1117,7 +1117,7 @@ TsuryPhoneFrequentContacts.styles = i$3 `
     }
 
     .empty-icon {
-      font-size: 48px;
+      --mdc-icon-size: 48px;
       margin-bottom: 12px;
       opacity: 0.5;
     }
@@ -4335,7 +4335,11 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         </div>
         <div class="swipe-handle ${this._isSwipingLeft ? 'swiping-left' : ''} ${this._isSwipingRight ? 'swiping-right' : ''}"
              style="transform: translateX(${this._swipeDistance}px)">
-          ${this._isSwipingLeft ? '✖' : this._isSwipingRight ? '✓' : '☎️'}
+          ${this._isSwipingLeft
+            ? x `<ha-icon icon="mdi:close"></ha-icon>`
+            : this._isSwipingRight
+                ? x `<ha-icon icon="mdi:check"></ha-icon>`
+                : x `<ha-icon icon="mdi:phone"></ha-icon>`}
         </div>
       </div>
     `;
@@ -4359,7 +4363,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         <button class="control-button ${this._isMuted ? 'muted' : ''}"
                 @click=${this._handleMute}
                 title="Mute">
-          ${this._isMuted ? '🔇' : '🔊'}
+          <ha-icon icon="${this._isMuted ? 'mdi:microphone-off' : 'mdi:microphone'}"></ha-icon>
         </button>
 
         <button class="control-button ${this._showKeypad ? 'active' : ''}"
@@ -4617,7 +4621,6 @@ TsuryPhoneCallModal.styles = i$3 `
       border: none;
       background: var(--card-background-color, #f5f5f5);
       color: var(--primary-text-color, #000);
-      font-size: 28px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -4625,6 +4628,10 @@ TsuryPhoneCallModal.styles = i$3 `
       transition: all 0.2s;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       justify-self: center;
+    }
+
+    .control-button ha-icon {
+      --mdc-icon-size: 28px;
     }
 
     .control-button:hover {
@@ -5831,7 +5838,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         return x `
       <div class="call-toast" @click=${this._handleCallToastClick}>
         <div class="call-toast-content">
-          <div class="call-toast-icon">📞</div>
+          <ha-icon class="call-toast-icon" icon="mdi:phone"></ha-icon>
           <div class="call-toast-name">${displayName}</div>
           <div class="call-toast-duration">${durationText}</div>
         </div>
@@ -6081,8 +6088,8 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         }
 
         .call-toast-icon {
-          font-size: 18px;
-          line-height: 1;
+          --mdc-icon-size: 18px;
+          color: var(--tsury-primary-text-color);
         }
 
         .call-toast-name {

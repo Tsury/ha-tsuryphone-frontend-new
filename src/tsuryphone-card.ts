@@ -872,7 +872,7 @@ export class TsuryPhoneCard extends LitElement {
     return html`
       <div class="call-toast" @click=${this._handleCallToastClick}>
         <div class="call-toast-content">
-          <div class="call-toast-icon">📞</div>
+          <ha-icon class="call-toast-icon" icon="mdi:phone"></ha-icon>
           <div class="call-toast-name">${displayName}</div>
           <div class="call-toast-duration">${durationText}</div>
         </div>
@@ -1126,8 +1126,8 @@ export class TsuryPhoneCard extends LitElement {
         }
 
         .call-toast-icon {
-          font-size: 18px;
-          line-height: 1;
+          --mdc-icon-size: 18px;
+          color: var(--tsury-primary-text-color);
         }
 
         .call-toast-name {
