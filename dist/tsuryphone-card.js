@@ -3953,10 +3953,13 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         }
         // Update call history from call_history_size sensor
         const callHistoryEntityId = `sensor.${deviceId}_call_history_size`;
+        console.log('[TsuryPhone] Looking for call history sensor:', callHistoryEntityId);
+        console.log('[TsuryPhone] Available entities:', Object.keys(this.hass.states).filter(e => e.includes('tsuryphone')));
         const callHistoryEntity = this.hass.states[callHistoryEntityId];
         if (callHistoryEntity?.attributes) {
             const historyAttrs = callHistoryEntity.attributes;
             console.log('[TsuryPhone] Call history sensor attributes:', historyAttrs);
+            console.log('[TsuryPhone] Attribute keys:', Object.keys(historyAttrs));
             if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
                 console.log('[TsuryPhone] Found call history entries:', historyAttrs.entries.length);
                 this._callHistoryCache = historyAttrs.entries;
@@ -3967,6 +3970,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         }
         else {
             console.log('[TsuryPhone] Call history sensor not found or has no attributes');
+            console.log('[TsuryPhone] Entity exists?', !!callHistoryEntity);
         }
         // Update call modal state
         this._updateCallModalState();
