@@ -3,15 +3,18 @@
  * Displays and manages blocked numbers list
  */
 
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { HomeAssistant } from '../../types/homeassistant';
-import { TsuryPhoneCardConfig, BlockedNumberEntry } from '../../types/tsuryphone.d';
-import { haThemeVariables } from '../../styles/theme';
-import '../shared/empty-state';
-import './blocked-item';
+import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { HomeAssistant } from "../../types/homeassistant";
+import {
+  TsuryPhoneCardConfig,
+  BlockedNumberEntry,
+} from "../../types/tsuryphone.d";
+import { haThemeVariables } from "../../styles/theme";
+import "../shared/empty-state";
+import "./blocked-item";
 
-@customElement('tsuryphone-blocked-view')
+@customElement("tsuryphone-blocked-view")
 export class TsuryPhoneBlockedView extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: TsuryPhoneCardConfig;
@@ -19,7 +22,7 @@ export class TsuryPhoneBlockedView extends LitElement {
 
   private _handleAddBlocked(): void {
     this.dispatchEvent(
-      new CustomEvent('open-block-modal', {
+      new CustomEvent("open-block-modal", {
         bubbles: true,
         composed: true,
       })
@@ -28,27 +31,20 @@ export class TsuryPhoneBlockedView extends LitElement {
 
   private async _handleRemoveBlocked(e: CustomEvent): Promise<void> {
     const { id } = e.detail;
-    // Find the blocked entry to get the number field
-    const entry = this.blockedNumbers.find((b) => b.id === id);
-    if (!entry) {
-      console.error('Blocked number entry not found:', id);
-      return;
-    }
-
-    const deviceIdPrefix = this.config?.device_id || '';
+    const deviceIdPrefix = this.config?.device_id || "";
     const phoneStateEntityId = deviceIdPrefix
       ? `sensor.${deviceIdPrefix}_phone_state`
       : `sensor.phone_state`;
 
     try {
       await this.hass.callService(
-        'tsuryphone',
-        'blocked_remove',
-        { number: entry.number },
+        "tsuryphone",
+        "blocked_remove",
+        { id },
         { entity_id: phoneStateEntityId }
       );
     } catch (err) {
-      console.error('Failed to remove blocked number:', err);
+      console.error("Failed to remove blocked number:", err);
       // TODO: Show error toast
     }
   }
@@ -94,7 +90,8 @@ export class TsuryPhoneBlockedView extends LitElement {
         )}
       </div>
       <div class="blocked-count">
-        ${this.blockedNumbers.length} blocked ${this.blockedNumbers.length === 1 ? 'number' : 'numbers'}
+        ${this.blockedNumbers.length} blocked
+        ${this.blockedNumbers.length === 1 ? "number" : "numbers"}
       </div>
     `;
   }
@@ -145,7 +142,8 @@ export class TsuryPhoneBlockedView extends LitElement {
           align-items: center;
           justify-content: center;
           gap: var(--tsury-spacing-sm);
-          transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+          transition: all var(--tsury-transition-duration)
+            var(--tsury-transition-timing);
         }
 
         .add-button:hover {
@@ -206,6 +204,6 @@ export class TsuryPhoneBlockedView extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-blocked-view': TsuryPhoneBlockedView;
+    "tsuryphone-blocked-view": TsuryPhoneBlockedView;
   }
 }

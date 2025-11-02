@@ -3242,28 +3242,22 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
         this.blockedNumbers = [];
     }
     _handleAddBlocked() {
-        this.dispatchEvent(new CustomEvent('open-block-modal', {
+        this.dispatchEvent(new CustomEvent("open-block-modal", {
             bubbles: true,
             composed: true,
         }));
     }
     async _handleRemoveBlocked(e) {
         const { id } = e.detail;
-        // Find the blocked entry to get the number field
-        const entry = this.blockedNumbers.find((b) => b.id === id);
-        if (!entry) {
-            console.error('Blocked number entry not found:', id);
-            return;
-        }
-        const deviceIdPrefix = this.config?.device_id || '';
+        const deviceIdPrefix = this.config?.device_id || "";
         const phoneStateEntityId = deviceIdPrefix
             ? `sensor.${deviceIdPrefix}_phone_state`
             : `sensor.phone_state`;
         try {
-            await this.hass.callService('tsuryphone', 'blocked_remove', { number: entry.number }, { entity_id: phoneStateEntityId });
+            await this.hass.callService("tsuryphone", "blocked_remove", { id }, { entity_id: phoneStateEntityId });
         }
         catch (err) {
-            console.error('Failed to remove blocked number:', err);
+            console.error("Failed to remove blocked number:", err);
             // TODO: Show error toast
         }
     }
@@ -3304,7 +3298,8 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
           `)}
       </div>
       <div class="blocked-count">
-        ${this.blockedNumbers.length} blocked ${this.blockedNumbers.length === 1 ? 'number' : 'numbers'}
+        ${this.blockedNumbers.length} blocked
+        ${this.blockedNumbers.length === 1 ? "number" : "numbers"}
       </div>
     `;
     }
@@ -3354,7 +3349,8 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
           align-items: center;
           justify-content: center;
           gap: var(--tsury-spacing-sm);
-          transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+          transition: all var(--tsury-transition-duration)
+            var(--tsury-transition-timing);
         }
 
         .add-button:hover {
@@ -3422,7 +3418,7 @@ __decorate([
     n({ attribute: false })
 ], TsuryPhoneBlockedView.prototype, "blockedNumbers", void 0);
 TsuryPhoneBlockedView = __decorate([
-    t('tsuryphone-blocked-view')
+    t("tsuryphone-blocked-view")
 ], TsuryPhoneBlockedView);
 
 let ContactModal = class ContactModal extends i {
@@ -3467,9 +3463,8 @@ let ContactModal = class ContactModal extends i {
     }
     _getPhoneStateId() {
         // Find the phone_state sensor entity
-        return (Object.keys(this.hass.states).find((id) => id.includes("tsuryphone") &&
-            id.includes("phone_state") &&
-            this.hass.states[id].entity_id.includes("sensor")) || null);
+        return (Object.keys(this.hass.states).find((id) => id.startsWith("sensor.") &&
+            id.includes("phone_state")) || null);
     }
     _isContactPriority(contact) {
         const phoneStateId = this._getPhoneStateId();
@@ -3566,6 +3561,10 @@ let ContactModal = class ContactModal extends i {
         }
     }
     async _addContact() {
+        const phoneStateId = this._getPhoneStateId();
+        if (!phoneStateId) {
+            throw new Error("Phone state entity not found");
+        }
         const serviceData = {
             number: this.formData.number.trim(),
             name: this.formData.name.trim(),
@@ -3573,34 +3572,35 @@ let ContactModal = class ContactModal extends i {
         if (this.formData.code.trim()) {
             serviceData.code = this.formData.code.trim();
         }
-        await this.hass.callService("tsuryphone", "quick_dial_add", serviceData);
+        await this.hass.callService("tsuryphone", "quick_dial_add", serviceData, { entity_id: phoneStateId });
     }
     async _deleteContact(id) {
-        await this.hass.callService("tsuryphone", "quick_dial_remove", { id });
+        const phoneStateId = this._getPhoneStateId();
+        if (!phoneStateId) {
+            throw new Error("Phone state entity not found");
+        }
+        await this.hass.callService("tsuryphone", "quick_dial_remove", { id }, { entity_id: phoneStateId });
     }
     async _handlePriorityChange() {
+        const phoneStateId = this._getPhoneStateId();
+        if (!phoneStateId) {
+            throw new Error("Phone state entity not found");
+        }
         const wasPriority = this.mode === "edit" && this.contact
             ? this._isContactPriority(this.contact)
             : false;
         const isPriority = this.formData.priority;
         if (isPriority && !wasPriority) {
             // Add to priority
-            await this.hass.callService("tsuryphone", "priority_add", {
-                number: this.formData.number.trim(),
-            });
+            await this.hass.callService("tsuryphone", "priority_add", { number: this.formData.number.trim() }, { entity_id: phoneStateId });
         }
         else if (!isPriority && wasPriority && this.contact) {
             // Remove from priority - need to find the priority entry ID
-            const phoneStateId = this._getPhoneStateId();
-            if (phoneStateId) {
-                const phoneState = this.hass.states[phoneStateId];
-                const priorityCallers = phoneState?.attributes?.priority_callers || [];
-                const priorityEntry = priorityCallers.find((p) => p.number === this.contact.number);
-                if (priorityEntry) {
-                    await this.hass.callService("tsuryphone", "priority_remove", {
-                        id: priorityEntry.id,
-                    });
-                }
+            const phoneState = this.hass.states[phoneStateId];
+            const priorityCallers = phoneState?.attributes?.priority_callers || [];
+            const priorityEntry = priorityCallers.find((p) => p.number === this.contact.number);
+            if (priorityEntry) {
+                await this.hass.callService("tsuryphone", "priority_remove", { id: priorityEntry.id }, { entity_id: phoneStateId });
             }
         }
     }

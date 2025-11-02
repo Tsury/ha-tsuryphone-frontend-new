@@ -325,9 +325,8 @@ export class ContactModal extends LitElement {
     return (
       Object.keys(this.hass.states).find(
         (id) =>
-          id.includes("tsuryphone") &&
-          id.includes("phone_state") &&
-          this.hass.states[id].entity_id.includes("sensor")
+          id.startsWith("sensor.") &&
+          id.includes("phone_state")
       ) || null
     );
   }
@@ -443,6 +442,11 @@ export class ContactModal extends LitElement {
   }
 
   private async _addContact() {
+    const phoneStateId = this._getPhoneStateId();
+    if (!phoneStateId) {
+      throw new Error("Phone state entity not found");
+    }
+
     const serviceData: any = {
       number: this.formData.number.trim(),
       name: this.formData.name.trim(),
@@ -452,14 +456,34 @@ export class ContactModal extends LitElement {
       serviceData.code = this.formData.code.trim();
     }
 
-    await this.hass.callService("tsuryphone", "quick_dial_add", serviceData);
+    await this.hass.callService(
+      "tsuryphone",
+      "quick_dial_add",
+      serviceData,
+      { entity_id: phoneStateId }
+    );
   }
 
   private async _deleteContact(id: string) {
-    await this.hass.callService("tsuryphone", "quick_dial_remove", { id });
+    const phoneStateId = this._getPhoneStateId();
+    if (!phoneStateId) {
+      throw new Error("Phone state entity not found");
+    }
+
+    await this.hass.callService(
+      "tsuryphone",
+      "quick_dial_remove",
+      { id },
+      { entity_id: phoneStateId }
+    );
   }
 
   private async _handlePriorityChange() {
+    const phoneStateId = this._getPhoneStateId();
+    if (!phoneStateId) {
+      throw new Error("Phone state entity not found");
+    }
+
     const wasPriority =
       this.mode === "edit" && this.contact
         ? this._isContactPriority(this.contact)
@@ -468,23 +492,26 @@ export class ContactModal extends LitElement {
 
     if (isPriority && !wasPriority) {
       // Add to priority
-      await this.hass.callService("tsuryphone", "priority_add", {
-        number: this.formData.number.trim(),
-      });
+      await this.hass.callService(
+        "tsuryphone",
+        "priority_add",
+        { number: this.formData.number.trim() },
+        { entity_id: phoneStateId }
+      );
     } else if (!isPriority && wasPriority && this.contact) {
       // Remove from priority - need to find the priority entry ID
-      const phoneStateId = this._getPhoneStateId();
-      if (phoneStateId) {
-        const phoneState = this.hass.states[phoneStateId];
-        const priorityCallers = phoneState?.attributes?.priority_callers || [];
-        const priorityEntry = priorityCallers.find(
-          (p: any) => p.number === this.contact!.number
+      const phoneState = this.hass.states[phoneStateId];
+      const priorityCallers = phoneState?.attributes?.priority_callers || [];
+      const priorityEntry = priorityCallers.find(
+        (p: any) => p.number === this.contact!.number
+      );
+      if (priorityEntry) {
+        await this.hass.callService(
+          "tsuryphone",
+          "priority_remove",
+          { id: priorityEntry.id },
+          { entity_id: phoneStateId }
         );
-        if (priorityEntry) {
-          await this.hass.callService("tsuryphone", "priority_remove", {
-            id: priorityEntry.id,
-          });
-        }
       }
     }
   }
