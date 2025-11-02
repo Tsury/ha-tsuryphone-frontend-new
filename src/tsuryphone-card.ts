@@ -246,38 +246,20 @@ export class TsuryPhoneCard extends LitElement {
     if (phoneStateEntity.attributes) {
       const attrs = phoneStateEntity.attributes as any;
 
-      console.log("[TsuryPhone] Phone state attributes:", attrs);
-      console.log("[TsuryPhone] Attribute keys:", Object.keys(attrs));
-
       // Update contacts
       if (attrs.quick_dials && Array.isArray(attrs.quick_dials)) {
-        console.log("[TsuryPhone] Found quick_dials:", attrs.quick_dials.length);
         this._contactsCache = attrs.quick_dials;
-      } else {
-        console.log("[TsuryPhone] No quick_dials found or not an array");
       }
 
       // Update blocked numbers
       if (attrs.blocked_numbers && Array.isArray(attrs.blocked_numbers)) {
-        console.log("[TsuryPhone] Found blocked_numbers:", attrs.blocked_numbers.length, attrs.blocked_numbers);
         this._blockedCache = attrs.blocked_numbers;
-      } else {
-        console.log("[TsuryPhone] No blocked_numbers found or not an array", {
-          exists: !!attrs.blocked_numbers,
-          isArray: Array.isArray(attrs.blocked_numbers),
-          value: attrs.blocked_numbers
-        });
       }
 
       // Update priority numbers
       if (attrs.priority_numbers && Array.isArray(attrs.priority_numbers)) {
-        console.log("[TsuryPhone] Found priority_numbers:", attrs.priority_numbers.length);
         this._priorityNumbers = new Set(attrs.priority_numbers);
-      } else {
-        console.log("[TsuryPhone] No priority_numbers found or not an array");
       }
-    } else {
-      console.log("[TsuryPhone] Phone state entity has no attributes!");
     }
 
     // Update call history from call_history_size sensor
@@ -285,40 +267,15 @@ export class TsuryPhoneCard extends LitElement {
     const callHistoryEntityId = deviceId
       ? `sensor.${deviceId}_call_history_size`
       : `sensor.call_history_size`;
-    console.log("[TsuryPhone] Phone state entity:", phoneStateEntityId);
-    console.log("[TsuryPhone] Extracted device ID:", deviceId);
-    console.log(
-      "[TsuryPhone] Looking for call history sensor:",
-      callHistoryEntityId
-    );
-    console.log(
-      "[TsuryPhone] Available entities:",
-      Object.keys(this.hass.states).filter(
-        (e) => e.includes("phone") || e.includes("call")
-      )
-    );
 
     const callHistoryEntity = this.hass.states[callHistoryEntityId];
 
     if (callHistoryEntity?.attributes) {
       const historyAttrs = callHistoryEntity.attributes as any;
-      console.log("[TsuryPhone] Call history sensor attributes:", historyAttrs);
-      console.log("[TsuryPhone] Attribute keys:", Object.keys(historyAttrs));
 
       if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
-        console.log(
-          "[TsuryPhone] Found call history entries:",
-          historyAttrs.entries.length
-        );
         this._callHistoryCache = historyAttrs.entries;
-      } else {
-        console.log("[TsuryPhone] No entries found in call history sensor");
       }
-    } else {
-      console.log(
-        "[TsuryPhone] Call history sensor not found or has no attributes"
-      );
-      console.log("[TsuryPhone] Entity exists?", !!callHistoryEntity);
     }
 
     // Update call modal state
@@ -373,7 +330,6 @@ export class TsuryPhoneCard extends LitElement {
 
     // Update blocked numbers
     if (attrs.blocked_numbers && Array.isArray(attrs.blocked_numbers)) {
-      console.log("[TsuryPhone] State update - blocked_numbers:", attrs.blocked_numbers.length, attrs.blocked_numbers);
       this._blockedCache = attrs.blocked_numbers;
     }
 
@@ -917,7 +873,6 @@ export class TsuryPhoneCard extends LitElement {
    * Render blocked view (placeholder)
    */
   private _renderBlockedView(): TemplateResult {
-    console.log('[TsuryPhone] Rendering blocked view with cache:', this._blockedCache);
     return html`
       <div
         class="view blocked-view fade-in"

@@ -17,12 +17,6 @@ export class TsuryPhoneBlockedView extends LitElement {
   @property({ attribute: false }) config!: TsuryPhoneCardConfig;
   @property({ attribute: false }) blockedNumbers: BlockedNumberEntry[] = [];
 
-  updated(changedProperties: Map<string, any>): void {
-    if (changedProperties.has('blockedNumbers')) {
-      console.log('[BlockedView] Blocked numbers updated:', this.blockedNumbers);
-    }
-  }
-
   private _handleAddBlocked(): void {
     this.dispatchEvent(
       new CustomEvent('open-block-modal', {
