@@ -538,7 +538,7 @@ export class TsuryPhoneCard extends LitElement {
         .tsuryphone-container {
           display: flex;
           flex-direction: column;
-          height: 650px;
+          height: 750px;
           background: var(--tsury-card-background-color);
           color: var(--tsury-primary-text-color);
           font-family: var(--tsury-font-family);

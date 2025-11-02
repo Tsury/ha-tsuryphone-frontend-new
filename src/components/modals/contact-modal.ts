@@ -49,27 +49,27 @@ export class ContactModal extends LitElement {
     }
 
     :host([open]) {
-      display: block;
+      display: flex;
+      flex-direction: column;
     }
 
     .modal {
-      position: absolute;
-      top: 0;
-      left: 0;
+      display: flex;
+      flex-direction: column;
       width: 100%;
       height: 100%;
       background: var(--card-background-color, #fff);
       padding: 24px;
       overflow-y: auto;
-      animation: slideIn 0.2s ease-out;
+      animation: slideUp 0.3s ease-out;
     }
 
-    @keyframes slideIn {
+    @keyframes slideUp {
       from {
-        transform: translateX(100%);
+        transform: translateY(100%);
       }
       to {
-        transform: translateX(0);
+        transform: translateY(0);
       }
     }
 
