@@ -34,6 +34,13 @@ export class TsuryPhoneBlockedView extends LitElement {
 
   private async _handleRemoveBlocked(e: CustomEvent): Promise<void> {
     const { id } = e.detail;
+    // Find the blocked entry to get the number field
+    const entry = this.blockedNumbers.find((b) => b.id === id);
+    if (!entry) {
+      console.error('Blocked number entry not found:', id);
+      return;
+    }
+
     const deviceIdPrefix = this.config?.device_id || '';
     const phoneStateEntityId = deviceIdPrefix
       ? `sensor.${deviceIdPrefix}_phone_state`
@@ -43,7 +50,7 @@ export class TsuryPhoneBlockedView extends LitElement {
       await this.hass.callService(
         'tsuryphone',
         'blocked_remove',
-        { id },
+        { number: entry.number },
         { entity_id: phoneStateEntityId }
       );
     } catch (err) {

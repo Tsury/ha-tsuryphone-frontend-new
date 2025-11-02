@@ -3254,12 +3254,18 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
     }
     async _handleRemoveBlocked(e) {
         const { id } = e.detail;
+        // Find the blocked entry to get the number field
+        const entry = this.blockedNumbers.find((b) => b.id === id);
+        if (!entry) {
+            console.error('Blocked number entry not found:', id);
+            return;
+        }
         const deviceIdPrefix = this.config?.device_id || '';
         const phoneStateEntityId = deviceIdPrefix
             ? `sensor.${deviceIdPrefix}_phone_state`
             : `sensor.phone_state`;
         try {
-            await this.hass.callService('tsuryphone', 'blocked_remove', { id }, { entity_id: phoneStateEntityId });
+            await this.hass.callService('tsuryphone', 'blocked_remove', { number: entry.number }, { entity_id: phoneStateEntityId });
         }
         catch (err) {
             console.error('Failed to remove blocked number:', err);
