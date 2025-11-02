@@ -3183,11 +3183,6 @@ let ContactModal = class ContactModal extends i {
         this.open = false;
         this.dispatchEvent(new CustomEvent("close"));
     }
-    _handleOverlayClick(e) {
-        if (e.target === e.currentTarget) {
-            this._handleClose();
-        }
-    }
     _handleInputChange(e) {
         const input = e.target;
         const field = input.name;
@@ -3356,18 +3351,17 @@ let ContactModal = class ContactModal extends i {
             return x ``;
         const title = this.mode === "add" ? "Add Contact" : "Edit Contact";
         return x `
-      <div class="overlay" @click=${this._handleOverlayClick}>
-        <div class="modal">
-          <div class="header">
-            <h2 class="title">${title}</h2>
-            <button
-              class="close-button"
-              @click=${this._handleClose}
-              ?disabled=${this.saving}
-            >
-              <ha-icon icon="mdi:close"></ha-icon>
-            </button>
-          </div>
+      <div class="modal">
+        <div class="header">
+          <h2 class="title">${title}</h2>
+          <button
+            class="close-button"
+            @click=${this._handleClose}
+            ?disabled=${this.saving}
+          >
+            <ha-icon icon="mdi:close"></ha-icon>
+          </button>
+        </div>
 
           ${this.showDeleteConfirm
             ? x `
@@ -3519,52 +3513,27 @@ ContactModal.styles = i$3 `
     }
 
     :host([open]) {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: block;
     }
 
-    .overlay {
+    .modal {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    .modal {
-      position: relative;
       background: var(--card-background-color, #fff);
-      border-radius: 28px;
       padding: 24px;
-      max-width: 400px;
-      width: 90%;
-      max-height: 80%;
       overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      animation: slideUp 0.3s ease-out;
-      z-index: 1;
+      animation: slideIn 0.2s ease-out;
     }
 
-    @keyframes slideUp {
+    @keyframes slideIn {
       from {
-        transform: translateY(20px);
-        opacity: 0;
+        transform: translateX(100%);
       }
       to {
-        transform: translateY(0);
-        opacity: 1;
+        transform: translateX(0);
       }
     }
 
