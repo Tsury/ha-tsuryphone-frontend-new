@@ -3266,8 +3266,105 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 **Version**: v0.1.40-alpha ✅
 
-**Dependencies**: Phase 5 complete ✅
+**Dependencies**: Phases 6, 6.5 complete ✅
 
 ---
 
-### Phase 7: Call Modal - NEXT 🎯
+### Phase 7: Call Modal ✅ COMPLETED (Nov 2, 2025)
+
+**Objective**: Implement full-screen in-card call modal for incoming and active calls
+
+**Status**: All core features implemented! ✅
+
+**Version**: v0.1.48-alpha
+
+**Component Created**: `components/modals/call-modal.ts`
+
+**Design Confirmation**:
+- ✅ **Full-screen in-card modal** (same as contact modal)
+- ✅ Position: absolute (not fixed - stays within card)
+- ✅ 100% width and height of card container
+- ✅ z-index: 100 (on top of content)
+- ✅ Slides up from bottom with 0.3s animation
+- ✅ Minimize button (−) instead of close (X)
+
+**Features Implemented**:
+
+**Incoming Call UI**:
+- ✅ Caller info display (name/number)
+- ✅ Priority caller badge (⭐ indicator)
+- ✅ Call status text
+- ✅ **Swipe Slider** for answer/decline:
+  - Swipe right (>120px) to answer (green)
+  - Swipe left (<-120px) to decline (red)
+  - Visual feedback with handle color change
+  - Haptic feedback on swipe completion
+  - Touch-based interaction (no click)
+
+**Active Call UI**:
+- ✅ Caller info display
+- ✅ **Call duration timer** (MM:SS format, live updating)
+- ✅ Mute button (🔇/🔊 toggle with visual state)
+- ✅ Keypad button (#) for DTMF (toggle state)
+- ✅ Speaker button (🔊) with active state
+- ✅ Hangup button (📞 red, grid-span full width)
+- ✅ Control buttons in 3-column grid layout
+
+**Call Waiting UI**:
+- ✅ Waiting call info card (name/number)
+- ✅ Priority badge for waiting calls
+- ✅ Swap button (switch between calls)
+- ✅ Merge button (conference calls)
+- ✅ Displayed above active call controls
+
+**State Management**:
+- ✅ Auto-updates from HA state sensors:
+  - `sensor.phone_state` → determine mode (incoming/active)
+  - `binary_sensor.in_call` → active call detection
+  - `sensor.current_call` → caller info
+  - `sensor.call_duration` → timer value
+  - `sensor.call_audio_output` → speaker state
+  - `sensor.current_waiting_call` → waiting call info
+- ✅ Modal mode: `incoming` | `active` | `waiting`
+- ✅ Device ID extraction from config entity name
+- ✅ Automatic modal open/close based on phone state
+
+**Service Integration**:
+- ✅ Answer: `tsuryphone.answer_call`
+- ✅ Decline/Hangup: `tsuryphone.hangup_call`
+- ✅ Mute: `tsuryphone.toggle_mute`
+- ✅ Speaker: `tsuryphone.toggle_speaker`
+- ✅ Swap calls: `tsuryphone.swap_calls`
+- ✅ Merge calls: `tsuryphone.merge_calls`
+
+**Interactions**:
+- ✅ Swipe gestures for answer/decline
+- ✅ Haptic feedback (light/medium/heavy)
+- ✅ Loading states during service calls
+- ✅ Error handling with event dispatch
+- ✅ Minimize button (closes modal but keeps call active)
+
+**Features Deferred**:
+- ⏸️ **Persistent Call Toast**: Shows when modal minimized during active call
+  - Will display: caller name, duration, tap to reopen
+  - Deferred to Phase 7.5 or later
+- ⏸️ **DTMF Keypad**: Button implemented but keypad UI deferred
+  - Full keypad for sending digits during call
+  - Deferred to Phase 7.5 or later
+
+**Edge Cases Handled**:
+- ✅ Modal stays closed if user minimizes during active call
+- ✅ Modal auto-opens on new incoming call
+- ✅ Modal auto-closes when call ends
+- ✅ Timer stops when modal unmounts
+- ✅ Swipe distance clamped to prevent overflow
+- ✅ Service call failures handled gracefully
+
+**Version Delivered**: v0.1.48-alpha
+**Backend Version**: v1.0.132 (no changes needed)
+
+**Dependencies**: Phases 6, 6.5 complete ✅
+
+---
+
+### Phase 8: Blocked View - NEXT 🎯
