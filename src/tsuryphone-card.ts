@@ -178,7 +178,7 @@ export class TsuryPhoneCard extends LitElement {
     
     // Update cached data from coordinator state
     // Support both direct entity config and device_id pattern
-    const deviceId = this.config?.device_id || 'tsuryphone';
+    let deviceId = this.config?.device_id || 'tsuryphone';
     let phoneStateEntityId: string;
     
     if (this.config?.entity) {
@@ -186,6 +186,16 @@ export class TsuryPhoneCard extends LitElement {
       phoneStateEntityId = this.config.entity.startsWith('sensor.') 
         ? this.config.entity 
         : `sensor.${this.config.entity}`;
+      
+      // Extract device ID from entity name (e.g., "sensor.phone_state" -> "phone")
+      // by removing "sensor." prefix and "_phone_state" suffix
+      const entityName = phoneStateEntityId.replace('sensor.', '');
+      if (entityName.endsWith('_phone_state')) {
+        deviceId = entityName.replace('_phone_state', '');
+      } else if (entityName === 'phone_state') {
+        // Handle case where entity is just "phone_state" without prefix
+        deviceId = '';
+      }
     } else {
       // Fall back to device_id pattern
       phoneStateEntityId = `sensor.${deviceId}_phone_state`;
@@ -218,9 +228,14 @@ export class TsuryPhoneCard extends LitElement {
     }
 
     // Update call history from call_history_size sensor
-    const callHistoryEntityId = `sensor.${deviceId}_call_history_size`;
+    // Build entity ID based on extracted device prefix
+    const callHistoryEntityId = deviceId 
+      ? `sensor.${deviceId}_call_history_size`
+      : `sensor.call_history_size`;
+    console.log('[TsuryPhone] Phone state entity:', phoneStateEntityId);
+    console.log('[TsuryPhone] Extracted device ID:', deviceId);
     console.log('[TsuryPhone] Looking for call history sensor:', callHistoryEntityId);
-    console.log('[TsuryPhone] Available entities:', Object.keys(this.hass.states).filter(e => e.includes('tsuryphone')));
+    console.log('[TsuryPhone] Available entities:', Object.keys(this.hass.states).filter(e => e.includes('phone') || e.includes('call')));
     
     const callHistoryEntity = this.hass.states[callHistoryEntityId];
     
