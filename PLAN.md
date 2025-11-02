@@ -2875,7 +2875,26 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Persistent call toast
 - Call state management
 
-**Phase 8: Polish & Testing**
+**Phase 8: Blocked View**
+
+- Blocked numbers list
+- Block number modal
+- Remove blocked number functionality
+
+**Phase 8.5: Full Integration Smoke Test**
+
+- Complete call flow testing
+- Contact CRUD testing
+- Call waiting scenarios
+- End-to-end user flows
+
+**Phase 8.75: Touch Gesture System**
+
+- Swipe gestures for navigation
+- Long press for context menus
+- Double tap for quick actions
+
+**Phase 9: Polish & Testing**
 
 - Error handling and edge cases
 - Loading states and animations
@@ -2885,7 +2904,9 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 ---
 
-## Current State Summary
+## Current State Summary (Nov 2, 2025)
+
+**Current Version**: v0.1.40-alpha
 
 ✅ **Working Features**:
 
@@ -2893,27 +2914,37 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Fully functional keypad with backend integration
 - Real-time digit dialing with device synchronization
 - Delete last digit functionality
+- **Complete Contacts View with CRUD operations**
+  - Search/filter contacts
+  - Alphabetical grouping
+  - Empty state
+  - Contact item display with avatars
+- **Full-screen Contact Modal**
+  - Add new contacts
+  - Edit existing contacts
+  - Delete contacts with confirmation
+  - Priority caller toggle
+  - Quick dial code assignment
+  - Form validation
 - State-driven UI architecture (no local state)
 - Device-based entity discovery (future-proof)
 - Haptic feedback on interactions
-- HA theming integration
+- HA theming integration (dark/light mode)
 - HACS distribution with auto-releases
+- Card height optimization (761px, no scroll)
 
 🚧 **In Progress**:
 
-- Contacts view (skeleton only)
-- Home view (placeholder data)
+- None (Phase 6 complete!)
 
 📋 **Not Started**:
 
-- Call modals and toasts
-- Real call history integration
-- Contact management (CRUD)
-- Block number functionality
-- Priority contacts
+- Call modals and toasts (Phase 7)
+- Blocked numbers view (Phase 8)
+- Real call history integration (postponed)
 - Advanced features (gestures, offline mode, etc.)
 
-**Next Immediate Goal**: Complete Contacts View (Phase 5) with full CRUD functionality using the same state-driven architecture pattern.
+**Next Immediate Goal**: Implement Call Modal (Phase 7) with incoming call UI, swipe gestures, and in-call controls.
 
 ---
 
@@ -2979,20 +3010,25 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 ### Phase 6: Contact Modal ✅ COMPLETED (Nov 2, 2025)
 
-**Objective**: Implement complete CRUD operations for contacts with in-card modal overlay.
+**Objective**: Implement complete CRUD operations for contacts with in-card full-screen modal.
 
-**Status**: All features implemented and tested!
+**Status**: All features implemented, tested, and deployed! ✅
+
+**Version**: v0.1.40-alpha
 
 **Component Created**: `components/modals/contact-modal.ts`
 
 **Design Clarification**: 
-- ✅ Modal is contained **within the card**, not a full-screen HA modal
-- ✅ Uses `position: absolute` to overlay content inside the card boundaries
-- ✅ Navigation remains visible beneath the overlay
-- ✅ z-index: 100 (sits on top of card content but within card)
+- ✅ Modal is a **full-screen view within the card** (not a floating dialog)
+- ✅ Fills 100% width and height of the card container
+- ✅ Completely hides navigation and content below
+- ✅ Slides in from bottom with smooth animation
+- ✅ No rounded corners, no shadows, no overlay darkness
+- ✅ Position: absolute (contained within card, not viewport-level)
+- ✅ z-index: 100 (sits on top of card content)
 
 **Features Implemented**:
-- ✅ Modal UI with overlay and centered dialog (within card)
+- ✅ Full-screen modal UI (fills entire card)
 - ✅ Name field (required validation)
 - ✅ Phone number field (required + format validation)
 - ✅ Code field (optional, with uniqueness validation)
@@ -3009,10 +3045,22 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Error handling and notifications
 
 **Fixes Applied (Nov 2, 2025)**:
+
+**Modal Opening**:
 - ✅ Added `reflect: true` to `open` property - fixes modal not opening
-- ✅ Changed from `position: fixed` to `position: absolute` - modal now contained in card
-- ✅ Reduced `max-height: 90vh` → `80%` - respects card boundaries
-- ✅ Card height set to 450px to eliminate scrolling in keypad view
+- ✅ Fixed "Add Contact" button not dispatching `action` event
+
+**Modal Layout & Design**:
+- ✅ Changed from `position: fixed` → `position: absolute` - modal now contained in card
+- ✅ Removed rounded corners, shadows, and semi-transparent overlay
+- ✅ Changed to fill 100% width/height (no centering, no max-width)
+- ✅ Added `box-sizing: border-box` to prevent padding overflow
+- ✅ Animation: slide from right → slide from bottom (translateY)
+
+**Card Height Optimization**:
+- ✅ Set explicit CSS height (450px → 650px → 750px → **761px**)
+- ✅ `getCardSize()` returns 9 (HA grid hint, doesn't control actual CSS)
+- ✅ Final height: **761px** eliminates all scrolling in keypad view
 
 **Service Integration**:
 - ✅ **Add**: `tsuryphone.quick_dial_add` with `{number, name, code?, priority?}`
@@ -3026,7 +3074,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 **Event Flow**:
 - ✅ Contact item click → fires `edit-contact` event → opens modal in edit mode
-- ✅ Empty state action → fires `action` event → opens modal in add mode
+- ✅ "Add Contact" button → fires `action` event → opens modal in add mode
 - ✅ Save → fires `contact-saved` event → closes modal, data refreshes automatically
 - ✅ Delete → fires `contact-deleted` event → closes modal, data refreshes automatically
 - ✅ Error → fires `error` event → displays error message for 3 seconds
@@ -3038,8 +3086,8 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Real-time error display as user types
 
 **UI/UX Features**:
-- ✅ Modal overlay (darkens background, click to close)
-- ✅ Modal centered with slide-up animation
+- ✅ Full-screen modal (completely replaces view)
+- ✅ Slide-up from bottom animation (0.3s ease-out)
 - ✅ Close button (X) in top-right
 - ✅ Title changes: "Add Contact" vs "Edit Contact"
 - ✅ Form fields with labels and inline error messages
@@ -3111,36 +3159,19 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Validation errors
 - Loading/saving state
 
-**UI/UX Details**:
+**Edge Cases Handled**:
+- ✅ Duplicate code detection (shows inline error)
+- ✅ Invalid phone number format (shows inline error)
+- ✅ Network errors during service calls (shows error event)
+- ✅ Concurrent edits (auto-refresh via state subscription)
+- ✅ Delete confirmation (inline confirmation dialog)
+- ✅ Priority sync (automatically adds/removes from priority list)
+- ✅ Edit mode workaround (delete old + add new due to backend limitation)
 
-- Modal overlay (darkens background)
-- Modal centered on screen
-- Close button (X) in top-right
-- Title changes: "Add Contact" vs "Edit Contact"
-- Form fields with labels and error messages
-- Delete button in red (edit mode only)
-- Confirmation dialog for delete action
-- Success/error toast notifications
-- Haptic feedback on actions
-
-**Integration Points**:
-
-- Listen to `edit-contact` event from `contact-item.ts`
-- Listen to `action` event from `empty-state.ts` (Add Contact button)
-- Refresh contacts list after add/edit/delete
-- Use shared modal styles from `styles/shared-styles.ts`
-- Use shared button styles and haptic feedback
-
-**Edge Cases**:
-
-- Duplicate code detection (show error)
-- Invalid phone number format (show error)
-- Network errors during service calls (show error toast)
-- Concurrent edits (refresh after save)
-- Delete confirmation (prevent accidental deletion)
-
-**Version Target**: v0.1.28-alpha+
+**Version**: v0.1.40-alpha ✅
 
 **Dependencies**: Phase 5 complete ✅
 
-### Phase 6: Contact Modal - NEXT 🎯
+---
+
+### Phase 7: Call Modal - NEXT 🎯
