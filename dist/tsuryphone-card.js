@@ -4155,13 +4155,13 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     _renderHomeView() {
         // Convert call history to the format expected by home-view
         const callHistory = this._callHistoryCache.map((call) => ({
-            id: call.id || `${call.timestamp}-${call.phone_number}`,
-            contactName: call.contact_name || call.phone_number,
-            phoneNumber: call.phone_number,
-            timestamp: call.timestamp,
-            duration: call.duration || 0,
-            type: call.type || 'incoming',
-            isBlocked: call.is_blocked || false,
+            id: call.seq || `${call.received_ts}-${call.number}`,
+            contactName: call.name || call.number,
+            phoneNumber: call.number,
+            timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
+            duration: call.duration_s || 0,
+            type: call.call_type, // 'incoming', 'outgoing', 'missed', 'blocked'
+            isBlocked: call.call_type === 'blocked',
         }));
         return x `
       <div class="view home-view fade-in">
