@@ -7,7 +7,7 @@ import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { haThemeVariables } from '../../styles/theme';
 
-export type NavigationTab = 'home' | 'keypad' | 'contacts';
+export type NavigationTab = 'home' | 'keypad' | 'contacts' | 'blocked';
 
 export interface TabChangeEvent {
   tab: NavigationTab;
@@ -39,6 +39,7 @@ export class TsuryPhoneNavigation extends LitElement {
         ${this._renderTab('home', 'mdi:home', 'Home')}
         ${this._renderTab('keypad', 'mdi:dialpad', 'Keypad')}
         ${this._renderTab('contacts', 'mdi:contacts', 'Contacts')}
+        ${this._renderTab('blocked', 'mdi:block-helper', 'Blocked')}
       </nav>
     `;
   }

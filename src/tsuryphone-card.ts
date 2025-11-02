@@ -6,23 +6,40 @@
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "./types/homeassistant";
-import { 
-  TsuryPhoneCardConfig, 
-  QuickDialEntry, 
-  BlockedNumberEntry, 
-  CallHistoryEntry 
+import {
+  TsuryPhoneCardConfig,
+  QuickDialEntry,
+  BlockedNumberEntry,
+  CallHistoryEntry,
 } from "./types/tsuryphone";
-import { haThemeVariables, haButtonStyles, haCardStyles, isDarkMode } from "./styles/theme";
+import {
+  haThemeVariables,
+  haButtonStyles,
+  haCardStyles,
+  isDarkMode,
+} from "./styles/theme";
 import { commonStyles } from "./styles/common";
-import './components/navigation/tsuryphone-navigation';
-import './components/home/home-view';
-import './components/keypad/keypad-view';
-import './components/contacts/contacts-view';
-import './components/modals/contact-modal';
-import './components/modals/call-modal';
-import type { NavigationTab, TabChangeEvent } from './components/navigation/tsuryphone-navigation';
-import type { CallHistoryEntry as CallHistoryEntryType, CallType } from './utils/call-history-grouping';
-import type { CallModalMode, CallInfo, WaitingCallInfo } from './components/modals/call-modal';
+import "./components/navigation/tsuryphone-navigation";
+import "./components/home/home-view";
+import "./components/keypad/keypad-view";
+import "./components/contacts/contacts-view";
+import "./components/blocked/blocked-view";
+import "./components/modals/contact-modal";
+import "./components/modals/call-modal";
+import "./components/modals/block-number-modal";
+import type {
+  NavigationTab,
+  TabChangeEvent,
+} from "./components/navigation/tsuryphone-navigation";
+import type {
+  CallHistoryEntry as CallHistoryEntryType,
+  CallType,
+} from "./utils/call-history-grouping";
+import type {
+  CallModalMode,
+  CallInfo,
+  WaitingCallInfo,
+} from "./components/modals/call-modal";
 
 // Declare the card for Home Assistant
 declare global {
@@ -47,15 +64,16 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _activeView: NavigationTab = "home";
   @state() private _showCallModal = false;
   @state() private _showContactModal = false;
+  @state() private _showBlockModal = false;
   @state() private _showBlockedView = false;
   @state() private _isDarkMode = false;
-  
+
   // Cached data from coordinator
   @state() private _contactsCache: QuickDialEntry[] = [];
   @state() private _blockedCache: BlockedNumberEntry[] = [];
   @state() private _callHistoryCache: CallHistoryEntry[] = [];
   @state() private _priorityNumbers: Set<string> = new Set();
-  
+
   // Connection state
   @state() private _isConnected = true;
   @state() private _errorMessage = "";
@@ -115,8 +133,8 @@ export class TsuryPhoneCard extends LitElement {
    */
   protected updated(changedProps: Map<string, any>): void {
     super.updated(changedProps);
-    
-    if (changedProps.has('hass')) {
+
+    if (changedProps.has("hass")) {
       this._handleHassUpdate();
     }
   }
@@ -133,29 +151,36 @@ export class TsuryPhoneCard extends LitElement {
     try {
       // Subscribe to entity state changes using subscribeEvents
       // We listen for state_changed events for our entities
-      const deviceId = this.config?.device_id || 'tsuryphone';
-      
+      const deviceId = this.config?.device_id || "tsuryphone";
+
       const unsubPromise = this.hass.connection.subscribeEvents(
         (event: any) => {
           // Check if the event is for one of our entities
           const entityId = event.data?.entity_id;
-          if (entityId && entityId.startsWith(`sensor.${deviceId}_`) || 
-              entityId?.startsWith(`binary_sensor.${deviceId}_`)) {
+          if (
+            (entityId && entityId.startsWith(`sensor.${deviceId}_`)) ||
+            entityId?.startsWith(`binary_sensor.${deviceId}_`)
+          ) {
             this._handleStateUpdate();
           }
         },
-        'state_changed'
+        "state_changed"
       );
-      
-      if (unsubPromise && typeof unsubPromise.then === 'function') {
-        unsubPromise.then((unsub: () => void) => {
-          this._unsubscribers.push(unsub);
-        }).catch((err: any) => {
-          console.error('TsuryPhone: Failed to subscribe to state changes:', err);
-        });
+
+      if (unsubPromise && typeof unsubPromise.then === "function") {
+        unsubPromise
+          .then((unsub: () => void) => {
+            this._unsubscribers.push(unsub);
+          })
+          .catch((err: any) => {
+            console.error(
+              "TsuryPhone: Failed to subscribe to state changes:",
+              err
+            );
+          });
       }
     } catch (err) {
-      console.error('TsuryPhone: Error in subscribe:', err);
+      console.error("TsuryPhone: Error in subscribe:", err);
     }
   }
 
@@ -167,7 +192,7 @@ export class TsuryPhoneCard extends LitElement {
       try {
         unsub();
       } catch (err) {
-        console.error('TsuryPhone: Error unsubscribing:', err);
+        console.error("TsuryPhone: Error unsubscribing:", err);
       }
     });
     this._unsubscribers = [];
@@ -186,52 +211,52 @@ export class TsuryPhoneCard extends LitElement {
     this._isConnected = true;
     this._errorMessage = "";
     this._isDarkMode = isDarkMode(this.hass);
-    
+
     // Update cached data from coordinator state
     // Support both direct entity config and device_id pattern
-    let deviceId = this.config?.device_id || 'tsuryphone';
+    let deviceId = this.config?.device_id || "tsuryphone";
     let phoneStateEntityId: string;
-    
+
     if (this.config?.entity) {
       // Use entity directly if provided
-      phoneStateEntityId = this.config.entity.startsWith('sensor.') 
-        ? this.config.entity 
+      phoneStateEntityId = this.config.entity.startsWith("sensor.")
+        ? this.config.entity
         : `sensor.${this.config.entity}`;
-      
+
       // Extract device ID from entity name (e.g., "sensor.phone_state" -> "phone")
       // by removing "sensor." prefix and "_phone_state" suffix
-      const entityName = phoneStateEntityId.replace('sensor.', '');
-      if (entityName.endsWith('_phone_state')) {
-        deviceId = entityName.replace('_phone_state', '');
-      } else if (entityName === 'phone_state') {
+      const entityName = phoneStateEntityId.replace("sensor.", "");
+      if (entityName.endsWith("_phone_state")) {
+        deviceId = entityName.replace("_phone_state", "");
+      } else if (entityName === "phone_state") {
         // Handle case where entity is just "phone_state" without prefix
-        deviceId = '';
+        deviceId = "";
       }
     } else {
       // Fall back to device_id pattern
       phoneStateEntityId = `sensor.${deviceId}_phone_state`;
     }
-    
+
     const phoneStateEntity = this.hass.states[phoneStateEntityId];
-    
+
     if (!phoneStateEntity) {
       this._errorMessage = `Entity ${phoneStateEntityId} not found`;
       return;
     }
-    
+
     if (phoneStateEntity.attributes) {
       const attrs = phoneStateEntity.attributes as any;
-      
+
       // Update contacts
       if (attrs.quick_dials && Array.isArray(attrs.quick_dials)) {
         this._contactsCache = attrs.quick_dials;
       }
-      
+
       // Update blocked numbers
       if (attrs.blocked_numbers && Array.isArray(attrs.blocked_numbers)) {
         this._blockedCache = attrs.blocked_numbers;
       }
-      
+
       // Update priority numbers
       if (attrs.priority_numbers && Array.isArray(attrs.priority_numbers)) {
         this._priorityNumbers = new Set(attrs.priority_numbers);
@@ -240,32 +265,45 @@ export class TsuryPhoneCard extends LitElement {
 
     // Update call history from call_history_size sensor
     // Build entity ID based on extracted device prefix
-    const callHistoryEntityId = deviceId 
+    const callHistoryEntityId = deviceId
       ? `sensor.${deviceId}_call_history_size`
       : `sensor.call_history_size`;
-    console.log('[TsuryPhone] Phone state entity:', phoneStateEntityId);
-    console.log('[TsuryPhone] Extracted device ID:', deviceId);
-    console.log('[TsuryPhone] Looking for call history sensor:', callHistoryEntityId);
-    console.log('[TsuryPhone] Available entities:', Object.keys(this.hass.states).filter(e => e.includes('phone') || e.includes('call')));
-    
+    console.log("[TsuryPhone] Phone state entity:", phoneStateEntityId);
+    console.log("[TsuryPhone] Extracted device ID:", deviceId);
+    console.log(
+      "[TsuryPhone] Looking for call history sensor:",
+      callHistoryEntityId
+    );
+    console.log(
+      "[TsuryPhone] Available entities:",
+      Object.keys(this.hass.states).filter(
+        (e) => e.includes("phone") || e.includes("call")
+      )
+    );
+
     const callHistoryEntity = this.hass.states[callHistoryEntityId];
-    
+
     if (callHistoryEntity?.attributes) {
       const historyAttrs = callHistoryEntity.attributes as any;
-      console.log('[TsuryPhone] Call history sensor attributes:', historyAttrs);
-      console.log('[TsuryPhone] Attribute keys:', Object.keys(historyAttrs));
-      
+      console.log("[TsuryPhone] Call history sensor attributes:", historyAttrs);
+      console.log("[TsuryPhone] Attribute keys:", Object.keys(historyAttrs));
+
       if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
-        console.log('[TsuryPhone] Found call history entries:', historyAttrs.entries.length);
+        console.log(
+          "[TsuryPhone] Found call history entries:",
+          historyAttrs.entries.length
+        );
         this._callHistoryCache = historyAttrs.entries;
       } else {
-        console.log('[TsuryPhone] No entries found in call history sensor');
+        console.log("[TsuryPhone] No entries found in call history sensor");
       }
     } else {
-      console.log('[TsuryPhone] Call history sensor not found or has no attributes');
-      console.log('[TsuryPhone] Entity exists?', !!callHistoryEntity);
+      console.log(
+        "[TsuryPhone] Call history sensor not found or has no attributes"
+      );
+      console.log("[TsuryPhone] Entity exists?", !!callHistoryEntity);
     }
-    
+
     // Update call modal state
     this._updateCallModalState();
   }
@@ -284,9 +322,9 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _updateCallModalState(): void {
     if (!this.hass) return;
-    
-    const deviceId = this.config?.device_id || '';
-    const phoneStateEntityId = deviceId 
+
+    const deviceId = this.config?.device_id || "";
+    const phoneStateEntityId = deviceId
       ? `sensor.${deviceId}_phone_state`
       : `sensor.phone_state`;
     const inCallEntityId = deviceId
@@ -294,55 +332,82 @@ export class TsuryPhoneCard extends LitElement {
       : `binary_sensor.in_call`;
 
     const phoneState = this.hass.states[phoneStateEntityId]?.state;
-    const inCall = this.hass.states[inCallEntityId]?.state === 'on';
-    
+    const inCall = this.hass.states[inCallEntityId]?.state === "on";
+
     // Determine call modal mode
-    if (phoneState === 'RINGING_IN') {
-      this._callModalMode = 'incoming';
+    if (phoneState === "RINGING_IN") {
+      this._callModalMode = "incoming";
       this._callModalOpen = true;
       this._callModalMinimized = false; // Reset on new incoming call
-      
+
       // Get incoming call info
-      const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
+      const currentCallEntity =
+        this.hass.states[
+          deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`
+        ];
       if (currentCallEntity?.attributes) {
         const attrs = currentCallEntity.attributes as any;
         this._currentCallInfo = {
-          number: attrs.number || 'Unknown',
+          number: attrs.number || "Unknown",
           name: attrs.name,
           isPriority: attrs.is_priority || false,
           isIncoming: true,
         };
       }
     } else if (inCall) {
-      this._callModalMode = 'active';
+      this._callModalMode = "active";
       // Keep modal open if it was already open, or if not manually minimized
-      if (!this._callModalOpen && !this._callModalMinimized && phoneState !== 'IDLE') {
+      if (
+        !this._callModalOpen &&
+        !this._callModalMinimized &&
+        phoneState !== "IDLE"
+      ) {
         this._callModalOpen = true;
       }
-      
+
       // Get active call info
-      const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
-      const durationEntity = this.hass.states[deviceId ? `sensor.${deviceId}_call_duration` : `sensor.call_duration`];
-      const audioOutputEntity = this.hass.states[deviceId ? `sensor.${deviceId}_call_audio_output` : `sensor.call_audio_output`];
-      
+      const currentCallEntity =
+        this.hass.states[
+          deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`
+        ];
+      const durationEntity =
+        this.hass.states[
+          deviceId ? `sensor.${deviceId}_call_duration` : `sensor.call_duration`
+        ];
+      const audioOutputEntity =
+        this.hass.states[
+          deviceId
+            ? `sensor.${deviceId}_call_audio_output`
+            : `sensor.call_audio_output`
+        ];
+
       if (currentCallEntity?.attributes) {
         const attrs = currentCallEntity.attributes as any;
         this._currentCallInfo = {
-          number: attrs.number || 'Unknown',
+          number: attrs.number || "Unknown",
           name: attrs.name,
           isPriority: attrs.is_priority || false,
-          isIncoming: attrs.direction === 'incoming',
+          isIncoming: attrs.direction === "incoming",
           duration: durationEntity ? parseInt(durationEntity.state) : 0,
-          audioOutput: audioOutputEntity?.state as any || 'earpiece',
+          audioOutput: (audioOutputEntity?.state as any) || "earpiece",
         };
       }
 
       // Check for waiting call
-      const waitingCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_waiting_call` : `sensor.current_waiting_call`];
-      if (waitingCallEntity && waitingCallEntity.state !== 'None' && waitingCallEntity.state !== 'unavailable') {
+      const waitingCallEntity =
+        this.hass.states[
+          deviceId
+            ? `sensor.${deviceId}_current_waiting_call`
+            : `sensor.current_waiting_call`
+        ];
+      if (
+        waitingCallEntity &&
+        waitingCallEntity.state !== "None" &&
+        waitingCallEntity.state !== "unavailable"
+      ) {
         const waitingAttrs = waitingCallEntity.attributes as any;
         this._waitingCallInfo = {
-          number: waitingAttrs.number || 'Unknown',
+          number: waitingAttrs.number || "Unknown",
           name: waitingAttrs.name,
           isPriority: waitingAttrs.is_priority || false,
         };
@@ -351,8 +416,13 @@ export class TsuryPhoneCard extends LitElement {
       }
 
       // Check if call waiting is available
-      const callWaitingAvailableEntity = this.hass.states[deviceId ? `binary_sensor.${deviceId}_call_waiting_available` : `binary_sensor.call_waiting_available`];
-      this._callWaitingAvailable = callWaitingAvailableEntity?.state === 'on';
+      const callWaitingAvailableEntity =
+        this.hass.states[
+          deviceId
+            ? `binary_sensor.${deviceId}_call_waiting_available`
+            : `binary_sensor.call_waiting_available`
+        ];
+      this._callWaitingAvailable = callWaitingAvailableEntity?.state === "on";
     } else {
       // No call - close modal and clear data
       this._callModalOpen = false;
@@ -372,18 +442,18 @@ export class TsuryPhoneCard extends LitElement {
 
     try {
       // Call service to get latest call history
-      const response = await this.hass.callService(
-        'tsuryphone',
-        'get_call_history',
+      const response = (await this.hass.callService(
+        "tsuryphone",
+        "get_call_history",
         { limit: 1000 },
         true
-      ) as any;
+      )) as any;
 
       if (response && response.call_history) {
         this._callHistoryCache = response.call_history;
       }
     } catch (err) {
-      console.error('TsuryPhone: Failed to refresh call history:', err);
+      console.error("TsuryPhone: Failed to refresh call history:", err);
     }
   }
 
@@ -446,7 +516,7 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _handleCallModalClose(): void {
     // Don't fully close during active call, just minimize
-    if (this._callModalMode === 'active' && this._currentCallInfo) {
+    if (this._callModalMode === "active" && this._currentCallInfo) {
       this._callModalOpen = false;
       this._callModalMinimized = true; // Track manual minimize
       this._showCallToast = true; // Show persistent toast
@@ -524,6 +594,20 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
+   * Handle open block modal
+   */
+  private _handleOpenBlockModal(): void {
+    this._showBlockModal = true;
+  }
+
+  /**
+   * Handle close block modal
+   */
+  private _handleCloseBlockModal(): void {
+    this._showBlockModal = false;
+  }
+
+  /**
    * Render the card
    */
   render(): TemplateResult {
@@ -550,9 +634,14 @@ export class TsuryPhoneCard extends LitElement {
 
     return html`
       <ha-card>
-        <div class="tsuryphone-container ${this._isDarkMode ? 'dark-mode' : 'light-mode'}">
+        <div
+          class="tsuryphone-container ${this._isDarkMode
+            ? "dark-mode"
+            : "light-mode"}"
+        >
           ${this._callModalOpen ? this._renderCallModal() : ""}
           ${this._contactModalOpen ? this._renderContactModal() : ""}
+          ${this._showBlockModal ? this._renderBlockModal() : ""}
           ${this._showCallToast ? this._renderCallToast() : ""}
           ${this._showBlockedView
             ? this._renderBlockedView()
@@ -588,15 +677,17 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _renderHomeView(): TemplateResult {
     // Convert call history to the format expected by home-view
-    const callHistory: CallHistoryEntryType[] = this._callHistoryCache.map((call: any) => ({
-      id: call.seq || `${call.received_ts}-${call.number}`,
-      contactName: call.name || call.number,
-      phoneNumber: call.number,
-      timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
-      duration: call.duration_s || 0,
-      type: call.call_type as CallType, // 'incoming', 'outgoing', 'missed', 'blocked'
-      isBlocked: call.call_type === 'blocked',
-    }));
+    const callHistory: CallHistoryEntryType[] = this._callHistoryCache.map(
+      (call: any) => ({
+        id: call.seq || `${call.received_ts}-${call.number}`,
+        contactName: call.name || call.number,
+        phoneNumber: call.number,
+        timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
+        duration: call.duration_s || 0,
+        type: call.call_type as CallType, // 'incoming', 'outgoing', 'missed', 'blocked'
+        isBlocked: call.call_type === "blocked",
+      })
+    );
 
     return html`
       <div class="view home-view fade-in">
@@ -615,7 +706,7 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _handleDialContact(e: CustomEvent): void {
     const { contact } = e.detail;
-    console.log('Dial contact:', contact);
+    console.log("Dial contact:", contact);
     // TODO: Open call modal or initiate call in Phase 6
   }
 
@@ -624,7 +715,7 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _handleCallDetails(e: CustomEvent): void {
     const { call } = e.detail;
-    console.log('Show call details:', call);
+    console.log("Show call details:", call);
     // TODO: Open call details modal in Phase 8
   }
 
@@ -664,11 +755,11 @@ export class TsuryPhoneCard extends LitElement {
    * Render call modal
    */
   private _renderCallModal(): TemplateResult {
-    const deviceIdPrefix = this.config?.device_id || '';
-    const phoneStateEntityId = deviceIdPrefix 
+    const deviceIdPrefix = this.config?.device_id || "";
+    const phoneStateEntityId = deviceIdPrefix
       ? `sensor.${deviceIdPrefix}_phone_state`
       : `sensor.phone_state`;
-      
+
     return html`
       <tsuryphone-call-modal
         .hass=${this.hass}
@@ -692,12 +783,13 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _renderCallToast(): TemplateResult {
     if (!this._currentCallInfo) return html``;
-    
-    const displayName = this._currentCallInfo.name || this._currentCallInfo.number;
+
+    const displayName =
+      this._currentCallInfo.name || this._currentCallInfo.number;
     const duration = this._currentCallInfo.duration || 0;
     const minutes = Math.floor(duration / 60);
     const seconds = duration % 60;
-    const durationText = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const durationText = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
     return html`
       <div class="call-toast" @click=${this._handleCallToastClick}>
@@ -730,10 +822,35 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
+   * Render block number modal
+   */
+  private _renderBlockModal(): TemplateResult {
+    return html`
+      <tsuryphone-block-number-modal
+        .hass=${this.hass}
+        .config=${this.config}
+        .open=${this._showBlockModal}
+        @close-modal=${this._handleCloseBlockModal}
+      ></tsuryphone-block-number-modal>
+    `;
+  }
+
+  /**
    * Render blocked view (placeholder)
    */
   private _renderBlockedView(): TemplateResult {
-    return html`<div class="modal-placeholder">Blocked Numbers View</div>`;
+    return html`
+      <div
+        class="view blocked-view fade-in"
+        @open-block-modal=${this._handleOpenBlockModal}
+      >
+        <tsuryphone-blocked-view
+          .hass=${this.hass}
+          .config=${this.config}
+          .blockedNumbers=${this._blockedCache}
+        ></tsuryphone-blocked-view>
+      </div>
+    `;
   }
 
   /**
@@ -829,7 +946,8 @@ export class TsuryPhoneCard extends LitElement {
         }
 
         .view-header {
-          padding: var(--tsury-spacing-md) var(--tsury-spacing-md) var(--tsury-spacing-sm);
+          padding: var(--tsury-spacing-md) var(--tsury-spacing-md)
+            var(--tsury-spacing-sm);
           background: var(--tsury-card-background-color);
           border-bottom: 1px solid var(--tsury-divider-color);
         }
@@ -883,7 +1001,8 @@ export class TsuryPhoneCard extends LitElement {
           cursor: pointer;
           font-size: var(--tsury-font-size-md);
           font-weight: var(--tsury-font-weight-medium);
-          transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+          transition: all var(--tsury-transition-duration)
+            var(--tsury-transition-timing);
         }
 
         .navigation-placeholder button:hover {

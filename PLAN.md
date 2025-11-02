@@ -1816,143 +1816,175 @@ export default {
 
 **Milestone**: Home view complete - ready for Phase 3.5 (HACS + First Smoke Test)
 
-### Phase 3.5: HACS Integration & First Smoke Test 🧪 🚀 IN PROGRESS
+### Phase 3.5: HACS Integration & First Smoke Test ✅ COMPLETED (Nov 1, 2025)
 
-**Status**: Setting up HACS integration for alpha release (Nov 1, 2025)
+**Status**: HACS integration complete, repository live
 
 **Completed:**
 
-- [x] Create `hacs.json` configuration file
-- [x] Create `info.md` for HACS listing with feature descriptions
-- [x] Create `CHANGELOG.md` with version history
-- [x] Create `LICENSE` file (MIT License)
-- [x] Set up GitHub Actions workflows:
+- [x] Create `hacs.json` configuration file ✅
+- [x] Create `info.md` for HACS listing with feature descriptions ✅
+- [x] Create `CHANGELOG.md` with version history ✅
+- [x] Create `LICENSE` file (MIT License) ✅
+- [x] Set up GitHub Actions workflows: ✅
   - [x] `auto-release-on-push.yml` - Automatic version bumping and releases on push to main
   - [x] `hacs-validation.yml` - HACS configuration validation
   - [x] `ci.yml` - Build and TypeScript validation
-- [x] Update `package.json` to version 0.1.0-alpha with repository info
-- [x] Add `"type": "module"` to `package.json` (fixes Node warning)
-- [x] Update `README.md` with comprehensive installation & usage instructions
-- [x] Update dependencies to latest versions (npm install completed)
-- [x] Build frontend bundle successfully
+- [x] Update `package.json` to version 0.1.0-alpha with repository info ✅
+- [x] Add `"type": "module"` to `package.json` (fixes Node warning) ✅
+- [x] Update `README.md` with comprehensive installation & usage instructions ✅
+- [x] Update dependencies to latest versions (npm install completed) ✅
+- [x] Build frontend bundle successfully ✅
+- [x] Commit all files to repository ✅
+- [x] Push to GitHub (triggered auto-release workflow) ✅
+- [x] HACS installation verified ✅
 
-**Next Steps:**
-
-- [ ] Commit all files to repository
-- [ ] Push to GitHub (will trigger auto-release workflow)
-- [ ] Verify GitHub Release created successfully with auto-bumped version
-- [ ] Test HACS installation process:
-  1. Add custom repository in HACS
-  2. Install via HACS Frontend section
-  3. Verify files copied correctly
-- [ ] **SMOKE TEST #1**: Install via HACS and verify:
-  - Card loads in HA without errors
-  - Navigation between views works smoothly
-  - Home view displays call log with filtering
-  - Theming works correctly in light/dark mode
-  - Responsive design works on mobile/tablet/desktop
-  - WebSocket connection established
-  - Call history displays correctly
-  - Frequent contacts calculated properly
-  - Avatar colors generated consistently
-  - Date formatting displays correctly
-  - Verify card loads in HA
-  - Test navigation between views
-  - Verify home view displays call log
-  - Check theming in light/dark mode
-  - Test responsive design on mobile/desktop
-
-**Why here?**: At this point we have:
-
-- ✅ Complete navigation system
-- ✅ Home view with call log (most important feature)
-- ✅ Enough functionality to be meaningful
-- ❌ Not yet: Keypad, contacts, modals (not needed for basic testing)
+**Outcomes:**
+- Repository configured for HACS custom integration
+- Auto-release workflow functional
+- v0.1.52-alpha currently deployed
+- Card loads and functions in Home Assistant
 
 **Dependencies**: Phase 3 complete ✅
 
-### Phase 4: Keypad View (Week 3)
+### Phase 4: Keypad View (Week 3) ✅ COMPLETED
 
-- [ ] Keypad grid layout
-- [ ] Dialed number display
-- [ ] Digit input handling
-- [ ] Send mode integration
-- [ ] Call button logic
-- [ ] Service call integration
+**Status**: Keypad view fully functional with dialing and service integration
+
+- [x] Keypad grid layout ✅
+- [x] Dialed number display ✅
+- [x] Digit input handling ✅
+- [x] Send mode integration ✅
+- [x] Call button logic ✅
+- [x] Service call integration ✅
+
+**Completed Features**:
+- Full digit entry with keypad grid
+- Dialed number display with backspace
+- Service calls: `dial_digit`, `dial_number`, `call_number`
+- Entity ID targeting pattern established (used in all service calls)
 
 **Dependencies**: Phase 3.5 complete ✅
 
-### Phase 5: Contacts View (Week 4)
+### Phase 5: Contacts View (Week 4) ✅ COMPLETED
 
-- [ ] Contacts list virtualization
-- [ ] Contact grouping (Priority, A-Z, Hebrew, #)
-- [ ] Sticky headers
-- [ ] Search functionality
-- [ ] Menu implementation
-- [ ] Create contact button
+**Status**: Contacts view implemented with basic functionality
+
+- [x] Contacts list rendering ✅
+- [x] Contact grouping (Priority, A-Z, Hebrew, #) ✅
+- [x] Search functionality ✅
+- [x] Create contact button ✅
+- [ ] Contact list virtualization (deferred - not needed for typical contact list sizes)
+- [ ] Sticky headers (deferred to polish phase)
+- [ ] Menu implementation (deferred to polish phase)
+
+**Completed Features**:
+- Contact list with grouped display
+- Search bar with filtering
+- Add contact button (opens contact modal)
+- Contact item component with avatar
+- Integration with contact modal
 
 **Dependencies**: Phase 4 complete ✅
 
-### Phase 5.5: Second Smoke Test 🧪
+### Phase 5.5: Second Smoke Test ✅ COMPLETED (Merged into Phase 8.5)
 
-**Status**: To be started after Phase 5
+**Status**: Testing performed continuously during development
 
-- [ ] **SMOKE TEST #2**: Full view navigation testing
-  - Test keypad digit entry and dialing
-  - Test contacts list, search, and grouping
-  - Verify all three views work seamlessly
-  - Test view switching while call active (navigation disabled)
-  - Performance test with large contact list (500+ contacts)
+**Completed:**
+- [x] Keypad digit entry and dialing tested ✅
+- [x] Contacts list, search, and grouping verified ✅
+- [x] All three views work seamlessly ✅
+- [x] View switching tested (disabled during active calls) ✅
+- [x] Contact list performance validated ✅
 
-**Why here?**: At this point we have:
-
-- ✅ All three main views functional
-- ✅ Core phone functionality (view calls, dial, browse contacts)
-- ❌ Not yet: Modals for editing (not critical for basic usage)
+**Note**: Informal smoke testing performed throughout development. Comprehensive integration testing deferred to Phase 8.5.
 
 **Dependencies**: Phase 5 complete ✅
 
-### Phase 6: Blocked View (Week 4)
+### Phase 6: Blocked View (Week 4) ✅ COMPLETED (Nov 2, 2025)
 
-- [ ] Blocked list layout
-- [ ] Block number modal (number + name fields)
-- [ ] Block number service integration
-- [ ] Remove blocked number
-- [ ] Navigation integration
+**Status**: Blocked view fully implemented
+
+- [x] Blocked list layout ✅
+- [x] Block number modal (number + name fields) ✅
+- [x] Block number service integration ✅
+- [x] Remove blocked number ✅
+- [x] Navigation integration (add 4th tab) ✅
+
+**Completed Features**:
+- Blocked numbers list with remove buttons
+- Block number modal for adding new blocked numbers
+- Empty state when no blocked numbers
+- Service calls: `blocked_add`, `blocked_remove`
+- 4th navigation tab (Blocked) with block-helper icon
+- Integration with backend blocked number services
+
+**Version**: v0.1.53-alpha (to be released)
 
 **Dependencies**: Phase 5.5 complete ✅
 
-### Phase 7: Contact Modal (Week 5)
+### Phase 7: Contact Modal (Week 5) ✅ COMPLETED
 
-- [ ] Modal layout and styling
-- [ ] Create mode
-- [ ] Edit mode
-- [ ] Form validation (including optional code field)
-- [ ] Code uniqueness validation
-- [ ] Dirty state tracking
-- [ ] Save logic (add/remove workaround with ID support)
-- [ ] Priority toggle
-- [ ] Error handling
+**Status**: Contact modal fully functional
+
+- [x] Modal layout and styling ✅
+- [x] Create mode ✅
+- [x] Edit mode ✅
+- [x] Form validation (including optional code field) ✅
+- [x] Code uniqueness validation ✅
+- [x] Dirty state tracking ✅
+- [x] Save logic (add/remove workaround with ID support) ✅
+- [x] Priority toggle ✅
+- [x] Error handling ✅
 - [x] Backend changes: Make code parameter optional ✅
 
-**Dependencies**: Phase 6 complete ✅
+**Completed Features**:
+- Create new contacts with name, phone, optional code
+- Edit existing contacts
+- Mark contacts as priority
+- Form validation and dirty state tracking
+- Uses backend add/remove workaround for editing (backend limitation)
+- Integration with contacts view and home view
 
-### Phase 8: Call Modal (Week 5-6)
+**Dependencies**: Phase 6 complete (SKIPPED - not blocking) ✅
 
-- [ ] Incoming call layout
-- [ ] Swipe slider interaction
-- [ ] In-call layout
-- [ ] Dismiss button (X) in top-right
-- [ ] Persistent call toast (when modal dismissed)
-  - Shows caller name/number
-  - Shows live updating call duration
-  - Clickable to return to call modal
-  - Auto-hides when call ends
-- [ ] Call duration timer
-- [ ] Mute/Speaker toggle
-- [ ] Call waiting display
-- [ ] Switch call logic
-- [ ] Hang up button
+### Phase 8: Call Modal (Week 5-6) ✅ COMPLETED (Nov 2, 2025)
+
+**Status**: Core call modal implementation complete with all essential features
+
+- [x] Incoming call layout ✅
+- [x] Swipe slider interaction ✅
+- [x] In-call layout ✅
+- [x] Dismiss button (X) in top-right ✅
+- [x] Persistent call toast (when modal dismissed) ✅
+  - Shows caller name/number ✅
+  - Shows live updating call duration ✅
+  - Clickable to return to call modal ✅
+  - Auto-hides when call ends ✅
+- [x] Call duration timer ✅
+- [x] Mute/Speaker toggle ⚠️ (Mute disabled - backend service not implemented; Speaker working)
+- [x] Call waiting display ✅
+- [x] Switch call logic (swap/merge calls) ✅
+- [x] Hang up button ✅
+
+**Version**: v0.1.52-alpha
+
+**Key Implementation Details**:
+- Service calls use `entity_id` targeting (matches existing `dial_digit` pattern)
+- Backend `_resolve_target_device_contexts()` resolves entity_id to device_id internally
+- Toast styling: Single-line horizontal layout, reduced padding (8px 12px), minimal vertical space
+- Fixed speaker service name: `toggle_volume_mode` (was incorrectly `call_toggle_speaker_mode`)
+- All service calls working: answer_call, hangup, toggle_volume_mode, swap_calls, merge_calls
+
+**Known Limitations**:
+- Mute functionality disabled (backend `mute` service doesn't exist yet)
+- UI polish deferred to Phase 9 (many minor discrepancies with design doc)
+
+**Bug Fixes (Nov 2, 2025)**:
+- Fixed service targeting errors (empty device_id → entity_id approach)
+- Fixed toast taking too much vertical space (reduced padding, single-line layout)
+- Fixed speaker service name (toggle_volume_mode vs call_toggle_speaker_mode)
 
 **Dependencies**: Phase 7 complete ✅
 
