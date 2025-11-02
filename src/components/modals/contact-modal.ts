@@ -22,7 +22,7 @@ interface ValidationErrors {
 @customElement("tsuryphone-contact-modal")
 export class ContactModal extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
-  @property({ type: Boolean }) open = false;
+  @property({ type: Boolean, reflect: true }) open = false;
   @property({ type: String }) mode: ContactModalMode = "add";
   @property({ attribute: false }) contact?: QuickDialEntry;
 

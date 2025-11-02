@@ -80,7 +80,7 @@ export class TsuryPhoneCard extends LitElement {
    * Get the card size (used by HA for layout)
    */
   getCardSize(): number {
-    return 6; // Roughly 6 grid rows
+    return 9; // Roughly 9 grid rows (~450px) - fits keypad without scroll
   }
 
   /**

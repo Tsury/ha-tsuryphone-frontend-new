@@ -3789,7 +3789,7 @@ __decorate([
     n({ attribute: false })
 ], ContactModal.prototype, "hass", void 0);
 __decorate([
-    n({ type: Boolean })
+    n({ type: Boolean, reflect: true })
 ], ContactModal.prototype, "open", void 0);
 __decorate([
     n({ type: String })
@@ -3859,7 +3859,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
      * Get the card size (used by HA for layout)
      */
     getCardSize() {
-        return 6; // Roughly 6 grid rows
+        return 9; // Roughly 9 grid rows (~450px) - fits keypad without scroll
     }
     /**
      * Lifecycle: Connected to DOM
