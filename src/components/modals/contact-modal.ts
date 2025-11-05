@@ -408,15 +408,14 @@ export class ContactModal extends LitElement {
 
     try {
       if (this.mode === "edit" && this.contact) {
-        // Edit mode: use edit_contact service
+        // Edit mode: use edit_contact service which handles priority internally
         await this._editContact();
       } else {
         // Add mode
         await this._addContact();
+        // Handle priority changes for new contacts
+        await this._handlePriorityChange();
       }
-
-      // Handle priority changes
-      await this._handlePriorityChange();
 
       triggerHaptic("medium");
       this.open = false;
