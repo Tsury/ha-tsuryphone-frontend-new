@@ -143,7 +143,7 @@ export class TsuryPhoneContactItem extends LitElement {
   }
 
   private _handleEdit(): void {
-    triggerHaptic("light");
+    triggerHaptic("selection");
     this.dispatchEvent(
       new CustomEvent("edit-contact", {
         detail: { contact: this.contact },

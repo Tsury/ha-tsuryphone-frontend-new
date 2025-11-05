@@ -340,7 +340,7 @@ export class ContactModal extends LitElement {
 
   private _handleClose() {
     if (this.saving) return;
-    triggerHaptic("light");
+    triggerHaptic("selection");
     this.open = false;
     this.dispatchEvent(new CustomEvent("close"));
   }
@@ -399,7 +399,7 @@ export class ContactModal extends LitElement {
 
   private async _handleSave() {
     if (!this._validate()) {
-      triggerHaptic("heavy");
+      triggerHaptic("warning");
       return;
     }
 
@@ -417,7 +417,7 @@ export class ContactModal extends LitElement {
         await this._handlePriorityChange();
       }
 
-      triggerHaptic("medium");
+      triggerHaptic("success");
       this.open = false;
       this.dispatchEvent(
         new CustomEvent("contact-saved", {
@@ -426,7 +426,7 @@ export class ContactModal extends LitElement {
       );
     } catch (error) {
       console.error("Error saving contact:", error);
-      triggerHaptic("heavy");
+      triggerHaptic("failure");
       this.dispatchEvent(
         new CustomEvent("error", {
           detail: { message: "Failed to save contact" },
@@ -534,7 +534,7 @@ export class ContactModal extends LitElement {
   }
 
   private _handleDeleteCancel() {
-    triggerHaptic("light");
+    triggerHaptic("selection");
     this.showDeleteConfirm = false;
   }
 
@@ -542,7 +542,7 @@ export class ContactModal extends LitElement {
     if (!this.contact) return;
 
     this.saving = true;
-    triggerHaptic("heavy");
+    triggerHaptic("warning");
 
     try {
       await this._deleteContact(this.contact.id);
@@ -573,7 +573,7 @@ export class ContactModal extends LitElement {
       );
     } catch (error) {
       console.error("Error deleting contact:", error);
-      triggerHaptic("heavy");
+      triggerHaptic("failure");
       this.dispatchEvent(
         new CustomEvent("error", {
           detail: { message: "Failed to delete contact" },

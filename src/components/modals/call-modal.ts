@@ -7,6 +7,7 @@
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
+import { triggerHaptic } from "../../utils/haptics";
 
 export type CallModalMode = "incoming" | "active" | "waiting";
 
@@ -403,7 +404,7 @@ export class TsuryPhoneCallModal extends LitElement {
   }
 
   private _handleClose(): void {
-    this._triggerHaptic("light");
+    triggerHaptic("selection");
     this.dispatchEvent(
       new CustomEvent("close", { bubbles: true, composed: true })
     );
@@ -454,7 +455,7 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private async _handleAnswer(): Promise<void> {
     this._isAnswering = true;
-    this._triggerHaptic("medium");
+    triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
@@ -471,7 +472,7 @@ export class TsuryPhoneCallModal extends LitElement {
       );
     } catch (error) {
       console.error("Failed to answer call:", error);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
       this.dispatchEvent(
         new CustomEvent("error", {
           detail: { message: "Failed to answer call" },
@@ -486,7 +487,7 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private async _handleDecline(): Promise<void> {
     this._isDeclining = true;
-    this._triggerHaptic("medium");
+    triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
@@ -503,7 +504,7 @@ export class TsuryPhoneCallModal extends LitElement {
       );
     } catch (error) {
       console.error("Failed to decline call:", error);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
       this.dispatchEvent(
         new CustomEvent("error", {
           detail: { message: "Failed to decline call" },
@@ -517,7 +518,7 @@ export class TsuryPhoneCallModal extends LitElement {
   }
 
   private async _handleHangup(): Promise<void> {
-    this._triggerHaptic("medium");
+    triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
@@ -534,12 +535,12 @@ export class TsuryPhoneCallModal extends LitElement {
       );
     } catch (error) {
       console.error("Failed to hang up:", error);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
     }
   }
 
   private async _handleMute(): Promise<void> {
-    this._triggerHaptic("light");
+    triggerHaptic("selection");
 
     try {
       if (!this.entityId) {
@@ -554,12 +555,12 @@ export class TsuryPhoneCallModal extends LitElement {
       // State will be updated via HA state changes
     } catch (error) {
       console.error("Failed to toggle mute:", error);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
     }
   }
 
   private async _handleSpeaker(): Promise<void> {
-    this._triggerHaptic("light");
+    triggerHaptic("selection");
 
     try {
       if (!this.entityId) {
@@ -577,13 +578,13 @@ export class TsuryPhoneCallModal extends LitElement {
   }
 
   private _handleKeypad(): void {
-    this._triggerHaptic("light");
+    triggerHaptic("selection");
     this._showKeypad = !this._showKeypad;
     this.requestUpdate();
   }
 
   private async _handleSwapCalls(): Promise<void> {
-    this._triggerHaptic("medium");
+    triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
@@ -601,7 +602,7 @@ export class TsuryPhoneCallModal extends LitElement {
   }
 
   private async _handleMergeCalls(): Promise<void> {
-    this._triggerHaptic("medium");
+    triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
@@ -615,17 +616,6 @@ export class TsuryPhoneCallModal extends LitElement {
       );
     } catch (error) {
       console.error("Failed to merge calls:", error);
-    }
-  }
-
-  private _triggerHaptic(type: "light" | "medium" | "heavy"): void {
-    if ("vibrate" in navigator) {
-      const patterns = {
-        light: 10,
-        medium: 20,
-        heavy: 30,
-      };
-      navigator.vibrate(patterns[type]);
     }
   }
 

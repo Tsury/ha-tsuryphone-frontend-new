@@ -1,22 +1,54 @@
 /**
  * Haptic Feedback Utility
- * Centralized haptic feedback using browser Vibration API
+ * Uses Home Assistant Companion app's haptic feedback system
+ * https://companion.home-assistant.io/docs/integrations/haptics/
  */
-
-export type HapticIntensity = "light" | "medium" | "heavy";
-
-const HAPTIC_PATTERNS: Record<HapticIntensity, number> = {
-  light: 10,
-  medium: 20,
-  heavy: 30,
-};
 
 /**
- * Trigger haptic feedback if supported
+ * Haptic types supported by Home Assistant Companion apps
+ * - success: Task or action completed successfully
+ * - warning: Task produced a warning
+ * - failure: Task or action failed
+ * - light: Light physical feedback
+ * - medium: Medium physical feedback
+ * - heavy: Heavy physical feedback
+ * - selection: Selection is actively changing
  */
-export function triggerHaptic(intensity: HapticIntensity = "light"): void {
+export type HapticType =
+  | "success"
+  | "warning"
+  | "failure"
+  | "light"
+  | "medium"
+  | "heavy"
+  | "selection";
+
+/**
+ * Trigger haptic feedback using Home Assistant Companion app
+ * Falls back to vibration API if not in HA app
+ */
+export function triggerHaptic(type: HapticType = "light"): void {
+  // Fire haptic event for Home Assistant Companion app
+  window.dispatchEvent(
+    new CustomEvent("haptic", {
+      detail: type,
+    })
+  );
+
+  // Fallback to vibration API for browsers without HA Companion app
   if ("vibrate" in navigator) {
-    navigator.vibrate(HAPTIC_PATTERNS[intensity]);
+    const fallbackPatterns: Record<HapticType, number | number[]> = {
+      success: 50,
+      warning: [30, 10, 30],
+      failure: [50, 10, 50, 10, 50],
+      light: 10,
+      medium: 20,
+      heavy: 30,
+      selection: 5,
+    };
+
+    const pattern = fallbackPatterns[type];
+    navigator.vibrate(pattern);
   }
 }
 
@@ -24,5 +56,7 @@ export function triggerHaptic(intensity: HapticIntensity = "light"): void {
  * Check if haptic feedback is supported
  */
 export function isHapticSupported(): boolean {
-  return "vibrate" in navigator;
+  // Haptics are always supported via HA Companion app events
+  // or via vibration API fallback
+  return true;
 }

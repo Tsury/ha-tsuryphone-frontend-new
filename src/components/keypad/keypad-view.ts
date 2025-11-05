@@ -11,6 +11,7 @@ import {
   getCachedTsuryPhoneEntities,
   DeviceEntities,
 } from "../../utils/entity-discovery";
+import { triggerHaptic } from "../../utils/haptics";
 import "./dialed-number-display";
 import "./keypad-grid";
 
@@ -144,7 +145,7 @@ export class TsuryPhoneKeypadView extends LitElement {
   }
 
   private async _handleDigitPress(digit: string): Promise<void> {
-    this._triggerHaptic("light");
+    triggerHaptic("selection");
 
     console.log(
       "[KeypadView] Dialing digit:",
@@ -168,7 +169,7 @@ export class TsuryPhoneKeypadView extends LitElement {
       console.log("[KeypadView] Digit dialed successfully");
     } catch (error) {
       console.error("Failed to dial digit:", error);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
     }
   }
 
@@ -187,16 +188,16 @@ export class TsuryPhoneKeypadView extends LitElement {
         }
       );
 
-      this._triggerHaptic("light");
+      triggerHaptic("selection");
     } catch (err) {
       console.error("Failed to delete last digit:", err);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
     }
   }
 
   private _handleClear(): void {
     // Clear is just deleting all digits - let user delete one by one
-    this._triggerHaptic("light");
+    triggerHaptic("selection");
   }
 
   private async _handleCall(): Promise<void> {
@@ -206,7 +207,7 @@ export class TsuryPhoneKeypadView extends LitElement {
       this._getCurrentDialingNumber() || this._getLastCalledNumber();
     if (!numberToDial) return;
 
-    this._triggerHaptic("medium");
+    triggerHaptic("medium");
 
     try {
       // Call the dial service
@@ -224,7 +225,7 @@ export class TsuryPhoneKeypadView extends LitElement {
       // The backend will clear the dialing number after successful dial
     } catch (error) {
       console.error("Failed to dial number:", error);
-      this._triggerHaptic("heavy");
+      triggerHaptic("failure");
     }
   }
 
@@ -278,18 +279,6 @@ export class TsuryPhoneKeypadView extends LitElement {
     // Get the most recent call
     const lastCall = callHistory[0];
     return lastCall.number || null;
-  }
-
-  private _triggerHaptic(type: "light" | "medium" | "heavy"): void {
-    if (!navigator.vibrate) return;
-
-    const durations = {
-      light: 10,
-      medium: 20,
-      heavy: 30,
-    };
-
-    navigator.vibrate(durations[type]);
   }
 
   protected render(): TemplateResult {

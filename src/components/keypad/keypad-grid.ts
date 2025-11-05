@@ -5,6 +5,7 @@
 
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { triggerHaptic } from '../../utils/haptics';
 
 interface KeypadButton {
   digit: string;
@@ -140,7 +141,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
       this._longPressTimer = window.setTimeout(() => {
         this._longPressTriggered = true;
         this._emitDigit(button.longPressDigit!);
-        this._triggerHaptic('medium');
+        triggerHaptic('selection');
       }, 500);
     }
   }
@@ -163,7 +164,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
 
     // Emit the regular digit
     this._emitDigit(button.digit);
-    this._triggerHaptic('light');
+    triggerHaptic('selection');
   }
 
   private _handlePointerCancel(): void {
@@ -186,17 +187,6 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         composed: true,
       })
     );
-  }
-
-  private _triggerHaptic(type: 'light' | 'medium'): void {
-    if (!navigator.vibrate) return;
-
-    const durations = {
-      light: 10,
-      medium: 20,
-    };
-
-    navigator.vibrate(durations[type]);
   }
 
   protected render(): TemplateResult {
