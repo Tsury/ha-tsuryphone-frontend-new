@@ -667,6 +667,11 @@ export class TsuryPhoneCallModal extends LitElement {
     if (!callInfo) return html``;
 
     const isSpeaker = callInfo.audioOutput === "speaker";
+    
+    // Check phone state to determine if we're dialing
+    const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
+    const isDialing = phoneState === "DIALING" || phoneState === "RINGING_OUT";
+    const callStatus = isDialing ? "Dialing..." : this._formatDuration(this._currentDuration);
 
     return html`
       <div class="caller-info">
@@ -677,7 +682,7 @@ export class TsuryPhoneCallModal extends LitElement {
       </div>
 
       <div class="call-timer">
-        ${this._formatDuration(this._currentDuration)}
+        ${callStatus}
       </div>
 
       ${this.callWaitingAvailable && this.waitingCall

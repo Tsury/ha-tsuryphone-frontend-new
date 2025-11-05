@@ -170,8 +170,15 @@ export class TsuryPhoneCallLogItem extends LitElement {
     const avatarColor = getAvatarColor(this.call.contactName);
     const initials = getInitials(this.call.contactName);
     const timeFormatted = formatCallTime(this.call.timestamp);
-    const duration =
-      this.call.duration > 0 ? formatDuration(this.call.duration) : null;
+    
+    // Show duration for answered calls, "Missed" for missed/blocked calls
+    let durationDisplay = null;
+    if (this.call.type === "missed" || this.call.isBlocked) {
+      durationDisplay = html`<span>• Missed</span>`;
+    } else if (this.call.duration > 0) {
+      durationDisplay = html`<span>• ${formatDuration(this.call.duration)}</span>`;
+    }
+    
     const displayNumber = normalizePhoneNumberForDisplay(
       this.call.phoneNumber,
       this.defaultDialCode
@@ -195,7 +202,7 @@ export class TsuryPhoneCallLogItem extends LitElement {
           </div>
           <div class="call-details">
             <span class="phone-number">${displayNumber}</span>
-            ${duration ? html`<span>• ${duration}</span>` : ""}
+            ${durationDisplay}
           </div>
         </div>
         <div class="call-time">${timeFormatted}</div>

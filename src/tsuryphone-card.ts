@@ -395,6 +395,28 @@ export class TsuryPhoneCard extends LitElement {
           isIncoming: true,
         };
       }
+    } else if (phoneState === "DIALING" || phoneState === "RINGING_OUT") {
+      // Show modal when dialing out
+      this._callModalMode = "active";
+      if (!this._callModalMinimized) {
+        this._callModalOpen = true;
+      }
+
+      // Get dialing call info
+      const currentCallEntity =
+        this.hass.states[
+          deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`
+        ];
+      if (currentCallEntity?.attributes) {
+        const attrs = currentCallEntity.attributes as any;
+        this._currentCallInfo = {
+          number: attrs.number || "Unknown",
+          name: attrs.name,
+          isPriority: attrs.is_priority || false,
+          isIncoming: false,
+          duration: 0, // No duration yet while dialing
+        };
+      }
     } else if (inCall) {
       this._callModalMode = "active";
       // Keep modal open if it was already open, or if not manually minimized
