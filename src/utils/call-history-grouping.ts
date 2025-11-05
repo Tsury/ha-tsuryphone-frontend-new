@@ -15,6 +15,7 @@ export interface CallHistoryEntry {
   duration: number;
   type: CallType;
   isBlocked?: boolean;
+  count?: number; // For stacked calls
 }
 
 export interface GroupedCallHistory {
@@ -49,17 +50,39 @@ export function groupCallHistory(
     return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
   });
 
-  // Group calls
+  // Group calls and stack adjacent calls from same contact
   sortedCalls.forEach((call) => {
     const groupLabel = getCallHistoryGroup(call.timestamp);
+    
+    // Filter out calls older than 365 days
+    if (!groupLabel) {
+      return;
+    }
+    
     if (!groups.has(groupLabel)) {
       groups.set(groupLabel, []);
     }
-    groups.get(groupLabel)!.push(call);
+    
+    const groupCalls = groups.get(groupLabel)!;
+    const lastCall = groupCalls[groupCalls.length - 1];
+    
+    // Stack if: same phone number, same type, and adjacent
+    if (
+      lastCall &&
+      lastCall.phoneNumber === call.phoneNumber &&
+      lastCall.type === call.type
+    ) {
+      // Increment count on the last call
+      lastCall.count = (lastCall.count || 1) + 1;
+      // Don't add the current call - it's now stacked
+    } else {
+      // Add as new call (count defaults to undefined, showing as single call)
+      groupCalls.push({ ...call });
+    }
   });
 
   // Convert to array and maintain order
-  const groupOrder = ["Today", "Yesterday", "This Week", "This Month"];
+  const groupOrder = ["Today", "Yesterday", "Older"];
   const result: GroupedCallHistory[] = [];
 
   // Add known groups in order
@@ -69,25 +92,7 @@ export function groupCallHistory(
         groupLabel: label,
         calls: groups.get(label)!,
       });
-      groups.delete(label);
     }
-  });
-
-  // Add remaining groups (month/year groups) in chronological order
-  const remainingGroups = Array.from(groups.entries())
-    .map(([groupLabel, calls]) => ({
-      groupLabel,
-      calls,
-      // Use first call's timestamp for sorting
-      timestamp: new Date(calls[0].timestamp).getTime(),
-    }))
-    .sort((a, b) => b.timestamp - a.timestamp);
-
-  remainingGroups.forEach((group) => {
-    result.push({
-      groupLabel: group.groupLabel,
-      calls: group.calls,
-    });
   });
 
   return result;

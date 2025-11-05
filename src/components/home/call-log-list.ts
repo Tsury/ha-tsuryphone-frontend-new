@@ -8,6 +8,8 @@ import '../shared/empty-state';
 export class TsuryPhoneCallLogList extends LitElement {
   @property({ type: Array }) groupedCalls: GroupedCallHistory[] = [];
   @property({ type: Boolean }) loading = false;
+  @property({ type: Boolean }) hasAnyCalls = false; // Whether there are any calls (before filtering)
+  @property({ type: String }) defaultDialCode = "";
 
   static styles = css`
     :host {
@@ -81,6 +83,17 @@ export class TsuryPhoneCallLogList extends LitElement {
     }
 
     if (this.groupedCalls.length === 0) {
+      // Different message if we have calls but filter matched nothing
+      if (this.hasAnyCalls) {
+        return html`
+          <tsuryphone-empty-state
+            icon="mdi:filter-off-outline"
+            title="No matching calls"
+            message="Try changing the filter to see more call history."
+          ></tsuryphone-empty-state>
+        `;
+      }
+      
       return html`
         <tsuryphone-empty-state
           icon="mdi:phone-outline"
@@ -98,7 +111,10 @@ export class TsuryPhoneCallLogList extends LitElement {
               <div class="group-header">${group.groupLabel}</div>
               ${group.calls.map(
                 (call, index) => html`
-                  <tsuryphone-call-log-item .call=${call}></tsuryphone-call-log-item>
+                  <tsuryphone-call-log-item 
+                    .call=${call} 
+                    .defaultDialCode=${this.defaultDialCode}
+                  ></tsuryphone-call-log-item>
                   ${index < group.calls.length - 1 ? html`<div class="divider"></div>` : ''}
                 `
               )}

@@ -11,7 +11,6 @@ export function formatCallTime(timestamp: string | Date): string {
   const diff = now.getTime() - date.getTime();
   const diffMinutes = Math.floor(diff / 60000);
   const diffHours = Math.floor(diff / 3600000);
-  const diffDays = Math.floor(diff / 86400000);
 
   // Just now (< 1 minute)
   if (diffMinutes < 1) {
@@ -28,15 +27,43 @@ export function formatCallTime(timestamp: string | Date): string {
     return `${diffHours}h ago`;
   }
 
-  // Days ago (< 7 days)
+  // For calls within the same week, show day and time (e.g., "Fri 23:50")
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const callDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+  const diffDays = Math.floor((today.getTime() - callDate.getTime()) / 86400000);
+
   if (diffDays < 7) {
-    return `${diffDays}d ago`;
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayName = days[date.getDay()];
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${dayName} ${hours}:${minutes}`;
   }
 
-  // Date format for older calls
-  const month = date.getMonth() + 1;
+  // For older calls, show month, day, and time (e.g., "Oct 25, 16:23")
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const monthName = months[date.getMonth()];
   const day = date.getDate();
-  return `${month}/${day}`;
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${monthName} ${day}, ${hours}:${minutes}`;
 }
 
 /**
@@ -57,6 +84,11 @@ export function getCallHistoryGroup(timestamp: string | Date): string {
   const diffTime = today.getTime() - callDate.getTime();
   const diffDays = Math.floor(diffTime / 86400000);
 
+  // Cap at 365 days
+  if (diffDays > 365) {
+    return ""; // Will be filtered out
+  }
+
   if (diffDays === 0) {
     return "Today";
   }
@@ -65,30 +97,8 @@ export function getCallHistoryGroup(timestamp: string | Date): string {
     return "Yesterday";
   }
 
-  if (diffDays < 7) {
-    return "This Week";
-  }
-
-  if (diffDays < 30) {
-    return "This Month";
-  }
-
-  // Format as "Month Year" for older calls
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  return `${months[date.getMonth()]} ${date.getFullYear()}`;
+  // Everything else is "Older"
+  return "Older";
 }
 
 /**

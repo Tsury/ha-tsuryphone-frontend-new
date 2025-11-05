@@ -15,6 +15,7 @@ import "./call-log-list";
 export class TsuryPhoneHomeView extends LitElement {
   @property({ type: Array }) callHistory: CallHistoryEntry[] = [];
   @property({ type: Boolean }) loading = false;
+  @property({ type: String }) defaultDialCode = "";
 
   @state() private _activeFilter: CallFilter = "all";
 
@@ -130,6 +131,8 @@ export class TsuryPhoneHomeView extends LitElement {
 
           <tsuryphone-call-log-list
             .groupedCalls=${groupedCalls}
+            .hasAnyCalls=${this.callHistory.length > 0}
+            .defaultDialCode=${this.defaultDialCode}
             .loading=${this.loading}
             @call-item-clicked=${this._handleCallItemClicked}
           ></tsuryphone-call-log-list>

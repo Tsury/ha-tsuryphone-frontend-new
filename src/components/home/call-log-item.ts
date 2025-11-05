@@ -3,10 +3,12 @@ import { customElement, property } from "lit/decorators.js";
 import { CallHistoryEntry } from "../../utils/call-history-grouping";
 import { formatCallTime, formatDuration } from "../../utils/date-formatter";
 import { getAvatarColor, getInitials } from "../../utils/avatar-color";
+import { normalizePhoneNumberForDisplay } from "../../utils/formatters";
 
 @customElement("tsuryphone-call-log-item")
 export class TsuryPhoneCallLogItem extends LitElement {
   @property({ type: Object }) call!: CallHistoryEntry;
+  @property({ type: String }) defaultDialCode = "";
 
   static styles = css`
     :host {
@@ -116,6 +118,13 @@ export class TsuryPhoneCallLogItem extends LitElement {
       font-weight: 500;
       flex-shrink: 0;
     }
+
+    .count-badge {
+      color: var(--secondary-text-color);
+      font-size: 13px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
   `;
 
   private _getCallTypeIcon() {
@@ -123,31 +132,25 @@ export class TsuryPhoneCallLogItem extends LitElement {
       case "incoming":
         return html`
           <div class="call-type-icon incoming" title="Incoming call">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M20 15.5c-1.2 0-2.4-.2-3.5-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1zM19 12h2c0-4.97-4.03-9-9-9v2c3.87 0 7 3.13 7 7zm-4 0h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3z"
-              />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 3 L5 17 M5 17 L5 10 M5 17 L12 17" />
             </svg>
           </div>
         `;
       case "outgoing":
         return html`
           <div class="call-type-icon outgoing" title="Outgoing call">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M20 15.5c-1.2 0-2.4-.2-3.5-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1zM9 1v2c3.87 0 7 3.13 7 7h2c0-4.97-4.03-9-9-9zm4 4v2c1.66 0 3 1.34 3 3h2c0-2.76-2.24-5-5-5z"
-              />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 21 L19 7 M19 7 L19 14 M19 7 L12 7" />
             </svg>
           </div>
         `;
       case "missed":
         return html`
           <div class="call-type-icon missed" title="Missed call">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M19.23 15.26l-2.54-.29c-.61-.07-1.21.14-1.64.57l-1.84 1.84c-2.83-1.44-5.15-3.75-6.59-6.59l1.85-1.85c.43-.43.64-1.03.57-1.64l-.29-2.52c-.12-1.01-.97-1.77-1.99-1.77H5.03c-1.13 0-2.07.94-2 2.07.53 8.54 7.36 15.36 15.89 15.89 1.13.07 2.07-.87 2.07-2v-1.73c.01-1.01-.75-1.86-1.76-1.98z"
-              />
-              <path d="M21.7 2.3L2.3 21.7 3.7 23.1 23.1 3.7z" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 3 L5 17 M5 17 L5 10 M5 17 L12 17" />
+              <line x1="3" y1="3" x2="21" y2="21" stroke-width="2.5" />
             </svg>
           </div>
         `;
@@ -170,6 +173,10 @@ export class TsuryPhoneCallLogItem extends LitElement {
     const timeFormatted = formatCallTime(this.call.timestamp);
     const duration =
       this.call.duration > 0 ? formatDuration(this.call.duration) : null;
+    const displayNumber = normalizePhoneNumberForDisplay(
+      this.call.phoneNumber,
+      this.defaultDialCode
+    );
 
     return html`
       <div class="call-item" @click=${this._handleClick}>
@@ -180,12 +187,15 @@ export class TsuryPhoneCallLogItem extends LitElement {
           <div class="call-header">
             <span class="contact-name">${this.call.contactName}</span>
             ${this._getCallTypeIcon()}
+            ${this.call.count && this.call.count > 1
+              ? html`<span class="count-badge">(${this.call.count})</span>`
+              : ""}
             ${this.call.isBlocked
               ? html`<span class="blocked-badge">Blocked</span>`
               : ""}
           </div>
           <div class="call-details">
-            <span class="phone-number">${this.call.phoneNumber}</span>
+            <span class="phone-number">${displayNumber}</span>
             ${duration ? html`<span>• ${duration}</span>` : ""}
           </div>
         </div>

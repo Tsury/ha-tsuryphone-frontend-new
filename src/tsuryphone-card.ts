@@ -72,6 +72,7 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _blockedCache: BlockedNumberEntry[] = [];
   @state() private _callHistoryCache: CallHistoryEntry[] = [];
   @state() private _priorityNumbers: Set<string> = new Set();
+  @state() private _defaultDialCode = "";
 
   // Connection state
   @state() private _isConnected = true;
@@ -259,6 +260,11 @@ export class TsuryPhoneCard extends LitElement {
       // Update priority numbers
       if (attrs.priority_numbers && Array.isArray(attrs.priority_numbers)) {
         this._priorityNumbers = new Set(attrs.priority_numbers);
+      }
+
+      // Update default dial code
+      if (attrs.dialing_context && attrs.dialing_context.default_code) {
+        this._defaultDialCode = attrs.dialing_context.default_code;
       }
     }
 
@@ -727,6 +733,7 @@ export class TsuryPhoneCard extends LitElement {
       <div class="view home-view fade-in">
         <tsuryphone-home-view
           .callHistory=${callHistory}
+          .defaultDialCode=${this._defaultDialCode}
           .loading=${false}
           @dial-contact=${this._handleDialContact}
           @call-details=${this._handleCallDetails}
@@ -747,10 +754,34 @@ export class TsuryPhoneCard extends LitElement {
   /**
    * Handle call details event from home view
    */
-  private _handleCallDetails(e: CustomEvent): void {
+  private async _handleCallDetails(e: CustomEvent): Promise<void> {
     const { call } = e.detail;
-    console.log("Show call details:", call);
-    // TODO: Open call details modal in Phase 8
+    
+    // Initiate a call to the number from call history
+    if (call && call.phoneNumber) {
+      try {
+        await this.hass.callService(
+          "tsuryphone",
+          "dial",
+          {
+            number: call.phoneNumber,
+          },
+          {
+            entity_id: this._getPhoneStateEntityId(),
+          }
+        );
+      } catch (error) {
+        console.error("Failed to dial number from call history:", error);
+      }
+    }
+  }
+
+  /**
+   * Get phone state entity ID
+   */
+  private _getPhoneStateEntityId(): string {
+    const deviceId = this.config?.device_id || "tsuryphone";
+    return `sensor.${deviceId}_phone_state`;
   }
 
   /**

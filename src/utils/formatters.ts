@@ -162,3 +162,25 @@ export function getAvatarLetter(name: string): string {
   if (!name) return "?";
   return name.trim()[0].toUpperCase();
 }
+
+/**
+ * Normalize phone number for display based on default dial code
+ * If number starts with the default dial code (e.g., +972), replace it with 0
+ */
+export function normalizePhoneNumberForDisplay(
+  number: string,
+  defaultDialCode: string
+): string {
+  if (!number || !defaultDialCode) return number;
+
+  // Remove any + prefix from default code for comparison
+  const cleanDefaultCode = defaultDialCode.replace(/^\+/, "");
+
+  // Check if number starts with + followed by default code
+  if (number.startsWith(`+${cleanDefaultCode}`)) {
+    // Replace with 0 and the rest of the number
+    return "0" + number.substring(cleanDefaultCode.length + 1);
+  }
+
+  return number;
+}
