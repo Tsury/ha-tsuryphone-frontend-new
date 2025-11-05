@@ -132,25 +132,24 @@ export class TsuryPhoneCallLogItem extends LitElement {
       case "incoming":
         return html`
           <div class="call-type-icon incoming" title="Incoming call">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 3 L5 17 M5 17 L5 10 M5 17 L12 17" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 4 L4 20 M4 20 L4 12 M4 20 L12 20" />
             </svg>
           </div>
         `;
       case "outgoing":
         return html`
           <div class="call-type-icon outgoing" title="Outgoing call">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 21 L19 7 M19 7 L19 14 M19 7 L12 7" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20 L20 4 M20 4 L20 12 M20 4 L12 4" />
             </svg>
           </div>
         `;
       case "missed":
         return html`
           <div class="call-type-icon missed" title="Missed call">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 3 L5 17 M5 17 L5 10 M5 17 L12 17" />
-              <line x1="3" y1="3" x2="21" y2="21" stroke-width="2.5" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 4 L12 12 M8 16 L4 20 M4 20 L4 12 M4 20 L12 20" />
             </svg>
           </div>
         `;

@@ -4,7 +4,7 @@
  */
 
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 
 interface KeypadButton {
   digit: string;
@@ -16,6 +16,8 @@ interface KeypadButton {
 export class TsuryPhoneKeypadGrid extends LitElement {
   private _longPressTimer: number | null = null;
   private _longPressTriggered = false;
+  
+  @state() private _pressedButton: string | null = null;
 
   private readonly _buttons: KeypadButton[] = [
     { digit: '1', letters: '' },
@@ -72,7 +74,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         background: var(--secondary-background-color);
       }
 
-      .keypad-button:active {
+      .keypad-button.pressed {
         transform: scale(0.95);
         background: var(--divider-color);
       }
@@ -131,6 +133,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
 
   private _handlePointerDown(button: KeypadButton): void {
     this._longPressTriggered = false;
+    this._pressedButton = button.digit;
 
     // Start long press timer if button supports it
     if (button.longPressDigit) {
@@ -143,6 +146,9 @@ export class TsuryPhoneKeypadGrid extends LitElement {
   }
 
   private _handlePointerUp(button: KeypadButton): void {
+    // Clear pressed state
+    this._pressedButton = null;
+    
     // Clear long press timer
     if (this._longPressTimer) {
       clearTimeout(this._longPressTimer);
@@ -161,6 +167,9 @@ export class TsuryPhoneKeypadGrid extends LitElement {
   }
 
   private _handlePointerCancel(): void {
+    // Clear pressed state
+    this._pressedButton = null;
+    
     // Clear long press timer if pointer is cancelled (e.g., scrolling)
     if (this._longPressTimer) {
       clearTimeout(this._longPressTimer);
@@ -196,7 +205,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         ${this._buttons.map(
           (button) => html`
             <button
-              class="keypad-button"
+              class="keypad-button ${this._pressedButton === button.digit ? 'pressed' : ''}"
               @pointerdown=${() => this._handlePointerDown(button)}
               @pointerup=${() => this._handlePointerUp(button)}
               @pointercancel=${() => this._handlePointerCancel()}

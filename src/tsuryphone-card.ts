@@ -718,15 +718,29 @@ export class TsuryPhoneCard extends LitElement {
   private _renderHomeView(): TemplateResult {
     // Convert call history to the format expected by home-view
     const callHistory: CallHistoryEntryType[] = this._callHistoryCache.map(
-      (call: any) => ({
-        id: call.seq || `${call.received_ts}-${call.number}`,
-        contactName: call.name || call.number,
-        phoneNumber: call.number,
-        timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
-        duration: call.duration_s || 0,
-        type: call.call_type as CallType, // 'incoming', 'outgoing', 'missed', 'blocked'
-        isBlocked: call.call_type === "blocked",
-      })
+      (call: any) => {
+        // Map call_type to our CallType enum
+        // Blocked calls should be treated as missed incoming calls
+        let callType: CallType;
+        if (call.call_type === "blocked") {
+          callType = "missed";
+        } else if (call.call_type === "incoming" || call.call_type === "outgoing" || call.call_type === "missed") {
+          callType = call.call_type;
+        } else {
+          // Default to missed for unknown types
+          callType = "missed";
+        }
+
+        return {
+          id: call.seq || `${call.received_ts}-${call.number}`,
+          contactName: call.name || call.number,
+          phoneNumber: call.number,
+          timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
+          duration: call.duration_s || 0,
+          type: callType,
+          isBlocked: call.call_type === "blocked",
+        };
+      }
     );
 
     return html`
@@ -781,6 +795,13 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _getPhoneStateEntityId(): string {
     const deviceId = this.config?.device_id || "tsuryphone";
+
+    if (this.config?.entity) {
+      return this.config.entity.startsWith("sensor.")
+        ? this.config.entity
+        : `sensor.${this.config.entity}`;
+    }
+
     return `sensor.${deviceId}_phone_state`;
   }
 

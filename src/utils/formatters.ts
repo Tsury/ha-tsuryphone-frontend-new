@@ -173,13 +173,14 @@ export function normalizePhoneNumberForDisplay(
 ): string {
   if (!number || !defaultDialCode) return number;
 
-  // Remove any + prefix from default code for comparison
-  const cleanDefaultCode = defaultDialCode.replace(/^\+/, "");
+  // Remove any + prefix and whitespace from both number and code
+  const cleanNumber = number.replace(/^\+/, "").replace(/\s/g, "");
+  const cleanDefaultCode = defaultDialCode.replace(/^\+/, "").replace(/\s/g, "");
 
-  // Check if number starts with + followed by default code
-  if (number.startsWith(`+${cleanDefaultCode}`)) {
+  // Check if number starts with the default code
+  if (cleanNumber.startsWith(cleanDefaultCode)) {
     // Replace with 0 and the rest of the number
-    return "0" + number.substring(cleanDefaultCode.length + 1);
+    return "0" + cleanNumber.substring(cleanDefaultCode.length);
   }
 
   return number;
