@@ -1,4 +1,4 @@
-import { css } from 'lit';
+import { css } from "lit";
 
 /**
  * Common utility styles used across components
@@ -58,7 +58,7 @@ export const commonStyles = css`
   }
 
   .scrollable::-webkit-scrollbar {
-    width: 4px;
+    width: 8px;
   }
 
   .scrollable::-webkit-scrollbar-track {
@@ -66,12 +66,12 @@ export const commonStyles = css`
   }
 
   .scrollable::-webkit-scrollbar-thumb {
-    background-color: rgba(128, 128, 128, 0.2);
-    border-radius: 2px;
+    background-color: rgba(128, 128, 128, 0.3);
+    border-radius: 4px;
   }
 
   .scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(128, 128, 128, 0.4);
+    background-color: rgba(128, 128, 128, 0.5);
   }
 
   /* Fade animations */
@@ -116,18 +116,22 @@ export const commonStyles = css`
   }
 
   .fade-in {
-    animation: fadeIn var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: fadeIn var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 
   .fade-out {
-    animation: fadeOut var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: fadeOut var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 
   .slide-in-up {
-    animation: slideInUp var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: slideInUp var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 
   .slide-out-down {
-    animation: slideOutDown var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: slideOutDown var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 `;
