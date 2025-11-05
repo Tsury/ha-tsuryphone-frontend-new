@@ -29,6 +29,9 @@ export interface TsuryPhoneState {
 
   // Volume
   volume_mode: "EARPIECE" | "SPEAKER";
+  
+  // Mute state
+  is_muted: boolean;
 }
 
 export interface QuickDialEntry {

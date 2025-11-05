@@ -358,6 +358,19 @@ export class TsuryPhoneCallModal extends LitElement {
     this._stopDurationTimer();
   }
 
+  override willUpdate(changedProps: Map<string, any>): void {
+    super.willUpdate(changedProps);
+    
+    // Sync mute state from HA entity
+    if (this.entityId && this.hass?.states[this.entityId]) {
+      const phoneState = this.hass.states[this.entityId];
+      const isMuted = phoneState.attributes?.is_muted ?? false;
+      if (isMuted !== this._isMuted) {
+        this._isMuted = isMuted;
+      }
+    }
+  }
+
   override updated(changedProps: Map<string, any>): void {
     if (changedProps.has("mode")) {
       if (this.mode === "active") {
@@ -527,15 +540,21 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private async _handleMute(): Promise<void> {
     this._triggerHaptic("light");
-    this._isMuted = !this._isMuted;
 
     try {
-      // TODO: Backend doesn't have toggle_mute service yet
-      // await this.hass.callService('tsuryphone', 'toggle_mute', {});
-      console.warn("Mute functionality not yet implemented in backend");
+      if (!this.entityId) {
+        throw new Error("Entity ID is required");
+      }
+      await this.hass.callService(
+        "tsuryphone",
+        "toggle_mute",
+        {},
+        { entity_id: this.entityId }
+      );
+      // State will be updated via HA state changes
     } catch (error) {
       console.error("Failed to toggle mute:", error);
-      this._isMuted = !this._isMuted; // Revert on error
+      this._triggerHaptic("heavy");
     }
   }
 

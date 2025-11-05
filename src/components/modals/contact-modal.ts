@@ -408,9 +408,8 @@ export class ContactModal extends LitElement {
 
     try {
       if (this.mode === "edit" && this.contact) {
-        // Edit mode: delete old + add new
-        await this._deleteContact(this.contact.id);
-        await this._addContact();
+        // Edit mode: use edit_contact service
+        await this._editContact();
       } else {
         // Add mode
         await this._addContact();
@@ -455,6 +454,25 @@ export class ContactModal extends LitElement {
     }
 
     await this.hass.callService("tsuryphone", "quick_dial_add", serviceData, {
+      entity_id: phoneStateId,
+    });
+  }
+
+  private async _editContact() {
+    const phoneStateId = this._getPhoneStateId();
+    if (!phoneStateId || !this.contact) {
+      throw new Error("Phone state entity or contact not found");
+    }
+
+    const serviceData: any = {
+      id: this.contact.id,
+      number: this.formData.number.trim(),
+      name: this.formData.name.trim(),
+      code: this.formData.code.trim() || "",
+      priority: this.formData.priority,
+    };
+
+    await this.hass.callService("tsuryphone", "edit_contact", serviceData, {
       entity_id: phoneStateId,
     });
   }
