@@ -36,9 +36,9 @@ export class TsuryPhoneNavigation extends LitElement {
   render(): TemplateResult {
     return html`
       <nav class="navigation ${this.disabled ? "disabled" : ""}" role="tablist">
+        ${this._renderTab("contacts", "mdi:contacts", "Contacts")}
         ${this._renderTab("home", "mdi:home", "Home")}
         ${this._renderTab("keypad", "mdi:dialpad", "Keypad")}
-        ${this._renderTab("contacts", "mdi:contacts", "Contacts")}
       </nav>
     `;
   }
