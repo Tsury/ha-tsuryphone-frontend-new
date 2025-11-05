@@ -77,7 +77,7 @@ export class TsuryPhoneNavigation extends LitElement {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          background: var(--tsury-card-background-color);
+          background: var(--tsury-secondary-background-color, var(--secondary-background-color));
           border-top: 1px solid var(--tsury-divider-color);
           padding: var(--tsury-spacing-xs) 0;
           min-height: 56px;

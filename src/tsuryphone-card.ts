@@ -375,6 +375,13 @@ export class TsuryPhoneCard extends LitElement {
     const phoneState = this.hass.states[phoneStateEntityId]?.state;
     const inCall = this.hass.states[inCallEntityId]?.state === "on";
 
+    console.log(
+      "[TsuryPhone] _updateCallModalState:",
+      "phoneState=", phoneState,
+      "inCall=", inCall,
+      "_callModalOpen=", this._callModalOpen
+    );
+
     // Determine call modal mode
     if (phoneState === "RINGING_IN") {
       this._callModalMode = "incoming";
@@ -397,6 +404,7 @@ export class TsuryPhoneCard extends LitElement {
       }
     } else if (phoneState === "DIALING" || phoneState === "RINGING_OUT") {
       // Show modal when dialing out
+      console.log("[TsuryPhone] Detected DIALING/RINGING_OUT state, opening call modal");
       this._callModalMode = "active";
       if (!this._callModalMinimized) {
         this._callModalOpen = true;
@@ -740,7 +748,7 @@ export class TsuryPhoneCard extends LitElement {
   private _renderHomeView(): TemplateResult {
     // Convert call history to the format expected by home-view
     const callHistory: CallHistoryEntryType[] = this._callHistoryCache.map(
-      (call: any) => {
+      (call: any, index: number) => {
         // Map call_type to our CallType enum
         // Blocked calls should be treated as missed incoming calls
         let callType: CallType;
@@ -753,7 +761,7 @@ export class TsuryPhoneCard extends LitElement {
           callType = "missed";
         }
 
-        return {
+        const entry = {
           id: call.seq || `${call.received_ts}-${call.number}`,
           contactName: call.name || call.number,
           phoneNumber: call.number,
@@ -762,6 +770,19 @@ export class TsuryPhoneCard extends LitElement {
           type: callType,
           isBlocked: call.call_type === "blocked",
         };
+
+        // Log first few calls to debug
+        if (index < 3) {
+          console.log(`[TsuryPhone] Call ${index}:`, {
+            raw_call_type: call.call_type,
+            duration_s: call.duration_s,
+            mapped_type: entry.type,
+            isBlocked: entry.isBlocked,
+            name: entry.contactName
+          });
+        }
+
+        return entry;
       }
     );
 
@@ -984,7 +1005,8 @@ export class TsuryPhoneCard extends LitElement {
         .tsuryphone-container {
           display: flex;
           flex-direction: column;
-          height: 761px;
+          height: 100vh;
+          max-height: 900px;
           background: var(--tsury-card-background-color);
           color: var(--tsury-primary-text-color);
           font-family: var(--tsury-font-family);

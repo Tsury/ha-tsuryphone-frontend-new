@@ -178,6 +178,18 @@ export class TsuryPhoneCallLogItem extends LitElement {
     } else if (this.call.duration > 0) {
       durationDisplay = html`<span>• ${formatDuration(this.call.duration)}</span>`;
     }
+
+    // Debug logging for first call item
+    if (!this.hasAttribute('debug-logged')) {
+      console.log('[CallLogItem] Rendering call:', {
+        type: this.call.type,
+        duration: this.call.duration,
+        isBlocked: this.call.isBlocked,
+        durationDisplay: durationDisplay ? 'shown' : 'hidden',
+        contactName: this.call.contactName
+      });
+      this.setAttribute('debug-logged', 'true');
+    }
     
     const displayNumber = normalizePhoneNumberForDisplay(
       this.call.phoneNumber,
