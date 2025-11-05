@@ -1,10 +1,10 @@
-import { LitElement, html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { CallFilter } from '../../utils/call-history-grouping';
+import { LitElement, html, css } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { CallFilter } from "../../utils/call-history-grouping";
 
-@customElement('tsuryphone-call-log-filters')
+@customElement("tsuryphone-call-log-filters")
 export class TsuryPhoneCallLogFilters extends LitElement {
-  @property({ type: String }) activeFilter: CallFilter = 'all';
+  @property({ type: String }) activeFilter: CallFilter = "all";
 
   static styles = css`
     :host {
@@ -59,7 +59,7 @@ export class TsuryPhoneCallLogFilters extends LitElement {
   private _handleFilterClick(filter: CallFilter) {
     this.activeFilter = filter;
     this.dispatchEvent(
-      new CustomEvent('filter-changed', {
+      new CustomEvent("filter-changed", {
         detail: { filter },
         bubbles: true,
         composed: true,
@@ -71,8 +71,8 @@ export class TsuryPhoneCallLogFilters extends LitElement {
     return html`
       <div class="filters">
         <div
-          class="filter-chip ${this.activeFilter === 'all' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('all')}
+          class="filter-chip ${this.activeFilter === "all" ? "active" : ""}"
+          @click=${() => this._handleFilterClick("all")}
           role="button"
           tabindex="0"
           aria-label="Show all calls"
@@ -80,8 +80,8 @@ export class TsuryPhoneCallLogFilters extends LitElement {
           All
         </div>
         <div
-          class="filter-chip ${this.activeFilter === 'missed' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('missed')}
+          class="filter-chip ${this.activeFilter === "missed" ? "active" : ""}"
+          @click=${() => this._handleFilterClick("missed")}
           role="button"
           tabindex="0"
           aria-label="Show missed calls"
@@ -89,8 +89,10 @@ export class TsuryPhoneCallLogFilters extends LitElement {
           Missed
         </div>
         <div
-          class="filter-chip ${this.activeFilter === 'outgoing' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('outgoing')}
+          class="filter-chip ${this.activeFilter === "outgoing"
+            ? "active"
+            : ""}"
+          @click=${() => this._handleFilterClick("outgoing")}
           role="button"
           tabindex="0"
           aria-label="Show outgoing calls"
@@ -98,8 +100,10 @@ export class TsuryPhoneCallLogFilters extends LitElement {
           Outgoing
         </div>
         <div
-          class="filter-chip ${this.activeFilter === 'incoming' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('incoming')}
+          class="filter-chip ${this.activeFilter === "incoming"
+            ? "active"
+            : ""}"
+          @click=${() => this._handleFilterClick("incoming")}
           role="button"
           tabindex="0"
           aria-label="Show incoming calls"
@@ -113,6 +117,6 @@ export class TsuryPhoneCallLogFilters extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-call-log-filters': TsuryPhoneCallLogFilters;
+    "tsuryphone-call-log-filters": TsuryPhoneCallLogFilters;
   }
 }

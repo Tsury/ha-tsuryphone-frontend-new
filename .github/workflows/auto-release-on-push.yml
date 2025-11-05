@@ -23,8 +23,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -47,23 +47,23 @@ jobs:
           # Remove any pre-release suffix (e.g., -alpha)
           BASE_VER=$(echo "$CURR" | sed 's/-.*$//')
           SUFFIX=$(echo "$CURR" | grep -oP '(?<=-).*' || echo "")
-          
+
           IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE_VER"
           if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
             echo "Invalid current version: $CURR" >&2
             exit 1
           fi
-          
+
           NEW_PATCH=$((PATCH + 1))
           NEW_BASE="$MAJOR.$MINOR.$NEW_PATCH"
-          
+
           # Keep suffix if it exists
           if [ -n "$SUFFIX" ]; then
             NEW_VERSION="$NEW_BASE-$SUFFIX"
           else
             NEW_VERSION="$NEW_BASE"
           fi
-          
+
           echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
           tmpfile=$(mktemp)
           jq --arg v "$NEW_VERSION" '.version=$v' package.json > "$tmpfile" && mv "$tmpfile" package.json
@@ -133,19 +133,19 @@ jobs:
           body: |
             Automated release for commit ${{ github.sha }}.
             Version: v${{ steps.bump.outputs.new }}
-            
+
             ## Installation
-            
+
             ### HACS (Recommended)
             1. Add this repository as a custom repository in HACS (Frontend category)
             2. Install "TsuryPhone Card" from HACS
             3. Add the card to your dashboard
-            
+
             ### Manual
             1. Download `tsuryphone-card.js` from this release
             2. Copy to `config/www/` in your Home Assistant installation
             3. Add as a resource in Lovelace dashboard
-            
+
             ## Files
             - `tsuryphone-card-${{ steps.bump.outputs.new }}.zip` - Complete package for HACS
             - `tsuryphone-card.js` - Standalone bundle

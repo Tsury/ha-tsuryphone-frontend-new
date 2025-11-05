@@ -1840,6 +1840,7 @@ export default {
 - [x] HACS installation verified ✅
 
 **Outcomes:**
+
 - Repository configured for HACS custom integration
 - Auto-release workflow functional
 - v0.1.52-alpha currently deployed
@@ -1859,6 +1860,7 @@ export default {
 - [x] Service call integration ✅
 
 **Completed Features**:
+
 - Full digit entry with keypad grid
 - Dialed number display with backspace
 - Service calls: `dial_digit`, `dial_number`, `call_number`
@@ -1879,6 +1881,7 @@ export default {
 - [ ] Menu implementation (deferred to polish phase)
 
 **Completed Features**:
+
 - Contact list with grouped display
 - Search bar with filtering
 - Add contact button (opens contact modal)
@@ -1892,6 +1895,7 @@ export default {
 **Status**: Testing performed continuously during development
 
 **Completed:**
+
 - [x] Keypad digit entry and dialing tested ✅
 - [x] Contacts list, search, and grouping verified ✅
 - [x] All three views work seamlessly ✅
@@ -1913,6 +1917,7 @@ export default {
 - [x] Navigation integration (add 4th tab) ✅
 
 **Completed Features**:
+
 - Blocked numbers list with remove buttons
 - Block number modal for adding new blocked numbers
 - Empty state when no blocked numbers
@@ -1940,6 +1945,7 @@ export default {
 - [x] Backend changes: Make code parameter optional ✅
 
 **Completed Features**:
+
 - Create new contacts with name, phone, optional code
 - Edit existing contacts
 - Mark contacts as priority
@@ -1971,6 +1977,7 @@ export default {
 **Version**: v0.1.52-alpha
 
 **Key Implementation Details**:
+
 - Service calls use `entity_id` targeting (matches existing `dial_digit` pattern)
 - Backend `_resolve_target_device_contexts()` resolves entity_id to device_id internally
 - Toast styling: Single-line horizontal layout, reduced padding (8px 12px), minimal vertical space
@@ -1978,10 +1985,12 @@ export default {
 - All service calls working: answer_call, hangup, toggle_volume_mode, swap_calls, merge_calls
 
 **Known Limitations**:
+
 - Mute functionality disabled (backend `mute` service doesn't exist yet)
 - UI polish deferred to Phase 9 (many minor discrepancies with design doc)
 
 **Bug Fixes (Nov 2, 2025)**:
+
 - Fixed service targeting errors (empty device_id → entity_id approach)
 - Fixed toast taking too much vertical space (reduced padding, single-line layout)
 - Fixed speaker service name (toggle_volume_mode vs call_toggle_speaker_mode)
@@ -3050,7 +3059,8 @@ All backend prerequisites have been completed. We can now proceed with implement
 
 **Component Created**: `components/modals/contact-modal.ts`
 
-**Design Clarification**: 
+**Design Clarification**:
+
 - ✅ Modal is a **full-screen view within the card** (not a floating dialog)
 - ✅ Fills 100% width and height of the card container
 - ✅ Completely hides navigation and content below
@@ -3060,6 +3070,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ z-index: 100 (sits on top of card content)
 
 **Features Implemented**:
+
 - ✅ Full-screen modal UI (fills entire card)
 - ✅ Name field (required validation)
 - ✅ Phone number field (required + format validation)
@@ -3079,10 +3090,12 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Fixes Applied (Nov 2, 2025)**:
 
 **Modal Opening**:
+
 - ✅ Added `reflect: true` to `open` property - fixes modal not opening
 - ✅ Fixed "Add Contact" button not dispatching `action` event
 
 **Modal Layout & Design**:
+
 - ✅ Changed from `position: fixed` → `position: absolute` - modal now contained in card
 - ✅ Removed rounded corners, shadows, and semi-transparent overlay
 - ✅ Changed to fill 100% width/height (no centering, no max-width)
@@ -3090,21 +3103,24 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Animation: slide from right → slide from bottom (translateY)
 
 **Card Height Optimization**:
+
 - ✅ Set explicit CSS height (450px → 650px → 750px → **761px**)
 - ✅ `getCardSize()` returns 9 (HA grid hint, doesn't control actual CSS)
 - ✅ Final height: **761px** eliminates all scrolling in keypad view
 
 **Service Integration**:
+
 - ✅ **Add**: `tsuryphone.quick_dial_add` with `{number, name, code?, priority?}`
 - ✅ **Edit**: Delete old + Add new workaround (backend limitation)
   - First: `tsuryphone.quick_dial_remove {id: oldId}`
   - Then: `tsuryphone.quick_dial_add` with new values
 - ✅ **Delete**: `tsuryphone.quick_dial_remove {id}` + confirmation
-- ✅ **Priority**: 
+- ✅ **Priority**:
   - Add: `tsuryphone.priority_add {number}`
   - Remove: `tsuryphone.priority_remove {id}` (finds priority entry ID)
 
 **Event Flow**:
+
 - ✅ Contact item click → fires `edit-contact` event → opens modal in edit mode
 - ✅ "Add Contact" button → fires `action` event → opens modal in add mode
 - ✅ Save → fires `contact-saved` event → closes modal, data refreshes automatically
@@ -3112,12 +3128,14 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Error → fires `error` event → displays error message for 3 seconds
 
 **Validation**:
+
 - ✅ Name: Required, min 1 character
 - ✅ Number: Required, regex validation for phone format
 - ✅ Code: Optional, uniqueness check against existing quick_dials
 - ✅ Real-time error display as user types
 
 **UI/UX Features**:
+
 - ✅ Full-screen modal (completely replaces view)
 - ✅ Slide-up from bottom animation (0.3s ease-out)
 - ✅ Close button (X) in top-right
@@ -3130,6 +3148,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Haptic feedback: light (close), medium (save/delete start), heavy (errors)
 
 **Edge Cases Handled**:
+
 - ✅ Duplicate code detection (shows error)
 - ✅ Invalid phone number format (shows error)
 - ✅ Priority caller state sync (auto-detects current priority status)
@@ -3155,6 +3174,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Issues Fixed**:
 
 **Backend Fixes**:
+
 - ✅ Added `entries` attribute to `sensor.call_history_size` sensor
 - ✅ Fixed AttributeError: Used correct `CallHistoryEntry` model attributes
   - Changed from: `entry.result`, `entry.is_priority` (don't exist)
@@ -3162,6 +3182,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Sensor entity category set to DIAGNOSTIC (disabled by default, needs manual enable)
 
 **Frontend Fixes**:
+
 - ✅ Extract device ID from entity name for multi-sensor lookup
   - Parse `entity: sensor.phone_state` → look for `sensor.call_history_size`
 - ✅ Read from correct sensor (`call_history_size` not `phone_state`)
@@ -3175,13 +3196,15 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Convert Unix timestamp to JavaScript Date for grouping functions
 
 **Data Flow**:
-1. Backend: `sensor.call_history_size` exposes `attributes.entries[]` 
+
+1. Backend: `sensor.call_history_size` exposes `attributes.entries[]`
 2. Frontend: Card reads from `call_history_size` sensor
 3. Frontend: Maps backend format → frontend `CallHistoryEntry` format
 4. Frontend: Passes to `home-view` component
 5. Frontend: Groups by date (Today, Yesterday, This Week, etc.)
 
 **Backend Entry Format**:
+
 ```python
 {
   "number": "+972546662771",
@@ -3196,6 +3219,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 ```
 
 **Frontend Entry Format**:
+
 ```typescript
 {
   id: "42",
@@ -3209,6 +3233,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 ```
 
 **User Action Required**:
+
 - ⚠️ Must manually enable `sensor.call_history_size` (Settings → Devices → TsuryPhone → Enable entity)
 - This is because backend sets `entity_category=EntityCategory.DIAGNOSTIC`
 
@@ -3221,6 +3246,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Note**: Several discrepancies exist between the current implementation and the design document. A comprehensive polish session is required to align all UI elements with the design specifications.
 
 **Items Requiring Polish**:
+
 - Call history item layout and styling
 - Contact card design and spacing
 - Typography consistency (font sizes, weights)
@@ -3288,6 +3314,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - Loading/saving state
 
 **Edge Cases Handled**:
+
 - ✅ Duplicate code detection (shows inline error)
 - ✅ Invalid phone number format (shows inline error)
 - ✅ Network errors during service calls (shows error event)
@@ -3313,6 +3340,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Component Created**: `components/modals/call-modal.ts`
 
 **Design Confirmation**:
+
 - ✅ **Full-screen in-card modal** (same as contact modal)
 - ✅ Position: absolute (not fixed - stays within card)
 - ✅ 100% width and height of card container
@@ -3323,6 +3351,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 **Features Implemented**:
 
 **Incoming Call UI**:
+
 - ✅ Caller info display (name/number)
 - ✅ Priority caller badge (⭐ indicator)
 - ✅ Call status text
@@ -3334,6 +3363,7 @@ All backend prerequisites have been completed. We can now proceed with implement
   - Touch-based interaction (no click)
 
 **Active Call UI**:
+
 - ✅ Caller info display
 - ✅ **Call duration timer** (MM:SS format, live updating)
 - ✅ Mute button (🔇/🔊 toggle with visual state)
@@ -3343,6 +3373,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Control buttons in 3-column grid layout
 
 **Call Waiting UI**:
+
 - ✅ Waiting call info card (name/number)
 - ✅ Priority badge for waiting calls
 - ✅ Swap button (switch between calls)
@@ -3350,6 +3381,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Displayed above active call controls
 
 **State Management**:
+
 - ✅ Auto-updates from HA state sensors:
   - `sensor.phone_state` → determine mode (incoming/active)
   - `binary_sensor.in_call` → active call detection
@@ -3362,6 +3394,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Automatic modal open/close based on phone state
 
 **Service Integration**:
+
 - ✅ Answer: `tsuryphone.answer_call`
 - ✅ Decline/Hangup: `tsuryphone.hangup_call`
 - ✅ Mute: `tsuryphone.toggle_mute`
@@ -3370,6 +3403,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Merge calls: `tsuryphone.merge_calls`
 
 **Interactions**:
+
 - ✅ Swipe gestures for answer/decline
 - ✅ Haptic feedback (light/medium/heavy)
 - ✅ Loading states during service calls
@@ -3377,6 +3411,7 @@ All backend prerequisites have been completed. We can now proceed with implement
 - ✅ Minimize button (closes modal but keeps call active)
 
 **Features Deferred**:
+
 - ⏸️ **Persistent Call Toast**: Shows when modal minimized during active call
   - Will display: caller name, duration, tap to reopen
   - Deferred to Phase 7.5 or later
@@ -3385,6 +3420,7 @@ All backend prerequisites have been completed. We can now proceed with implement
   - Deferred to Phase 7.5 or later
 
 **Edge Cases Handled**:
+
 - ✅ Modal stays closed if user minimizes during active call
 - ✅ Modal auto-opens on new incoming call
 - ✅ Modal auto-closes when call ends

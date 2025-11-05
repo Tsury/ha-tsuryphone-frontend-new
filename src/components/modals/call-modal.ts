@@ -4,11 +4,11 @@
  * Similar to contact-modal - position: absolute, fills entire card
  */
 
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { HomeAssistant } from '../../types/homeassistant';
+import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import { HomeAssistant } from "../../types/homeassistant";
 
-export type CallModalMode = 'incoming' | 'active' | 'waiting';
+export type CallModalMode = "incoming" | "active" | "waiting";
 
 export interface CallInfo {
   number: string;
@@ -16,7 +16,7 @@ export interface CallInfo {
   isPriority?: boolean;
   isIncoming: boolean;
   duration?: number; // seconds
-  audioOutput?: 'earpiece' | 'speaker' | 'bluetooth';
+  audioOutput?: "earpiece" | "speaker" | "bluetooth";
 }
 
 export interface WaitingCallInfo {
@@ -25,12 +25,12 @@ export interface WaitingCallInfo {
   isPriority?: boolean;
 }
 
-@customElement('tsuryphone-call-modal')
+@customElement("tsuryphone-call-modal")
 export class TsuryPhoneCallModal extends LitElement {
   @property({ type: Object }) hass!: HomeAssistant;
   @property({ type: String }) entityId?: string; // Phone state entity ID for service targeting
   @property({ type: Boolean, reflect: true }) open = false;
-  @property({ type: String }) mode: CallModalMode = 'incoming';
+  @property({ type: String }) mode: CallModalMode = "incoming";
   @property({ type: Object }) callInfo?: CallInfo;
   @property({ type: Object }) waitingCall?: WaitingCallInfo;
   @property({ type: Boolean }) callWaitingAvailable = false;
@@ -199,7 +199,9 @@ export class TsuryPhoneCallModal extends LitElement {
       align-items: center;
       justify-content: center;
       cursor: grab;
-      transition: transform 0.2s ease-out, background-color 0.2s;
+      transition:
+        transform 0.2s ease-out,
+        background-color 0.2s;
       z-index: 2;
     }
 
@@ -345,7 +347,7 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    if (this.mode === 'active' && this.callInfo?.duration !== undefined) {
+    if (this.mode === "active" && this.callInfo?.duration !== undefined) {
       this._currentDuration = this.callInfo.duration;
       this._startDurationTimer();
     }
@@ -357,8 +359,8 @@ export class TsuryPhoneCallModal extends LitElement {
   }
 
   override updated(changedProps: Map<string, any>): void {
-    if (changedProps.has('mode')) {
-      if (this.mode === 'active') {
+    if (changedProps.has("mode")) {
+      if (this.mode === "active") {
         this._startDurationTimer();
       } else {
         this._stopDurationTimer();
@@ -384,12 +386,14 @@ export class TsuryPhoneCallModal extends LitElement {
   private _formatDuration(seconds: number): string {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
 
   private _handleClose(): void {
-    this._triggerHaptic('light');
-    this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+    this._triggerHaptic("light");
+    this.dispatchEvent(
+      new CustomEvent("close", { bubbles: true, composed: true })
+    );
   }
 
   private _handleSwipeStart(e: TouchEvent): void {
@@ -405,7 +409,10 @@ export class TsuryPhoneCallModal extends LitElement {
 
     // Limit swipe distance
     const maxDistance = 200;
-    this._swipeDistance = Math.max(-maxDistance, Math.min(maxDistance, this._swipeDistance));
+    this._swipeDistance = Math.max(
+      -maxDistance,
+      Math.min(maxDistance, this._swipeDistance)
+    );
 
     // Update visual state
     this._isSwipingLeft = this._swipeDistance < -50;
@@ -434,22 +441,31 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private async _handleAnswer(): Promise<void> {
     this._isAnswering = true;
-    this._triggerHaptic('medium');
+    this._triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
-        throw new Error('Entity ID is required');
+        throw new Error("Entity ID is required");
       }
-      await this.hass.callService('tsuryphone', 'answer_call', {}, { entity_id: this.entityId });
-      this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
+      await this.hass.callService(
+        "tsuryphone",
+        "answer_call",
+        {},
+        { entity_id: this.entityId }
+      );
+      this.dispatchEvent(
+        new CustomEvent("call-answered", { bubbles: true, composed: true })
+      );
     } catch (error) {
-      console.error('Failed to answer call:', error);
-      this._triggerHaptic('heavy');
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: { message: 'Failed to answer call' },
-        bubbles: true,
-        composed: true
-      }));
+      console.error("Failed to answer call:", error);
+      this._triggerHaptic("heavy");
+      this.dispatchEvent(
+        new CustomEvent("error", {
+          detail: { message: "Failed to answer call" },
+          bubbles: true,
+          composed: true,
+        })
+      );
     } finally {
       this._isAnswering = false;
     }
@@ -457,107 +473,138 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private async _handleDecline(): Promise<void> {
     this._isDeclining = true;
-    this._triggerHaptic('medium');
+    this._triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
-        throw new Error('Entity ID is required');
+        throw new Error("Entity ID is required");
       }
-      await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
-      this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
+      await this.hass.callService(
+        "tsuryphone",
+        "hangup",
+        {},
+        { entity_id: this.entityId }
+      );
+      this.dispatchEvent(
+        new CustomEvent("call-declined", { bubbles: true, composed: true })
+      );
     } catch (error) {
-      console.error('Failed to decline call:', error);
-      this._triggerHaptic('heavy');
-      this.dispatchEvent(new CustomEvent('error', {
-        detail: { message: 'Failed to decline call' },
-        bubbles: true,
-        composed: true
-      }));
+      console.error("Failed to decline call:", error);
+      this._triggerHaptic("heavy");
+      this.dispatchEvent(
+        new CustomEvent("error", {
+          detail: { message: "Failed to decline call" },
+          bubbles: true,
+          composed: true,
+        })
+      );
     } finally {
       this._isDeclining = false;
     }
   }
 
   private async _handleHangup(): Promise<void> {
-    this._triggerHaptic('medium');
+    this._triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
-        throw new Error('Entity ID is required');
+        throw new Error("Entity ID is required");
       }
-      await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
-      this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
+      await this.hass.callService(
+        "tsuryphone",
+        "hangup",
+        {},
+        { entity_id: this.entityId }
+      );
+      this.dispatchEvent(
+        new CustomEvent("call-ended", { bubbles: true, composed: true })
+      );
     } catch (error) {
-      console.error('Failed to hang up:', error);
-      this._triggerHaptic('heavy');
+      console.error("Failed to hang up:", error);
+      this._triggerHaptic("heavy");
     }
   }
 
   private async _handleMute(): Promise<void> {
-    this._triggerHaptic('light');
+    this._triggerHaptic("light");
     this._isMuted = !this._isMuted;
 
     try {
       // TODO: Backend doesn't have toggle_mute service yet
       // await this.hass.callService('tsuryphone', 'toggle_mute', {});
-      console.warn('Mute functionality not yet implemented in backend');
+      console.warn("Mute functionality not yet implemented in backend");
     } catch (error) {
-      console.error('Failed to toggle mute:', error);
+      console.error("Failed to toggle mute:", error);
       this._isMuted = !this._isMuted; // Revert on error
     }
   }
 
   private async _handleSpeaker(): Promise<void> {
-    this._triggerHaptic('light');
+    this._triggerHaptic("light");
 
     try {
       if (!this.entityId) {
-        throw new Error('Entity ID is required');
+        throw new Error("Entity ID is required");
       }
-      await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, { entity_id: this.entityId });
+      await this.hass.callService(
+        "tsuryphone",
+        "toggle_volume_mode",
+        {},
+        { entity_id: this.entityId }
+      );
     } catch (error) {
-      console.error('Failed to toggle speaker:', error);
+      console.error("Failed to toggle speaker:", error);
     }
   }
 
   private _handleKeypad(): void {
-    this._triggerHaptic('light');
+    this._triggerHaptic("light");
     this._showKeypad = !this._showKeypad;
     this.requestUpdate();
   }
 
   private async _handleSwapCalls(): Promise<void> {
-    this._triggerHaptic('medium');
+    this._triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
-        throw new Error('Entity ID is required');
+        throw new Error("Entity ID is required");
       }
-      await this.hass.callService('tsuryphone', 'swap_calls', {}, { entity_id: this.entityId });
+      await this.hass.callService(
+        "tsuryphone",
+        "swap_calls",
+        {},
+        { entity_id: this.entityId }
+      );
     } catch (error) {
-      console.error('Failed to swap calls:', error);
+      console.error("Failed to swap calls:", error);
     }
   }
 
   private async _handleMergeCalls(): Promise<void> {
-    this._triggerHaptic('medium');
+    this._triggerHaptic("medium");
 
     try {
       if (!this.entityId) {
-        throw new Error('Entity ID is required');
+        throw new Error("Entity ID is required");
       }
-      await this.hass.callService('tsuryphone', 'merge_calls', {}, { entity_id: this.entityId });
+      await this.hass.callService(
+        "tsuryphone",
+        "merge_calls",
+        {},
+        { entity_id: this.entityId }
+      );
     } catch (error) {
-      console.error('Failed to merge calls:', error);
+      console.error("Failed to merge calls:", error);
     }
   }
 
-  private _triggerHaptic(type: 'light' | 'medium' | 'heavy'): void {
-    if ('vibrate' in navigator) {
+  private _triggerHaptic(type: "light" | "medium" | "heavy"): void {
+    if ("vibrate" in navigator) {
       const patterns = {
         light: 10,
         medium: 20,
-        heavy: 30
+        heavy: 30,
       };
       navigator.vibrate(patterns[type]);
     }
@@ -570,30 +617,36 @@ export class TsuryPhoneCallModal extends LitElement {
     return html`
       <div class="caller-info">
         <div class="caller-name">${callInfo.name || callInfo.number}</div>
-        ${callInfo.name ? html`<div class="caller-number">${callInfo.number}</div>` : ''}
-        ${callInfo.isPriority ? html`
-          <div class="priority-badge">
-            ⭐ Priority Caller
-          </div>
-        ` : ''}
+        ${callInfo.name
+          ? html`<div class="caller-number">${callInfo.number}</div>`
+          : ""}
+        ${callInfo.isPriority
+          ? html` <div class="priority-badge">⭐ Priority Caller</div> `
+          : ""}
       </div>
 
       <div class="call-status">Incoming call...</div>
 
-      <div class="swipe-slider"
-           @touchstart=${this._handleSwipeStart}
-           @touchmove=${this._handleSwipeMove}
-           @touchend=${this._handleSwipeEnd}>
+      <div
+        class="swipe-slider"
+        @touchstart=${this._handleSwipeStart}
+        @touchmove=${this._handleSwipeMove}
+        @touchend=${this._handleSwipeEnd}
+      >
         <div class="swipe-track">
           <span class="swipe-label">Decline</span>
           <span class="swipe-label">Answer</span>
         </div>
-        <div class="swipe-handle ${this._isSwipingLeft ? 'swiping-left' : ''} ${this._isSwipingRight ? 'swiping-right' : ''}"
-             style="transform: translateX(${this._swipeDistance}px)">
-          ${this._isSwipingLeft 
-            ? html`<ha-icon icon="mdi:close"></ha-icon>` 
-            : this._isSwipingRight 
-              ? html`<ha-icon icon="mdi:check"></ha-icon>` 
+        <div
+          class="swipe-handle ${this._isSwipingLeft
+            ? "swiping-left"
+            : ""} ${this._isSwipingRight ? "swiping-right" : ""}"
+          style="transform: translateX(${this._swipeDistance}px)"
+        >
+          ${this._isSwipingLeft
+            ? html`<ha-icon icon="mdi:close"></ha-icon>`
+            : this._isSwipingRight
+              ? html`<ha-icon icon="mdi:check"></ha-icon>`
               : html`<ha-icon icon="mdi:phone"></ha-icon>`}
         </div>
       </div>
@@ -604,40 +657,56 @@ export class TsuryPhoneCallModal extends LitElement {
     const { callInfo } = this;
     if (!callInfo) return html``;
 
-    const isSpeaker = callInfo.audioOutput === 'speaker';
+    const isSpeaker = callInfo.audioOutput === "speaker";
 
     return html`
       <div class="caller-info">
         <div class="caller-name">${callInfo.name || callInfo.number}</div>
-        ${callInfo.name ? html`<div class="caller-number">${callInfo.number}</div>` : ''}
+        ${callInfo.name
+          ? html`<div class="caller-number">${callInfo.number}</div>`
+          : ""}
       </div>
 
-      <div class="call-timer">${this._formatDuration(this._currentDuration)}</div>
+      <div class="call-timer">
+        ${this._formatDuration(this._currentDuration)}
+      </div>
 
-      ${this.callWaitingAvailable && this.waitingCall ? this._renderWaitingCall() : ''}
+      ${this.callWaitingAvailable && this.waitingCall
+        ? this._renderWaitingCall()
+        : ""}
 
       <div class="call-controls">
-        <button class="control-button ${this._isMuted ? 'muted' : ''}"
-                @click=${this._handleMute}
-                title="Mute">
-          <ha-icon icon="${this._isMuted ? 'mdi:microphone-off' : 'mdi:microphone'}"></ha-icon>
+        <button
+          class="control-button ${this._isMuted ? "muted" : ""}"
+          @click=${this._handleMute}
+          title="Mute"
+        >
+          <ha-icon
+            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
+          ></ha-icon>
         </button>
 
-        <button class="control-button ${this._showKeypad ? 'active' : ''}"
-                @click=${this._handleKeypad}
-                title="Keypad">
+        <button
+          class="control-button ${this._showKeypad ? "active" : ""}"
+          @click=${this._handleKeypad}
+          title="Keypad"
+        >
           <ha-icon icon="mdi:dialpad"></ha-icon>
         </button>
 
-        <button class="control-button ${isSpeaker ? 'active' : ''}"
-                @click=${this._handleSpeaker}
-                title="Speaker">
+        <button
+          class="control-button ${isSpeaker ? "active" : ""}"
+          @click=${this._handleSpeaker}
+          title="Speaker"
+        >
           �
         </button>
 
-        <button class="control-button hangup-button"
-                @click=${this._handleHangup}
-                title="Hang up">
+        <button
+          class="control-button hangup-button"
+          @click=${this._handleHangup}
+          title="Hang up"
+        >
           <ha-icon icon="mdi:phone-hangup"></ha-icon>
         </button>
       </div>
@@ -651,15 +720,27 @@ export class TsuryPhoneCallModal extends LitElement {
     return html`
       <div class="waiting-call">
         <div class="waiting-call-info">
-          <div class="waiting-call-name">${waitingCall.name || waitingCall.number}</div>
-          ${waitingCall.name ? html`<div class="waiting-call-number">${waitingCall.number}</div>` : ''}
-          ${waitingCall.isPriority ? html`<div class="priority-badge">⭐ Priority</div>` : ''}
+          <div class="waiting-call-name">
+            ${waitingCall.name || waitingCall.number}
+          </div>
+          ${waitingCall.name
+            ? html`<div class="waiting-call-number">${waitingCall.number}</div>`
+            : ""}
+          ${waitingCall.isPriority
+            ? html`<div class="priority-badge">⭐ Priority</div>`
+            : ""}
         </div>
         <div class="waiting-actions">
-          <button class="waiting-action-button swap-button" @click=${this._handleSwapCalls}>
+          <button
+            class="waiting-action-button swap-button"
+            @click=${this._handleSwapCalls}
+          >
             Swap
           </button>
-          <button class="waiting-action-button merge-button" @click=${this._handleMergeCalls}>
+          <button
+            class="waiting-action-button merge-button"
+            @click=${this._handleMergeCalls}
+          >
             Merge
           </button>
         </div>
@@ -669,21 +750,31 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override render(): TemplateResult {
     const titleMap = {
-      incoming: 'Incoming Call',
-      active: 'Active Call',
-      waiting: 'Call Waiting'
+      incoming: "Incoming Call",
+      active: "Active Call",
+      waiting: "Call Waiting",
     };
 
     return html`
       <div class="modal-header">
         <h2 class="modal-title">${titleMap[this.mode]}</h2>
-        <button class="close-button" @click=${this._handleClose} title="Minimize">
+        <button
+          class="close-button"
+          @click=${this._handleClose}
+          title="Minimize"
+        >
           −
         </button>
       </div>
 
-      <div class="modal-content ${this._isAnswering || this._isDeclining ? 'loading' : ''}">
-        ${this.mode === 'incoming' ? this._renderIncomingCall() : this._renderActiveCall()}
+      <div
+        class="modal-content ${this._isAnswering || this._isDeclining
+          ? "loading"
+          : ""}"
+      >
+        ${this.mode === "incoming"
+          ? this._renderIncomingCall()
+          : this._renderActiveCall()}
       </div>
     `;
   }
@@ -691,6 +782,6 @@ export class TsuryPhoneCallModal extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-call-modal': TsuryPhoneCallModal;
+    "tsuryphone-call-modal": TsuryPhoneCallModal;
   }
 }

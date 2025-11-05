@@ -3,6 +3,7 @@
 Run this after creating a GitHub release and uploading the release assets, or by adding the repo to HACS as a custom repository.
 
 ## Preconditions
+
 - Home Assistant instance running (2024.12+ recommended)
 - HACS installed and configured
 - TsuryPhone backend integration installed and connected to a TsuryPhone device
@@ -28,11 +29,12 @@ Run this after creating a GitHub release and uploading the release assets, or by
    - Resize browser / use mobile device to verify layout
 
 ## Expected Results
+
 - Card loads without JS errors
 - Home view shows call history and filters work
 - Theming and responsive behaviors are correct
 
 ## Troubleshooting
+
 - If the card fails to load, check browser console for module/resource path errors (ensure `dist/tsuryphone-card.js` is available)
 - If call data is missing, verify TsuryPhone integration is connected and publishing state
-

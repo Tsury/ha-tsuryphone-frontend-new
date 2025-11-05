@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0-alpha] - 2025-11-01
 
 ### Added
+
 - Initial alpha release
 - Bottom navigation with three tabs (Home, Keypad, Contacts)
 - Home view with call log display
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic call modal triggering based on phone state
 
 ### Known Limitations
+
 - Keypad view not yet implemented
 - Contacts view not yet implemented
 - Contact creation/editing modals not yet implemented
@@ -34,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Block number modal not yet implemented
 
 ### Requirements
+
 - Home Assistant 2024.1.0 or newer
 - TsuryPhone integration installed and configured
 - Modern browser with Web Components support

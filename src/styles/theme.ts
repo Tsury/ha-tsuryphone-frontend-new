@@ -1,4 +1,4 @@
-import { css } from 'lit';
+import { css } from "lit";
 
 /**
  * Common HA theme CSS variables for consistent styling
@@ -50,7 +50,11 @@ export const haThemeVariables = css`
   --tsury-border-radius-xl: 16px;
 
   /* Typography */
-  --tsury-font-family: var(--paper-font-common-base_-_font-family, 'Roboto', sans-serif);
+  --tsury-font-family: var(
+    --paper-font-common-base_-_font-family,
+    "Roboto",
+    sans-serif
+  );
   --tsury-font-size-sm: 12px;
   --tsury-font-size-md: 14px;
   --tsury-font-size-lg: 16px;
@@ -77,30 +81,30 @@ export function isDarkMode(hass: any): boolean {
  */
 export function getColorWithOpacity(color: string, opacity: number): string {
   // If color is already rgba, extract rgb part
-  if (color.startsWith('rgba')) {
+  if (color.startsWith("rgba")) {
     const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
     if (rgbMatch) {
       return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`;
     }
   }
-  
+
   // If color is rgb
-  if (color.startsWith('rgb')) {
+  if (color.startsWith("rgb")) {
     const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
     if (rgbMatch) {
       return `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]}, ${opacity})`;
     }
   }
-  
+
   // If hex color
-  if (color.startsWith('#')) {
-    const hex = color.replace('#', '');
+  if (color.startsWith("#")) {
+    const hex = color.replace("#", "");
     const r = parseInt(hex.substring(0, 2), 16);
     const g = parseInt(hex.substring(2, 4), 16);
     const b = parseInt(hex.substring(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
-  
+
   // Fallback: return as-is
   return color;
 }
@@ -108,9 +112,12 @@ export function getColorWithOpacity(color: string, opacity: number): string {
 /**
  * Get contrast text color based on background
  */
-export function getContrastTextColor(backgroundColor: string, isDark: boolean): string {
+export function getContrastTextColor(
+  backgroundColor: string,
+  isDark: boolean
+): string {
   // Simple heuristic: use primary text color
-  return isDark ? '#ffffff' : '#000000';
+  return isDark ? "#ffffff" : "#000000";
 }
 
 /**
@@ -118,11 +125,11 @@ export function getContrastTextColor(backgroundColor: string, isDark: boolean): 
  */
 export function getSurfaceColor(elevation: number, isDark: boolean): string {
   if (!isDark) {
-    return 'var(--card-background-color)';
+    return "var(--card-background-color)";
   }
-  
+
   // In dark mode, add white overlay based on elevation
-  const opacity = Math.min(0.05 + (elevation * 0.02), 0.16);
+  const opacity = Math.min(0.05 + elevation * 0.02, 0.16);
   return `rgba(255, 255, 255, ${opacity})`;
 }
 
@@ -138,7 +145,8 @@ export const haButtonStyles = css`
     border-radius: var(--tsury-border-radius-md);
     padding: var(--tsury-spacing-sm) var(--tsury-spacing-md);
     cursor: pointer;
-    transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+    transition: all var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
     outline: none;
     position: relative;
     overflow: hidden;
@@ -185,7 +193,7 @@ export const haButtonStyles = css`
 
   /* Ripple effect */
   button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -194,7 +202,9 @@ export const haButtonStyles = css`
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.3);
     transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition:
+      width 0.6s,
+      height 0.6s;
   }
 
   button:active::before {
@@ -236,16 +246,23 @@ export const haListStyles = css`
     padding: var(--tsury-spacing-md);
     min-height: 48px;
     cursor: pointer;
-    transition: background-color var(--tsury-transition-duration) var(--tsury-transition-timing);
+    transition: background-color var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
     border-radius: var(--tsury-border-radius-md);
   }
 
   .list-item:hover {
-    background-color: rgba(var(--rgb-primary-color), var(--tsury-state-hover-opacity));
+    background-color: rgba(
+      var(--rgb-primary-color),
+      var(--tsury-state-hover-opacity)
+    );
   }
 
   .list-item:active {
-    background-color: rgba(var(--rgb-primary-color), var(--tsury-state-pressed-opacity));
+    background-color: rgba(
+      var(--rgb-primary-color),
+      var(--tsury-state-pressed-opacity)
+    );
   }
 
   .list-item-avatar {

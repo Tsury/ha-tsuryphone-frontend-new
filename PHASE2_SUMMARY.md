@@ -9,6 +9,7 @@
 Created `src/components/navigation/tsuryphone-navigation.ts`:
 
 **Features Implemented:**
+
 - Three-tab navigation: Home, Keypad, Contacts
 - Material Design-inspired styling
 - Active tab indicator (top border animation)
@@ -19,6 +20,7 @@ Created `src/components/navigation/tsuryphone-navigation.ts`:
 - Responsive sizing for mobile/tablet/desktop
 
 **Styling Details:**
+
 - Active tab: Primary color with animated top border
 - Inactive tabs: Secondary text color
 - Hover state: Subtle background overlay
@@ -28,6 +30,7 @@ Created `src/components/navigation/tsuryphone-navigation.ts`:
 - Smooth transitions on all state changes
 
 **Accessibility:**
+
 - ARIA role="tablist" for navigation
 - ARIA role="tab" for each button
 - aria-selected attribute for active state
@@ -36,6 +39,7 @@ Created `src/components/navigation/tsuryphone-navigation.ts`:
 - Focus indicators
 
 **Responsive Design:**
+
 - Mobile (< 600px): 11px labels, 56px min-width tabs
 - Tablet/Desktop (default): 12px labels, 64px min-width tabs
 - Large Desktop (> 1024px): 13px labels, 80px min-width tabs, 64px height
@@ -45,13 +49,15 @@ Created `src/components/navigation/tsuryphone-navigation.ts`:
 Updated `src/tsuryphone-card.ts`:
 
 **Implementation:**
+
 - NavigationTab type imported from navigation component
 - TabChangeEvent interface for type-safe event handling
-- _handleTabChange() method to update active view
+- \_handleTabChange() method to update active view
 - View state management with @state() decorator
 - Event bubbling and composition for parent handling
 
 **View Rendering:**
+
 - Conditional rendering based on active tab
 - Only one view rendered at a time (performance optimization)
 - Smooth view switching with fade-in animations
@@ -59,6 +65,7 @@ Updated `src/tsuryphone-card.ts`:
 #### 3. **Responsive Layout** ✅
 
 **Container Structure:**
+
 ```
 .tsuryphone-container
   └── .views-container (flex column)
@@ -70,6 +77,7 @@ Updated `src/tsuryphone-card.ts`:
 ```
 
 **Layout Features:**
+
 - Flex-based layout for proper sizing
 - Scrollable view content area
 - Fixed navigation at bottom
@@ -78,6 +86,7 @@ Updated `src/tsuryphone-card.ts`:
 - Proper overflow handling
 
 **CSS Features:**
+
 - Flexbox for responsive layout
 - -webkit-overflow-scrolling for smooth iOS scrolling
 - overflow-y: auto for vertical scrolling
@@ -87,12 +96,14 @@ Updated `src/tsuryphone-card.ts`:
 #### 4. **View Transitions** ✅
 
 **Animation System:**
+
 - Fade-in animation on view render (from common.ts)
 - 200ms duration with ease timing function
 - Smooth opacity transition from 0 to 1
 - Applied via .fade-in class
 
 **Transition Effects:**
+
 - Tab indicator slide animation (200ms)
 - Ripple effect on tab tap (400ms)
 - Hover/active state transitions (200ms)
@@ -101,12 +112,14 @@ Updated `src/tsuryphone-card.ts`:
 ### Files Created/Modified
 
 **New Files:**
+
 ```
 src/components/navigation/
 └── tsuryphone-navigation.ts  - Bottom navigation component (200+ lines)
 ```
 
 **Modified Files:**
+
 ```
 src/tsuryphone-card.ts         - Integrated navigation, added view routing
 ```
@@ -116,19 +129,23 @@ src/tsuryphone-card.ts         - Integrated navigation, added view routing
 #### Navigation Component Architecture
 
 **Custom Element:**
+
 - @customElement decorator for web component registration
 - Extends LitElement for reactive properties
 - Type-safe props with TypeScript
 
 **Properties:**
+
 - `activeTab`: NavigationTab - Current active tab
 - `disabled`: boolean - Disables all navigation
 
 **Events:**
+
 - `tab-change`: CustomEvent<TabChangeEvent> - Fired on tab click
 - Bubbles and composes through shadow DOM
 
 **Styling Strategy:**
+
 - Uses HA theme variables for consistency
 - CSS custom properties for dynamic theming
 - Responsive media queries
@@ -137,6 +154,7 @@ src/tsuryphone-card.ts         - Integrated navigation, added view routing
 #### View Routing Pattern
 
 **State Management:**
+
 ```typescript
 @state() private _activeView: NavigationTab = "home";
 
@@ -146,6 +164,7 @@ private _handleTabChange(e: CustomEvent<TabChangeEvent>): void {
 ```
 
 **Conditional Rendering:**
+
 ```typescript
 ${this._activeView === "home" ? this._renderHomeView() : ""}
 ${this._activeView === "keypad" ? this._renderKeypadView() : ""}
@@ -153,6 +172,7 @@ ${this._activeView === "contacts" ? this._renderContactsView() : ""}
 ```
 
 **Benefits:**
+
 - Only one view in DOM at a time
 - Clean state management
 - Easy to extend with more views
@@ -172,6 +192,7 @@ ${this._activeView === "contacts" ? this._renderContactsView() : ""}
 #### Disabled State
 
 When call modal is active:
+
 - Navigation becomes semi-transparent (50% opacity)
 - pointer-events: none prevents interaction
 - Cursor shows not-allowed on hover
@@ -187,12 +208,14 @@ When call modal is active:
 ### Performance
 
 **Metrics:**
+
 - Build time: ~750ms (includes navigation component)
 - Navigation component bundle: ~5KB (gzipped estimate)
 - Tab switch: < 50ms (instant, no re-rendering of hidden views)
 - Animation smoothness: 60 FPS
 
 **Optimizations:**
+
 - Single view rendering (not all three)
 - CSS transitions (GPU accelerated)
 - Event delegation
@@ -201,12 +224,14 @@ When call modal is active:
 ### Accessibility
 
 **Keyboard Navigation:**
+
 - Tab key to focus navigation
 - Arrow keys to move between tabs (browser default)
 - Enter/Space to activate tab
 - Focus visible indicators
 
 **Screen Readers:**
+
 - Proper ARIA roles and attributes
 - Tab labels announced
 - Active state announced

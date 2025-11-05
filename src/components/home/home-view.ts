@@ -1,22 +1,22 @@
-import { LitElement, html, css } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { 
-  CallHistoryEntry, 
-  CallFilter, 
-  filterCallHistory, 
+import { LitElement, html, css } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import {
+  CallHistoryEntry,
+  CallFilter,
+  filterCallHistory,
   groupCallHistory,
-  getFrequentContacts 
-} from '../../utils/call-history-grouping';
-import './call-log-filters';
-import './frequent-contacts';
-import './call-log-list';
+  getFrequentContacts,
+} from "../../utils/call-history-grouping";
+import "./call-log-filters";
+import "./frequent-contacts";
+import "./call-log-list";
 
-@customElement('tsuryphone-home-view')
+@customElement("tsuryphone-home-view")
 export class TsuryPhoneHomeView extends LitElement {
   @property({ type: Array }) callHistory: CallHistoryEntry[] = [];
   @property({ type: Boolean }) loading = false;
 
-  @state() private _activeFilter: CallFilter = 'all';
+  @state() private _activeFilter: CallFilter = "all";
 
   static styles = css`
     :host {
@@ -76,7 +76,7 @@ export class TsuryPhoneHomeView extends LitElement {
   private _handleContactClicked(e: CustomEvent) {
     // Bubble up the event for parent to handle (e.g., open call modal)
     this.dispatchEvent(
-      new CustomEvent('dial-contact', {
+      new CustomEvent("dial-contact", {
         detail: e.detail,
         bubbles: true,
         composed: true,
@@ -87,7 +87,7 @@ export class TsuryPhoneHomeView extends LitElement {
   private _handleCallItemClicked(e: CustomEvent) {
     // Bubble up the event for parent to handle (e.g., open call details)
     this.dispatchEvent(
-      new CustomEvent('call-details', {
+      new CustomEvent("call-details", {
         detail: e.detail,
         bubbles: true,
         composed: true,
@@ -97,14 +97,18 @@ export class TsuryPhoneHomeView extends LitElement {
 
   render() {
     // Filter and group call history
-    const filteredCalls = filterCallHistory(this.callHistory, this._activeFilter);
+    const filteredCalls = filterCallHistory(
+      this.callHistory,
+      this._activeFilter
+    );
     const groupedCalls = groupCallHistory(filteredCalls);
-    
+
     // Get frequent contacts (only from all calls, not filtered)
     const frequentContacts = getFrequentContacts(this.callHistory, 6);
-    
+
     // Show frequent contacts only if we have calls and filter is 'all'
-    const showFrequentContacts = this._activeFilter === 'all' && frequentContacts.length > 0;
+    const showFrequentContacts =
+      this._activeFilter === "all" && frequentContacts.length > 0;
 
     return html`
       <div class="home-view">
@@ -122,7 +126,7 @@ export class TsuryPhoneHomeView extends LitElement {
                 ></tsuryphone-frequent-contacts>
                 <div class="divider"></div>
               `
-            : ''}
+            : ""}
 
           <tsuryphone-call-log-list
             .groupedCalls=${groupedCalls}
@@ -137,6 +141,6 @@ export class TsuryPhoneHomeView extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-home-view': TsuryPhoneHomeView;
+    "tsuryphone-home-view": TsuryPhoneHomeView;
   }
 }

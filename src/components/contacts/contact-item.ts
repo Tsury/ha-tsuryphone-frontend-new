@@ -9,10 +9,7 @@ import { HomeAssistant } from "../../types/homeassistant";
 import { TsuryPhoneCardConfig, QuickDialEntry } from "../../types/tsuryphone";
 import { formatPhoneNumber } from "../../utils/formatters";
 import { triggerHaptic } from "../../utils/haptics";
-import {
-  listItemStyles,
-  buttonStyles,
-} from "../../styles/shared-styles";
+import { listItemStyles, buttonStyles } from "../../styles/shared-styles";
 import "../shared/avatar";
 
 @customElement("tsuryphone-contact-item")
@@ -146,7 +143,7 @@ export class TsuryPhoneContactItem extends LitElement {
     const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
     const priorityCallers = phoneState?.attributes?.priority_callers || [];
     const isPriority = priorityCallers.some(
-      (p: any) => p.number === this.contact.number  // Both are normalized E.164 format
+      (p: any) => p.number === this.contact.number // Both are normalized E.164 format
     );
 
     return html`

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -18,8 +18,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -39,19 +39,19 @@ jobs:
             echo "❌ Build failed - dist/tsuryphone-card.js not found"
             exit 1
           fi
-          
+
           if [ ! -f "dist/tsuryphone-card.js.map" ]; then
             echo "⚠️ Source map not found (non-critical)"
           fi
-          
+
           echo "✅ Build successful"
           echo "Bundle size:"
           ls -lh dist/tsuryphone-card.js
-          
+
           # Check bundle size
           SIZE=$(stat -f%z dist/tsuryphone-card.js 2>/dev/null || stat -c%s dist/tsuryphone-card.js)
           echo "Bundle size: $SIZE bytes"
-          
+
           # Warn if bundle is too large (> 1MB)
           if [ $SIZE -gt 1048576 ]; then
             echo "⚠️ Bundle size exceeds 1MB"

@@ -7,6 +7,7 @@
 **Trigger**: Automatically on every push to `main` branch
 
 **What it does**:
+
 1. Reads current version from `package.json`
 2. Auto-bumps patch version (e.g., 0.1.0-alpha → 0.1.1-alpha)
 3. Installs dependencies with `npm ci`
@@ -22,6 +23,7 @@
 **Skip release**: Include `[skip-release]` in commit message
 
 **Example**:
+
 ```bash
 git commit -m "fix: some bug [skip-release]"
 ```
@@ -33,11 +35,13 @@ git commit -m "fix: some bug [skip-release]"
 **Trigger**: On push, pull requests, or manual dispatch
 
 **What it does**:
+
 1. Validates `hacs.json` is valid JSON with required fields
 2. Checks for `info.md` and `README.md`
 3. Verifies build artifact path exists (if built)
 
 **Required fields in hacs.json**:
+
 - `name`
 - `filename`
 
@@ -48,6 +52,7 @@ git commit -m "fix: some bug [skip-release]"
 **Trigger**: On push, pull requests, or manual dispatch
 
 **What it does**:
+
 1. Sets up Node.js 20
 2. Installs dependencies (`npm ci`)
 3. Runs TypeScript compiler (`tsc --noEmit`)
@@ -64,6 +69,7 @@ git commit -m "fix: some bug [skip-release]"
 ### Auto-versioning Strategy
 
 The auto-release workflow uses **patch version bumping**:
+
 - `0.1.0-alpha` → `0.1.1-alpha` → `0.1.2-alpha`
 
 The suffix (e.g., `-alpha`) is preserved during auto-bumping.
@@ -138,11 +144,13 @@ git push origin main
 ## Monitoring Workflows
 
 Check workflow status:
+
 - Go to: `https://github.com/Tsury/ha-tsuryphone-frontend-new/actions`
 - View recent runs
 - Check logs if failures occur
 
 Common issues:
+
 - **Build failure**: Check TypeScript errors in CI logs
 - **Version bump failure**: Ensure `package.json` has valid semver
 - **Release failure**: Check GitHub token permissions

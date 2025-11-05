@@ -3,19 +3,19 @@
  * Bottom navigation bar with three tabs: Home, Keypad, Contacts
  */
 
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { haThemeVariables } from '../../styles/theme';
+import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { haThemeVariables } from "../../styles/theme";
 
-export type NavigationTab = 'home' | 'keypad' | 'contacts' | 'blocked';
+export type NavigationTab = "home" | "keypad" | "contacts" | "blocked";
 
 export interface TabChangeEvent {
   tab: NavigationTab;
 }
 
-@customElement('tsuryphone-navigation')
+@customElement("tsuryphone-navigation")
 export class TsuryPhoneNavigation extends LitElement {
-  @property({ type: String }) activeTab: NavigationTab = 'home';
+  @property({ type: String }) activeTab: NavigationTab = "home";
   @property({ type: Boolean }) disabled = false;
 
   private _handleTabClick(tab: NavigationTab): void {
@@ -25,7 +25,7 @@ export class TsuryPhoneNavigation extends LitElement {
 
     // Dispatch custom event for parent to handle
     this.dispatchEvent(
-      new CustomEvent<TabChangeEvent>('tab-change', {
+      new CustomEvent<TabChangeEvent>("tab-change", {
         detail: { tab },
         bubbles: true,
         composed: true,
@@ -35,21 +35,25 @@ export class TsuryPhoneNavigation extends LitElement {
 
   render(): TemplateResult {
     return html`
-      <nav class="navigation ${this.disabled ? 'disabled' : ''}" role="tablist">
-        ${this._renderTab('home', 'mdi:home', 'Home')}
-        ${this._renderTab('keypad', 'mdi:dialpad', 'Keypad')}
-        ${this._renderTab('contacts', 'mdi:contacts', 'Contacts')}
-        ${this._renderTab('blocked', 'mdi:block-helper', 'Blocked')}
+      <nav class="navigation ${this.disabled ? "disabled" : ""}" role="tablist">
+        ${this._renderTab("home", "mdi:home", "Home")}
+        ${this._renderTab("keypad", "mdi:dialpad", "Keypad")}
+        ${this._renderTab("contacts", "mdi:contacts", "Contacts")}
+        ${this._renderTab("blocked", "mdi:block-helper", "Blocked")}
       </nav>
     `;
   }
 
-  private _renderTab(tab: NavigationTab, icon: string, label: string): TemplateResult {
+  private _renderTab(
+    tab: NavigationTab,
+    icon: string,
+    label: string
+  ): TemplateResult {
     const isActive = this.activeTab === tab;
-    
+
     return html`
       <button
-        class="nav-tab ${isActive ? 'active' : ''}"
+        class="nav-tab ${isActive ? "active" : ""}"
         role="tab"
         aria-selected="${isActive}"
         aria-label="${label}"
@@ -98,7 +102,8 @@ export class TsuryPhoneNavigation extends LitElement {
           border: none;
           cursor: pointer;
           color: var(--tsury-secondary-text-color);
-          transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+          transition: all var(--tsury-transition-duration)
+            var(--tsury-transition-timing);
           position: relative;
           min-width: 64px;
           outline: none;
@@ -110,11 +115,17 @@ export class TsuryPhoneNavigation extends LitElement {
         }
 
         .nav-tab:not(:disabled):hover {
-          background: rgba(var(--rgb-primary-color, 128, 128, 128), var(--tsury-state-hover-opacity));
+          background: rgba(
+            var(--rgb-primary-color, 128, 128, 128),
+            var(--tsury-state-hover-opacity)
+          );
         }
 
         .nav-tab:not(:disabled):active {
-          background: rgba(var(--rgb-primary-color, 128, 128, 128), var(--tsury-state-pressed-opacity));
+          background: rgba(
+            var(--rgb-primary-color, 128, 128, 128),
+            var(--tsury-state-pressed-opacity)
+          );
         }
 
         .nav-tab:not(:disabled):focus-visible {
@@ -127,7 +138,7 @@ export class TsuryPhoneNavigation extends LitElement {
         }
 
         .nav-tab.active::before {
-          content: '';
+          content: "";
           position: absolute;
           top: 0;
           left: 50%;
@@ -163,7 +174,7 @@ export class TsuryPhoneNavigation extends LitElement {
 
         /* Ripple effect on tap */
         .nav-tab::after {
-          content: '';
+          content: "";
           position: absolute;
           top: 50%;
           left: 50%;
@@ -172,7 +183,9 @@ export class TsuryPhoneNavigation extends LitElement {
           border-radius: 50%;
           background: rgba(var(--rgb-primary-color, 128, 128, 128), 0.2);
           transform: translate(-50%, -50%);
-          transition: width 0.4s, height 0.4s;
+          transition:
+            width 0.4s,
+            height 0.4s;
           pointer-events: none;
         }
 
@@ -213,6 +226,6 @@ export class TsuryPhoneNavigation extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-navigation': TsuryPhoneNavigation;
+    "tsuryphone-navigation": TsuryPhoneNavigation;
   }
 }

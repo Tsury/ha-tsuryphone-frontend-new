@@ -104,7 +104,7 @@ export class TsuryPhoneContactsView extends LitElement {
     const phoneStateEntityId = this._getPhoneStateEntityId();
     const phoneState = this.hass?.states[phoneStateEntityId];
     const contacts = phoneState?.attributes?.quick_dials || [];
-    
+
     return contacts;
   }
 

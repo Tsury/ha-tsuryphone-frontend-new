@@ -5,6 +5,7 @@ A modern, Android Pixel 8-style Phone + Contacts interface for the TsuryPhone Ho
 ## Features
 
 ### 📱 Home View (Call Log)
+
 - **Call History**: View your recent calls with detailed information
 - **Smart Filtering**: Filter by All, Missed, Outgoing, or Incoming calls
 - **Contact Integration**: Automatically shows contact names and avatars
@@ -13,17 +14,20 @@ A modern, Android Pixel 8-style Phone + Contacts interface for the TsuryPhone Ho
 - **Beautiful Design**: Material Design-inspired UI with smooth animations
 
 ### 🔢 Keypad View (Coming Soon)
+
 - Full numeric keypad for manual dialing
 - Live dialing number display
 - Quick dial integration
 
 ### 👥 Contacts View (Coming Soon)
+
 - Browse all your quick dial contacts
 - Smart grouping: Priority, A-Z, Hebrew, Numbers
 - Search functionality
 - Create and edit contacts
 
 ### 🚫 Blocked Numbers (Coming Soon)
+
 - Manage blocked numbers
 - Block from call history
 - Easy unblock option
@@ -61,11 +65,11 @@ entity: binary_sensor.tsuryphone_connection
 
 ### Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `entity` | string | **Required** | The TsuryPhone connection sensor entity ID |
-| `name` | string | "TsuryPhone" | Card title |
-| `theme_mode` | string | "auto" | Theme mode: "auto", "light", or "dark" |
+| Option       | Type   | Default      | Description                                |
+| ------------ | ------ | ------------ | ------------------------------------------ |
+| `entity`     | string | **Required** | The TsuryPhone connection sensor entity ID |
+| `name`       | string | "TsuryPhone" | Card title                                 |
+| `theme_mode` | string | "auto"       | Theme mode: "auto", "light", or "dark"     |
 
 ### Example Configuration
 
@@ -98,6 +102,7 @@ The card automatically adapts to your Home Assistant theme, supporting both ligh
 **Version**: 0.1.0-alpha
 
 This is an early alpha release with the following features:
+
 - ✅ Navigation system (Home, Keypad, Contacts tabs)
 - ✅ Home view with call log and filtering
 - ✅ Full theming integration

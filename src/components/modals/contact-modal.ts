@@ -324,9 +324,7 @@ export class ContactModal extends LitElement {
     // Find the phone_state sensor entity
     return (
       Object.keys(this.hass.states).find(
-        (id) =>
-          id.startsWith("sensor.") &&
-          id.includes("phone_state")
+        (id) => id.startsWith("sensor.") && id.includes("phone_state")
       ) || null
     );
   }
@@ -456,12 +454,9 @@ export class ContactModal extends LitElement {
       serviceData.code = this.formData.code.trim();
     }
 
-    await this.hass.callService(
-      "tsuryphone",
-      "quick_dial_add",
-      serviceData,
-      { entity_id: phoneStateId }
-    );
+    await this.hass.callService("tsuryphone", "quick_dial_add", serviceData, {
+      entity_id: phoneStateId,
+    });
   }
 
   private async _deleteContact(id: string) {
@@ -590,33 +585,35 @@ export class ContactModal extends LitElement {
           </button>
         </div>
 
-          ${this.showDeleteConfirm
-            ? html`
-                <div class="delete-confirm">
-                  <div class="delete-confirm-text">
-                    Are you sure you want to delete this contact? This action
-                    cannot be undone.
+          ${
+            this.showDeleteConfirm
+              ? html`
+                  <div class="delete-confirm">
+                    <div class="delete-confirm-text">
+                      Are you sure you want to delete this contact? This action
+                      cannot be undone.
+                    </div>
+                    <div class="delete-confirm-actions">
+                      <button
+                        @click=${this._handleDeleteCancel}
+                        ?disabled=${this.saving}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        class="button-delete"
+                        @click=${this._handleDeleteConfirm}
+                        ?disabled=${this.saving}
+                      >
+                        ${this.saving
+                          ? html`<div class="spinner"></div>`
+                          : "Delete"}
+                      </button>
+                    </div>
                   </div>
-                  <div class="delete-confirm-actions">
-                    <button
-                      @click=${this._handleDeleteCancel}
-                      ?disabled=${this.saving}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      class="button-delete"
-                      @click=${this._handleDeleteConfirm}
-                      ?disabled=${this.saving}
-                    >
-                      ${this.saving
-                        ? html`<div class="spinner"></div>`
-                        : "Delete"}
-                    </button>
-                  </div>
-                </div>
-              `
-            : ""}
+                `
+              : ""
+          }
 
           <div class="form">
             <div class="form-field">
@@ -632,9 +629,11 @@ export class ContactModal extends LitElement {
                 ?disabled=${this.saving}
                 placeholder="Contact name"
               />
-              ${this.errors.name
-                ? html`<div class="error-message">${this.errors.name}</div>`
-                : ""}
+              ${
+                this.errors.name
+                  ? html`<div class="error-message">${this.errors.name}</div>`
+                  : ""
+              }
             </div>
 
             <div class="form-field">
@@ -650,9 +649,11 @@ export class ContactModal extends LitElement {
                 ?disabled=${this.saving}
                 placeholder="+1234567890"
               />
-              ${this.errors.number
-                ? html`<div class="error-message">${this.errors.number}</div>`
-                : ""}
+              ${
+                this.errors.number
+                  ? html`<div class="error-message">${this.errors.number}</div>`
+                  : ""
+              }
             </div>
 
             <div class="form-field">
@@ -668,9 +669,11 @@ export class ContactModal extends LitElement {
                 ?disabled=${this.saving}
                 placeholder="e.g., 1, 2, mom, work"
               />
-              ${this.errors.code
-                ? html`<div class="error-message">${this.errors.code}</div>`
-                : ""}
+              ${
+                this.errors.code
+                  ? html`<div class="error-message">${this.errors.code}</div>`
+                  : ""
+              }
             </div>
 
             <div class="priority-toggle">
@@ -689,19 +692,21 @@ export class ContactModal extends LitElement {
             </div>
           </div>
 
-          ${this.mode === "edit" && !this.showDeleteConfirm
-            ? html`
-                <button
-                  class="button-delete"
-                  @click=${this._handleDeleteClick}
-                  ?disabled=${this.saving}
-                  style="width: 100%; margin-top: 24px;"
-                >
-                  <ha-icon icon="mdi:delete"></ha-icon>
-                  Delete Contact
-                </button>
-              `
-            : ""}
+          ${
+            this.mode === "edit" && !this.showDeleteConfirm
+              ? html`
+                  <button
+                    class="button-delete"
+                    @click=${this._handleDeleteClick}
+                    ?disabled=${this.saving}
+                    style="width: 100%; margin-top: 24px;"
+                  >
+                    <ha-icon icon="mdi:delete"></ha-icon>
+                    Delete Contact
+                  </button>
+                `
+              : ""
+          }
 
           <div class="actions">
             <button
@@ -716,11 +721,13 @@ export class ContactModal extends LitElement {
               @click=${this._handleSave}
               ?disabled=${this.saving}
             >
-              ${this.saving
-                ? html`<div class="spinner"></div>`
-                : this.mode === "add"
-                ? "Add Contact"
-                : "Save Changes"}
+              ${
+                this.saving
+                  ? html`<div class="spinner"></div>`
+                  : this.mode === "add"
+                    ? "Add Contact"
+                    : "Save Changes"
+              }
             </button>
           </div>
         </div>

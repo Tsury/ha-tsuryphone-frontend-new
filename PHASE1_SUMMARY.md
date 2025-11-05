@@ -5,18 +5,21 @@
 ### What Was Built
 
 #### 1. **Project Structure** ✅
+
 - Complete npm package configuration
 - TypeScript build system with Rollup
 - ESLint and Prettier setup
 - Proper directory structure (`src/`, `dist/`, `types/`, `styles/`, `components/`)
 
 #### 2. **Build System** ✅
+
 - Rollup configuration for ES module bundling
 - TypeScript compilation with decorators support
 - Sourcemap generation for debugging
 - Dev and production build scripts
 
 #### 3. **Type System** ✅
+
 - Complete TsuryPhone data model types
 - Home Assistant integration types
 - Updated QuickDialEntry with `id` field (supporting optional codes)
@@ -27,6 +30,7 @@
 Created comprehensive theming system in `src/styles/theme.ts`:
 
 **HA Theme Variables:**
+
 - Primary, secondary, and disabled text colors
 - Card and background colors
 - State colors (success, error, warning, info)
@@ -39,12 +43,14 @@ Created comprehensive theming system in `src/styles/theme.ts`:
 - Transition timing
 
 **Utility Functions:**
+
 - `isDarkMode()` - Detect current theme mode
 - `getColorWithOpacity()` - Color manipulation with alpha
 - `getContrastTextColor()` - Accessible text colors
 - `getSurfaceColor()` - Elevation-based surfaces
 
 **Reusable Styles:**
+
 - `haButtonStyles` - HA-themed buttons with ripple effects
 - `haCardStyles` - Standard card styling
 - `haListStyles` - List item styling with hover states
@@ -54,12 +60,14 @@ Created comprehensive theming system in `src/styles/theme.ts`:
 Created `src/styles/common.ts`:
 
 **Layout Classes:**
+
 - Flexbox utilities (flex, flex-column, flex-center, flex-1)
 - Text utilities (ellipsis, center)
 - Clickable and disabled states
 - Scrollable containers with custom scrollbars
 
 **Animations:**
+
 - fadeIn / fadeOut
 - slideInUp / slideOutDown
 - CSS classes for animation triggers
@@ -69,18 +77,21 @@ Created `src/styles/common.ts`:
 Implemented in `src/tsuryphone-card.ts`:
 
 **State Management:**
+
 - Subscribe to `state_changed` events for all device entities
 - Automatic data caching from coordinator state
 - Real-time updates for contacts, blocked numbers, call history
 - Call modal auto-triggering based on phone state
 
 **Connection Handling:**
+
 - Connection state tracking (`_isConnected`)
 - Error state management with user-friendly messages
 - Graceful fallback when HA unavailable
 - Proper subscription cleanup on disconnect
 
 **Data Caching:**
+
 - `_contactsCache` - QuickDialEntry[]
 - `_blockedCache` - BlockedNumberEntry[]
 - `_callHistoryCache` - CallHistoryEntry[]
@@ -89,12 +100,14 @@ Implemented in `src/tsuryphone-card.ts`:
 #### 7. **Error Handling** ✅
 
 **Error Overlay:**
+
 - Shows when HA connection is lost
 - Displays entity not found errors
 - User-friendly error messages
 - Icon-based visual feedback
 
 **Defensive Coding:**
+
 - Null checks for hass and config
 - Try-catch blocks in subscriptions
 - Console logging for debugging

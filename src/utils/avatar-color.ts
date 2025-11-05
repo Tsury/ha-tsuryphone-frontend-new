@@ -3,18 +3,18 @@
  */
 
 const AVATAR_COLORS = [
-  '#1976d2', // Blue
-  '#388e3c', // Green
-  '#d32f2f', // Red
-  '#7b1fa2', // Purple
-  '#f57c00', // Orange
-  '#0097a7', // Cyan
-  '#c2185b', // Pink
-  '#5d4037', // Brown
-  '#455a64', // Blue Grey
-  '#689f38', // Light Green
-  '#0288d1', // Light Blue
-  '#e64a19', // Deep Orange
+  "#1976d2", // Blue
+  "#388e3c", // Green
+  "#d32f2f", // Red
+  "#7b1fa2", // Purple
+  "#f57c00", // Orange
+  "#0097a7", // Cyan
+  "#c2185b", // Pink
+  "#5d4037", // Brown
+  "#455a64", // Blue Grey
+  "#689f38", // Light Green
+  "#0288d1", // Light Blue
+  "#e64a19", // Deep Orange
 ];
 
 /**
@@ -46,16 +46,16 @@ export function getAvatarColor(name: string): string {
  */
 export function getInitials(name: string): string {
   if (!name) {
-    return '?';
+    return "?";
   }
 
   const words = name.trim().split(/\s+/);
-  
+
   if (words.length === 1) {
     // Single word: take first 2 chars
     return words[0].substring(0, 2).toUpperCase();
   }
-  
+
   // Multiple words: take first char of first two words
   return (words[0][0] + words[1][0]).toUpperCase();
 }
