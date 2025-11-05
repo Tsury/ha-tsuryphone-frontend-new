@@ -35,6 +35,29 @@ export class TsuryPhoneContactItem extends LitElement {
           min-width: 0;
         }
 
+        .avatar-container {
+          position: relative;
+        }
+
+        .priority-badge {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--warning-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .priority-badge ha-icon {
+          --mdc-icon-size: 14px;
+          color: var(--text-primary-color, white);
+        }
+
         .contact-details {
           flex: 1;
           min-width: 0;
@@ -43,7 +66,7 @@ export class TsuryPhoneContactItem extends LitElement {
         .contact-name {
           font-size: 16px;
           font-weight: 500;
-          color: var(--primary-text-color, #000);
+          color: var(--primary-text-color);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -51,7 +74,7 @@ export class TsuryPhoneContactItem extends LitElement {
 
         .contact-number {
           font-size: 14px;
-          color: var(--secondary-text-color, #666);
+          color: var(--secondary-text-color);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -67,8 +90,8 @@ export class TsuryPhoneContactItem extends LitElement {
           height: 40px;
           border-radius: 50%;
           border: none;
-          background: var(--primary-color, #03a9f4);
-          color: white;
+          background: var(--primary-color);
+          color: var(--text-primary-color, white);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -77,16 +100,12 @@ export class TsuryPhoneContactItem extends LitElement {
         }
 
         .call-button:hover {
-          background: var(--dark-primary-color, #0288d1);
+          background: var(--dark-primary-color, var(--primary-color));
           transform: scale(1.05);
         }
 
         .call-button:active {
           transform: scale(0.95);
-        }
-
-        .priority-star {
-          color: var(--warning-color, #ffa726);
         }
       `,
     ];
@@ -149,16 +168,19 @@ export class TsuryPhoneContactItem extends LitElement {
     return html`
       <div class="list-item" @click=${this._handleEdit}>
         <div class="contact-info">
-          <tsuryphone-avatar .name=${this.contact.name}></tsuryphone-avatar>
+          <div class="avatar-container">
+            <tsuryphone-avatar .name=${this.contact.name}></tsuryphone-avatar>
+            ${isPriority
+              ? html`
+                  <div class="priority-badge">
+                    <ha-icon icon="mdi:star"></ha-icon>
+                  </div>
+                `
+              : ""}
+          </div>
           <div class="contact-details">
             <div class="contact-name">
               ${this.contact.name}
-              ${isPriority
-                ? html`<ha-icon
-                    class="priority-star"
-                    icon="mdi:star"
-                  ></ha-icon>`
-                : ""}
             </div>
             <div class="contact-number">${formattedNumber}</div>
           </div>

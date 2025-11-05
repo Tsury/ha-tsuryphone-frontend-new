@@ -59,7 +59,7 @@ export class ContactModal extends LitElement {
       flex-direction: column;
       width: 100%;
       height: 100%;
-      background: var(--card-background-color, #fff);
+      background: var(--card-background-color);
       padding: 24px;
       overflow-y: auto;
       animation: slideUp 0.3s ease-out;
@@ -104,7 +104,7 @@ export class ContactModal extends LitElement {
     }
 
     .close-button:hover {
-      background-color: var(--divider-color, rgba(0, 0, 0, 0.1));
+      background-color: var(--secondary-background-color);
     }
 
     .close-button ha-icon {
@@ -130,7 +130,7 @@ export class ContactModal extends LitElement {
     }
 
     .form-field label .required {
-      color: var(--error-color, #db4437);
+      color: var(--error-color);
     }
 
     .form-field label .optional {
@@ -141,7 +141,7 @@ export class ContactModal extends LitElement {
 
     .form-field input {
       padding: 12px 16px;
-      border: 1px solid var(--divider-color, #e0e0e0);
+      border: 1px solid var(--divider-color);
       border-radius: 12px;
       font-size: 16px;
       font-family: inherit;
@@ -156,12 +156,12 @@ export class ContactModal extends LitElement {
     }
 
     .form-field input.error {
-      border-color: var(--error-color, #db4437);
+      border-color: var(--error-color);
     }
 
     .form-field .error-message {
       font-size: 12px;
-      color: var(--error-color, #db4437);
+      color: var(--error-color);
       margin-top: 4px;
     }
 
@@ -191,7 +191,7 @@ export class ContactModal extends LitElement {
 
     .priority-toggle ha-icon {
       --mdc-icon-size: 20px;
-      color: var(--warning-color, #f57c00);
+      color: var(--warning-color);
     }
 
     .actions {
@@ -223,16 +223,16 @@ export class ContactModal extends LitElement {
     .button-cancel {
       background: transparent;
       color: var(--primary-text-color);
-      border: 1px solid var(--divider-color, #e0e0e0);
+      border: 1px solid var(--divider-color);
     }
 
     .button-cancel:hover:not(:disabled) {
-      background: var(--divider-color, rgba(0, 0, 0, 0.05));
+      background: var(--secondary-background-color);
     }
 
     .button-save {
       background: var(--primary-color);
-      color: var(--text-primary-color, #fff);
+      color: var(--text-primary-color, white);
     }
 
     .button-save:hover:not(:disabled) {
@@ -240,8 +240,8 @@ export class ContactModal extends LitElement {
     }
 
     .button-delete {
-      background: var(--error-color, #db4437);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
       margin-bottom: 12px;
     }
 

@@ -17,6 +17,7 @@ export class TsuryPhoneContactsView extends LitElement {
 
   @state() private _searchQuery = "";
   @state() private _showAddModal = false;
+  @state() private _showMenu = false;
 
   static get styles(): CSSResultGroup {
     return css`
@@ -24,15 +25,19 @@ export class TsuryPhoneContactsView extends LitElement {
         display: flex;
         flex-direction: column;
         height: 100%;
-        background: var(--card-background-color, #fff);
+        background: var(--card-background-color);
       }
 
       .contacts-header {
         padding: 16px;
-        border-bottom: 1px solid var(--divider-color, #e0e0e0);
+        border-bottom: 1px solid var(--divider-color);
         display: flex;
         flex-direction: column;
         gap: 12px;
+        position: sticky;
+        top: 0;
+        background: var(--card-background-color);
+        z-index: 2;
       }
 
       .search-bar {
@@ -40,8 +45,76 @@ export class TsuryPhoneContactsView extends LitElement {
         align-items: center;
         gap: 8px;
         padding: 8px 12px;
-        background: var(--secondary-background-color, #f5f5f5);
+        background: var(--secondary-background-color);
         border-radius: 8px;
+        flex: 1;
+      }
+
+      .search-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .menu-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: var(--primary-text-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        position: relative;
+      }
+
+      .menu-button:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .menu-button:active {
+        transform: scale(0.95);
+      }
+
+      .menu-dropdown {
+        position: absolute;
+        top: 48px;
+        right: 16px;
+        background: var(--card-background-color);
+        border-radius: 8px;
+        box-shadow: var(
+          --ha-card-box-shadow,
+          0 4px 12px rgba(0, 0, 0, 0.15)
+        );
+        min-width: 160px;
+        z-index: 10;
+        overflow: hidden;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        color: var(--primary-text-color);
+        font-size: 14px;
+        transition: background 0.2s;
+      }
+
+      .menu-item:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .menu-item:active {
+        background: var(--divider-color);
       }
 
       .search-input {
@@ -49,12 +122,12 @@ export class TsuryPhoneContactsView extends LitElement {
         border: none;
         background: transparent;
         font-size: 16px;
-        color: var(--primary-text-color, #000);
+        color: var(--primary-text-color);
         outline: none;
       }
 
       .search-input::placeholder {
-        color: var(--secondary-text-color, #666);
+        color: var(--secondary-text-color);
       }
 
       .add-button {
@@ -62,8 +135,8 @@ export class TsuryPhoneContactsView extends LitElement {
         padding: 12px;
         border-radius: 8px;
         border: none;
-        background: var(--primary-color, #03a9f4);
-        color: white;
+        background: var(--primary-color);
+        color: var(--text-primary-color, white);
         font-size: 16px;
         font-weight: 500;
         cursor: pointer;
@@ -75,7 +148,7 @@ export class TsuryPhoneContactsView extends LitElement {
       }
 
       .add-button:hover {
-        background: var(--dark-primary-color, #0288d1);
+        background: var(--dark-primary-color, var(--primary-color));
       }
 
       .add-button:active {
@@ -89,10 +162,10 @@ export class TsuryPhoneContactsView extends LitElement {
 
       .section-header {
         padding: 12px 16px;
-        background: var(--secondary-background-color, #f5f5f5);
+        background: var(--secondary-background-color);
         font-size: 14px;
         font-weight: 500;
-        color: var(--secondary-text-color, #666);
+        color: var(--secondary-text-color);
         position: sticky;
         top: 0;
         z-index: 1;
@@ -166,34 +239,80 @@ export class TsuryPhoneContactsView extends LitElement {
     );
   }
 
+  private _toggleMenu(): void {
+    this._showMenu = !this._showMenu;
+  }
+
+  private _handleBlockedClick(): void {
+    this._showMenu = false;
+    this.dispatchEvent(
+      new CustomEvent("navigate-blocked", {
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  private _handleClickOutside(e: MouseEvent): void {
+    const target = e.target as HTMLElement;
+    if (this._showMenu && !target.closest('.menu-button') && !target.closest('.menu-dropdown')) {
+      this._showMenu = false;
+    }
+  }
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    document.addEventListener('click', this._handleClickOutside.bind(this));
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    document.removeEventListener('click', this._handleClickOutside.bind(this));
+  }
+
   protected render(): TemplateResult {
     const contacts = this._getContacts();
     const groupedContacts = this._groupContactsByLetter();
 
     return html`
       <div class="contacts-header">
-        <div class="search-bar">
-          <ha-icon icon="mdi:magnify"></ha-icon>
-          <input
-            class="search-input"
-            type="text"
-            placeholder="Search contacts..."
-            .value=${this._searchQuery}
-            @input=${this._handleSearch}
-          />
-          ${this._searchQuery
+        <div class="search-bar-container">
+          <div class="search-bar">
+            <ha-icon icon="mdi:magnify"></ha-icon>
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Search contacts"
+              .value=${this._searchQuery}
+              @input=${this._handleSearch}
+            />
+            ${this._searchQuery
+              ? html`
+                  <ha-icon
+                    icon="mdi:close"
+                    @click=${() => (this._searchQuery = "")}
+                    style="cursor: pointer"
+                  ></ha-icon>
+                `
+              : ""}
+          </div>
+          <button class="menu-button" @click=${this._toggleMenu} title="More options">
+            <ha-icon icon="mdi:dots-vertical"></ha-icon>
+          </button>
+          ${this._showMenu
             ? html`
-                <ha-icon
-                  icon="mdi:close"
-                  @click=${() => (this._searchQuery = "")}
-                  style="cursor: pointer"
-                ></ha-icon>
+                <div class="menu-dropdown">
+                  <button class="menu-item" @click=${this._handleBlockedClick}>
+                    <ha-icon icon="mdi:block-helper"></ha-icon>
+                    Blocked
+                  </button>
+                </div>
               `
             : ""}
         </div>
         <button class="add-button" @click=${this._handleAddContact}>
           <ha-icon icon="mdi:plus"></ha-icon>
-          Add Contact
+          Create contact
         </button>
       </div>
 
@@ -204,7 +323,7 @@ export class TsuryPhoneContactsView extends LitElement {
                 icon="mdi:contacts-outline"
                 title="No contacts yet"
                 message="Add your first contact to get started"
-                actionLabel="Add Contact"
+                actionLabel="Create contact"
                 .onAction=${() => this._handleAddContact()}
               ></tsuryphone-empty-state>
             `

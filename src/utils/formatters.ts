@@ -119,7 +119,7 @@ export function formatCallTime(timestamp: number): string {
  * Generate consistent color from string (for avatars)
  */
 export function generateColor(input: string): string {
-  if (!input) return "hsl(200, 50%, 70%)"; // Default color
+  if (!input) return "hsl(200, 60%, 45%)"; // Default color
 
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
@@ -127,7 +127,32 @@ export function generateColor(input: string): string {
   }
 
   const hue = Math.abs(hash % 360);
-  return `hsl(${hue}, 50%, 70%)`; // Pastel colors
+  
+  // Check if dark mode - simple heuristic
+  const isDark = (() => {
+    if (typeof document !== 'undefined') {
+      const html = document.documentElement;
+      const themeStyle = getComputedStyle(html);
+      const cardBg = themeStyle.getPropertyValue('--card-background-color');
+      
+      if (cardBg && cardBg.includes('rgb')) {
+        const values = cardBg.match(/\d+/g);
+        if (values && values.length >= 3) {
+          const brightness = (parseInt(values[0]) + parseInt(values[1]) + parseInt(values[2])) / 3;
+          return brightness < 128;
+        }
+      }
+    }
+    return true; // default to dark
+  })();
+  
+  // Dark mode: darker, more saturated colors
+  // Light mode: lighter, less saturated colors
+  if (isDark) {
+    return `hsl(${hue}, 65%, 45%)`; // Darker for dark mode
+  } else {
+    return `hsl(${hue}, 60%, 60%)`; // Lighter for light mode
+  }
 }
 
 /**

@@ -61,7 +61,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         font-weight: 300;
         color: var(--primary-text-color);
         transition: background 0.15s, transform 0.1s;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
         user-select: none;
         -webkit-tap-highlight-color: transparent;
         position: relative;
@@ -95,6 +95,13 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         margin-top: 4px;
         opacity: 0.6;
         text-transform: uppercase;
+        height: 14px;
+        line-height: 14px;
+      }
+
+      .letters-placeholder {
+        height: 14px;
+        margin-top: 4px;
       }
 
       .long-press-hint {
@@ -199,7 +206,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
               <span class="digit">${button.digit}</span>
               ${button.letters
                 ? html`<span class="letters">${button.letters}</span>`
-                : ''}
+                : html`<span class="letters-placeholder"></span>`}
               ${button.longPressDigit && button.longPressDigit !== button.letters
                 ? html`<span class="long-press-hint">${button.longPressDigit}</span>`
                 : ''}

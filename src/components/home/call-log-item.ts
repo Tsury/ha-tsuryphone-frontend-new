@@ -23,7 +23,7 @@ export class TsuryPhoneCallLogItem extends LitElement {
     }
 
     .call-item:hover {
-      background: var(--sidebar-background-color, rgba(0, 0, 0, 0.05));
+      background: var(--secondary-background-color);
     }
 
     .call-item:active {
@@ -75,15 +75,15 @@ export class TsuryPhoneCallLogItem extends LitElement {
     }
 
     .call-type-icon.incoming {
-      color: var(--success-color, #4caf50);
+      color: var(--success-color);
     }
 
     .call-type-icon.outgoing {
-      color: var(--info-color, #2196f3);
+      color: var(--info-color);
     }
 
     .call-type-icon.missed {
-      color: var(--error-color, #f44336);
+      color: var(--error-color);
     }
 
     .call-details {
@@ -108,8 +108,8 @@ export class TsuryPhoneCallLogItem extends LitElement {
     }
 
     .blocked-badge {
-      background: var(--error-color, #f44336);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
       font-size: 11px;
       padding: 2px 6px;
       border-radius: 4px;

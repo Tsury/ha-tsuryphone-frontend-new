@@ -39,7 +39,6 @@ export class TsuryPhoneNavigation extends LitElement {
         ${this._renderTab("home", "mdi:home", "Home")}
         ${this._renderTab("keypad", "mdi:dialpad", "Keypad")}
         ${this._renderTab("contacts", "mdi:contacts", "Contacts")}
-        ${this._renderTab("blocked", "mdi:block-helper", "Blocked")}
       </nav>
     `;
   }

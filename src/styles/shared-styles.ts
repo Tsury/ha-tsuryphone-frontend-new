@@ -44,18 +44,18 @@ export const listItemStyles = css`
     align-items: center;
     padding: 12px 16px;
     gap: 12px;
-    background: var(--card-background-color, #fff);
-    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    background: var(--card-background-color);
+    border-bottom: 1px solid var(--divider-color);
     cursor: pointer;
     transition: background-color 0.2s;
   }
 
   .list-item:hover {
-    background: var(--secondary-background-color, #f5f5f5);
+    background: var(--secondary-background-color);
   }
 
   .list-item:active {
-    background: var(--divider-color, #e0e0e0);
+    background: var(--divider-color);
   }
 
   .list-item-content {
@@ -69,7 +69,7 @@ export const listItemStyles = css`
   .list-item-title {
     font-size: 16px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -77,7 +77,7 @@ export const listItemStyles = css`
 
   .list-item-subtitle {
     font-size: 14px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -98,8 +98,8 @@ export const buttonStyles = css`
     padding: 8px 16px;
     border-radius: 8px;
     border: none;
-    background: var(--primary-color, #03a9f4);
-    color: white;
+    background: var(--primary-color);
+    color: var(--text-primary-color, white);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -110,7 +110,7 @@ export const buttonStyles = css`
   }
 
   .action-button:hover {
-    background: var(--dark-primary-color, #0288d1);
+    background: var(--dark-primary-color, var(--primary-color));
     transform: scale(1.02);
   }
 
@@ -119,17 +119,19 @@ export const buttonStyles = css`
   }
 
   .action-button:disabled {
-    background: var(--disabled-color, #9e9e9e);
+    background: var(--disabled-color);
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
   .action-button.secondary {
-    background: var(--secondary-background-color, #f5f5f5);
-    color: var(--primary-text-color, #000);
+    background: var(--secondary-background-color);
+    color: var(--primary-text-color);
   }
 
   .action-button.danger {
-    background: var(--error-color, #f44336);
+    background: var(--error-color);
+    color: var(--text-primary-color, white);
   }
 
   .icon-button {
@@ -138,7 +140,7 @@ export const buttonStyles = css`
     border-radius: 50%;
     border: none;
     background: transparent;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -147,11 +149,11 @@ export const buttonStyles = css`
   }
 
   .icon-button:hover {
-    background: var(--secondary-background-color, #f5f5f5);
+    background: var(--secondary-background-color);
   }
 
   .icon-button:active {
-    background: var(--divider-color, #e0e0e0);
+    background: var(--divider-color);
     transform: scale(0.95);
   }
 `;
@@ -166,7 +168,7 @@ export const modalStyles = css`
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.5));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -175,19 +177,22 @@ export const modalStyles = css`
   }
 
   .modal {
-    background: var(--card-background-color, #fff);
+    background: var(--card-background-color);
     border-radius: 16px;
     max-width: 500px;
     width: 100%;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: var(
+      --ha-card-box-shadow,
+      0 8px 32px rgba(0, 0, 0, 0.3)
+    );
   }
 
   .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    border-bottom: 1px solid var(--divider-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -196,7 +201,7 @@ export const modalStyles = css`
   .modal-title {
     font-size: 20px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
   }
 
   .modal-body {
@@ -207,7 +212,7 @@ export const modalStyles = css`
 
   .modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid var(--divider-color, #e0e0e0);
+    border-top: 1px solid var(--divider-color);
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -226,41 +231,41 @@ export const formStyles = css`
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
     margin-bottom: 8px;
   }
 
   .form-input {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid var(--divider-color, #e0e0e0);
+    border: 1px solid var(--divider-color);
     border-radius: 8px;
     font-size: 16px;
     font-family: inherit;
-    color: var(--primary-text-color, #000);
-    background: var(--card-background-color, #fff);
+    color: var(--primary-text-color);
+    background: var(--card-background-color);
     box-sizing: border-box;
     transition: border-color 0.2s;
   }
 
   .form-input:focus {
     outline: none;
-    border-color: var(--primary-color, #03a9f4);
+    border-color: var(--primary-color);
   }
 
   .form-input::placeholder {
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
   }
 
   .form-helper {
     font-size: 12px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     margin-top: 4px;
   }
 
   .form-error {
     font-size: 12px;
-    color: var(--error-color, #f44336);
+    color: var(--error-color);
     margin-top: 4px;
   }
 `;
@@ -281,7 +286,7 @@ export const emptyStateStyles = css`
   .empty-state-icon {
     width: 64px;
     height: 64px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     margin-bottom: 16px;
     opacity: 0.5;
   }
@@ -289,13 +294,13 @@ export const emptyStateStyles = css`
   .empty-state-title {
     font-size: 18px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
     margin-bottom: 8px;
   }
 
   .empty-state-message {
     font-size: 14px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     margin-bottom: 24px;
   }
 `;

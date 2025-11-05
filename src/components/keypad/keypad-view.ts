@@ -101,7 +101,7 @@ export class TsuryPhoneKeypadView extends LitElement {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--success-color, #4caf50);
+        background: var(--success-color);
         border: none;
         cursor: pointer;
         display: flex;
@@ -111,12 +111,12 @@ export class TsuryPhoneKeypadView extends LitElement {
         transition:
           transform 0.1s,
           box-shadow 0.2s;
-        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
       }
 
       .call-button:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        filter: brightness(1.1);
       }
 
       .call-button:active {
@@ -124,19 +124,21 @@ export class TsuryPhoneKeypadView extends LitElement {
       }
 
       .call-button:disabled {
-        background: var(--disabled-color, #9e9e9e);
+        background: var(--disabled-color);
+        opacity: 0.5;
         cursor: not-allowed;
         box-shadow: none;
       }
 
       .call-button:disabled:hover {
         transform: none;
+        filter: none;
       }
 
       .call-icon {
         width: 32px;
         height: 32px;
-        fill: white;
+        fill: var(--text-primary-color, white);
       }
     `;
   }

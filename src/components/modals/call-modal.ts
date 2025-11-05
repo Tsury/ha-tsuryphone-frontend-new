@@ -56,7 +56,7 @@ export class TsuryPhoneCallModal extends LitElement {
       width: 100%;
       height: 100%;
       z-index: 100;
-      background: var(--card-background-color, #fff);
+      background: var(--card-background-color);
       box-sizing: border-box;
     }
 
@@ -80,14 +80,14 @@ export class TsuryPhoneCallModal extends LitElement {
       align-items: center;
       justify-content: space-between;
       padding: 16px;
-      border-bottom: 1px solid var(--divider-color, #e0e0e0);
-      background: var(--card-background-color, #fff);
+      border-bottom: 1px solid var(--divider-color);
+      background: var(--card-background-color);
     }
 
     .modal-title {
       font-size: 20px;
       font-weight: 500;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
     }
 
     .close-button {
@@ -95,7 +95,7 @@ export class TsuryPhoneCallModal extends LitElement {
       border: none;
       cursor: pointer;
       padding: 8px;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
       font-size: 24px;
       line-height: 1;
       opacity: 0.6;
@@ -126,13 +126,13 @@ export class TsuryPhoneCallModal extends LitElement {
     .caller-name {
       font-size: 32px;
       font-weight: 500;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
       margin-bottom: 8px;
     }
 
     .caller-number {
       font-size: 18px;
-      color: var(--secondary-text-color, #666);
+      color: var(--secondary-text-color);
     }
 
     .priority-badge {
@@ -140,8 +140,8 @@ export class TsuryPhoneCallModal extends LitElement {
       align-items: center;
       gap: 4px;
       padding: 4px 12px;
-      background: var(--warning-color, #ff9800);
-      color: white;
+      background: var(--warning-color);
+      color: var(--text-primary-color, white);
       border-radius: 12px;
       font-size: 14px;
       font-weight: 500;
@@ -150,7 +150,7 @@ export class TsuryPhoneCallModal extends LitElement {
 
     .call-status {
       font-size: 16px;
-      color: var(--secondary-text-color, #666);
+      color: var(--secondary-text-color);
       margin-bottom: 24px;
     }
 
@@ -159,7 +159,7 @@ export class TsuryPhoneCallModal extends LitElement {
       width: 100%;
       max-width: 320px;
       height: 72px;
-      background: var(--divider-color, #e0e0e0);
+      background: var(--divider-color);
       border-radius: 36px;
       position: relative;
       overflow: hidden;
@@ -182,7 +182,7 @@ export class TsuryPhoneCallModal extends LitElement {
     .swipe-label {
       font-size: 14px;
       font-weight: 500;
-      color: var(--secondary-text-color, #666);
+      color: var(--secondary-text-color);
       pointer-events: none;
     }
 
@@ -192,9 +192,9 @@ export class TsuryPhoneCallModal extends LitElement {
       left: 6px;
       width: 60px;
       height: 60px;
-      background: white;
+      background: var(--card-background-color);
       border-radius: 30px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -210,18 +210,18 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .swipe-handle.swiping-left {
-      background: var(--error-color, #f44336);
+      background: var(--error-color);
     }
 
     .swipe-handle.swiping-right {
-      background: var(--success-color, #4caf50);
+      background: var(--success-color);
     }
 
     /* Active Call Controls */
     .call-timer {
       font-size: 48px;
       font-weight: 300;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
       margin-bottom: 48px;
       font-variant-numeric: tabular-nums;
     }
@@ -240,14 +240,14 @@ export class TsuryPhoneCallModal extends LitElement {
       height: 72px;
       border-radius: 50%;
       border: none;
-      background: var(--card-background-color, #f5f5f5);
-      color: var(--primary-text-color, #000);
+      background: var(--secondary-background-color);
+      color: var(--primary-text-color);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
       justify-self: center;
     }
 
@@ -256,7 +256,7 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .control-button:hover {
-      background: var(--divider-color, #e0e0e0);
+      background: var(--divider-color);
     }
 
     .control-button:active {
@@ -264,26 +264,26 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .control-button.active {
-      background: var(--primary-color, #03a9f4);
-      color: white;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
     }
 
     .control-button.muted {
-      background: var(--error-color, #f44336);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
     }
 
     .hangup-button {
       grid-column: 1 / -1;
       width: 72px;
       height: 72px;
-      background: var(--error-color, #f44336);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
       justify-self: center;
     }
 
     .hangup-button:hover {
-      background: var(--error-color, #d32f2f);
+      filter: brightness(0.9);
     }
 
     /* Call Waiting */
@@ -291,7 +291,7 @@ export class TsuryPhoneCallModal extends LitElement {
       width: 100%;
       max-width: 400px;
       padding: 16px;
-      background: var(--divider-color, #f5f5f5);
+      background: var(--secondary-background-color);
       border-radius: 12px;
       margin-bottom: 24px;
     }

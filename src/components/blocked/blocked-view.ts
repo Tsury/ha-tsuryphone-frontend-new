@@ -133,8 +133,8 @@ export class TsuryPhoneBlockedView extends LitElement {
           padding: var(--tsury-spacing-md);
           border-radius: 8px;
           border: none;
-          background: var(--tsury-error-color, #f44336);
-          color: white;
+          background: var(--tsury-error-color, var(--error-color));
+          color: var(--text-primary-color, white);
           font-size: 16px;
           font-weight: 500;
           cursor: pointer;
@@ -147,9 +147,9 @@ export class TsuryPhoneBlockedView extends LitElement {
         }
 
         .add-button:hover {
-          background: var(--tsury-error-dark-color, #d32f2f);
+          filter: brightness(0.9);
           transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+          box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
         }
 
         .add-button:active {
