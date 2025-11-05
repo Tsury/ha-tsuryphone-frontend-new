@@ -124,7 +124,7 @@ export class TsuryPhoneFrequentContacts extends LitElement {
     if (this.contacts.length === 0) {
       return html`
         <div class="frequent-contacts">
-          <div class="section-header">Frequent Contacts</div>
+          <div class="section-header">Frequents</div>
           <div class="empty-state">
             <ha-icon class="empty-icon" icon="mdi:account-multiple-outline"></ha-icon>
             <div class="empty-text">No frequent contacts yet</div>
@@ -135,7 +135,7 @@ export class TsuryPhoneFrequentContacts extends LitElement {
 
     return html`
       <div class="frequent-contacts">
-        <div class="section-header">Frequent Contacts</div>
+        <div class="section-header">Frequents</div>
         <div class="contacts-grid">
           ${this.contacts.map(
             contact => html`
