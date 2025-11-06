@@ -5962,9 +5962,9 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
                 };
             }
         }
-        else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT" || currentDialingNumber) {
-            // Show modal when dialing out or calling (or if current_dialing_number is set)
-            console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state or dialing number, opening call modal");
+        else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT") {
+            // Show modal when actively dialing out or calling (NOT just when typing digits)
+            console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state, opening call modal");
             this._callModalMode = "active";
             if (!this._callModalMinimized) {
                 this._callModalOpen = true;
