@@ -746,7 +746,7 @@ export class TsuryPhoneCallModal extends LitElement {
           @click=${this._handleSpeaker}
           title="Speaker"
         >
-          �
+          <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:phone"}"></ha-icon>
         </button>
 
         <button

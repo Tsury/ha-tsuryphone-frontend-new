@@ -1210,7 +1210,7 @@ export class TsuryPhoneCard extends LitElement {
         /* Call Toast (minimized call indicator) */
         .call-toast {
           position: absolute;
-          top: 8px;
+          bottom: 64px; /* Just above 56px nav bar */
           left: 12px;
           right: 12px;
           z-index: 50;
