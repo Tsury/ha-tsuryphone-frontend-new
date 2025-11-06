@@ -401,18 +401,29 @@ export class TsuryPhoneCard extends LitElement {
       ? `binary_sensor.${deviceId}_in_call`
       : `binary_sensor.in_call`;
 
-    const phoneState = this.hass.states[phoneStateEntityId]?.state;
-    const phoneStateAttrs = this.hass.states[phoneStateEntityId]?.attributes as any;
+    const phoneStateEntity = this.hass.states[phoneStateEntityId];
+    const phoneState = phoneStateEntity?.state;
+    const phoneStateAttrs = phoneStateEntity?.attributes as any;
     const inCall = this.hass.states[inCallEntityId]?.state === "on";
     const currentDialingNumber = phoneStateAttrs?.current_dialing_number || "";
 
-    console.log(
-      "[TsuryPhone] _updateCallModalState:",
-      "phoneState=", phoneState,
-      "inCall=", inCall,
-      "currentDialingNumber=", currentDialingNumber,
-      "_callModalOpen=", this._callModalOpen
+    // EXTENSIVE DEBUG LOGGING
+    console.log("========== _updateCallModalState DEBUG ==========");
+    console.log("[TsuryPhone] phoneStateEntityId:", phoneStateEntityId);
+    console.log("[TsuryPhone] phoneStateEntity exists:", !!phoneStateEntity);
+    console.log("[TsuryPhone] phoneState:", phoneState);
+    console.log("[TsuryPhone] inCall:", inCall);
+    console.log("[TsuryPhone] phoneStateAttrs:", phoneStateAttrs);
+    console.log("[TsuryPhone] ALL attributes:", Object.keys(phoneStateAttrs || {}));
+    console.log("[TsuryPhone] current_dialing_number attribute:", phoneStateAttrs?.current_dialing_number);
+    console.log("[TsuryPhone] currentDialingNumber (after ||):", currentDialingNumber);
+    console.log("[TsuryPhone] _callModalOpen:", this._callModalOpen);
+    console.log("[TsuryPhone] Should open modal?", 
+      "phoneState check:", ["DIALING", "CALLING_OUT", "RINGING_OUT", "RINGING_IN", "IN_CALL"].includes(phoneState || ""),
+      "OR inCall:", inCall,
+      "OR currentDialingNumber:", !!currentDialingNumber
     );
+    console.log("================================================");
 
     // Determine call modal mode
     if (phoneState === "RINGING_IN") {

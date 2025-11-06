@@ -81,13 +81,13 @@ export class TsuryPhoneCallModal extends LitElement {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--divider-color);
       background: var(--card-background-color);
     }
 
     .modal-title {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--primary-text-color);
     }
@@ -98,7 +98,7 @@ export class TsuryPhoneCallModal extends LitElement {
       cursor: pointer;
       padding: 4px;
       color: var(--primary-text-color);
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1;
       opacity: 0.6;
       transition: opacity 0.2s;
@@ -588,13 +588,29 @@ export class TsuryPhoneCallModal extends LitElement {
    * Get normalized phone number for display
    */
   private _getNormalizedNumber(number: string): string {
-    if (!this.entityId) return number;
+    if (!this.entityId) {
+      console.log("[CallModal] _getNormalizedNumber: No entityId, returning raw number:", number);
+      return number;
+    }
     
     const phoneStateEntity = this.hass.states[this.entityId];
     const dialingContext = phoneStateEntity?.attributes?.dialing_context;
     const defaultDialCode = dialingContext?.default_code || "";
     
-    return normalizePhoneNumberForDisplay(number, defaultDialCode);
+    console.log("[CallModal] _getNormalizedNumber DEBUG:", {
+      entityId: this.entityId,
+      phoneStateEntity: !!phoneStateEntity,
+      attributes: phoneStateEntity?.attributes,
+      dialingContext: dialingContext,
+      defaultDialCode: defaultDialCode,
+      inputNumber: number,
+      fallbackCode: defaultDialCode || "972"
+    });
+    
+    const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode || "972");
+    console.log("[CallModal] Normalized result:", normalized);
+    
+    return normalized;
   }
 
   private async _handleSwapCalls(): Promise<void> {

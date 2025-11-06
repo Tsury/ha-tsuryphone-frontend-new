@@ -4661,12 +4661,25 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
      * Get normalized phone number for display
      */
     _getNormalizedNumber(number) {
-        if (!this.entityId)
+        if (!this.entityId) {
+            console.log("[CallModal] _getNormalizedNumber: No entityId, returning raw number:", number);
             return number;
+        }
         const phoneStateEntity = this.hass.states[this.entityId];
         const dialingContext = phoneStateEntity?.attributes?.dialing_context;
         const defaultDialCode = dialingContext?.default_code || "";
-        return normalizePhoneNumberForDisplay(number, defaultDialCode);
+        console.log("[CallModal] _getNormalizedNumber DEBUG:", {
+            entityId: this.entityId,
+            phoneStateEntity: !!phoneStateEntity,
+            attributes: phoneStateEntity?.attributes,
+            dialingContext: dialingContext,
+            defaultDialCode: defaultDialCode,
+            inputNumber: number,
+            fallbackCode: defaultDialCode || "972"
+        });
+        const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode || "972");
+        console.log("[CallModal] Normalized result:", normalized);
+        return normalized;
     }
     async _handleSwapCalls() {
         triggerHaptic("medium");
@@ -4895,13 +4908,13 @@ TsuryPhoneCallModal.styles = i$3 `
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 8px 12px;
       border-bottom: 1px solid var(--divider-color);
       background: var(--card-background-color);
     }
 
     .modal-title {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--primary-text-color);
     }
@@ -4912,7 +4925,7 @@ TsuryPhoneCallModal.styles = i$3 `
       cursor: pointer;
       padding: 4px;
       color: var(--primary-text-color);
-      font-size: 20px;
+      font-size: 18px;
       line-height: 1;
       opacity: 0.6;
       transition: opacity 0.2s;
@@ -5861,11 +5874,24 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         const inCallEntityId = deviceId
             ? `binary_sensor.${deviceId}_in_call`
             : `binary_sensor.in_call`;
-        const phoneState = this.hass.states[phoneStateEntityId]?.state;
-        const phoneStateAttrs = this.hass.states[phoneStateEntityId]?.attributes;
+        const phoneStateEntity = this.hass.states[phoneStateEntityId];
+        const phoneState = phoneStateEntity?.state;
+        const phoneStateAttrs = phoneStateEntity?.attributes;
         const inCall = this.hass.states[inCallEntityId]?.state === "on";
         const currentDialingNumber = phoneStateAttrs?.current_dialing_number || "";
-        console.log("[TsuryPhone] _updateCallModalState:", "phoneState=", phoneState, "inCall=", inCall, "currentDialingNumber=", currentDialingNumber, "_callModalOpen=", this._callModalOpen);
+        // EXTENSIVE DEBUG LOGGING
+        console.log("========== _updateCallModalState DEBUG ==========");
+        console.log("[TsuryPhone] phoneStateEntityId:", phoneStateEntityId);
+        console.log("[TsuryPhone] phoneStateEntity exists:", !!phoneStateEntity);
+        console.log("[TsuryPhone] phoneState:", phoneState);
+        console.log("[TsuryPhone] inCall:", inCall);
+        console.log("[TsuryPhone] phoneStateAttrs:", phoneStateAttrs);
+        console.log("[TsuryPhone] ALL attributes:", Object.keys(phoneStateAttrs || {}));
+        console.log("[TsuryPhone] current_dialing_number attribute:", phoneStateAttrs?.current_dialing_number);
+        console.log("[TsuryPhone] currentDialingNumber (after ||):", currentDialingNumber);
+        console.log("[TsuryPhone] _callModalOpen:", this._callModalOpen);
+        console.log("[TsuryPhone] Should open modal?", "phoneState check:", ["DIALING", "CALLING_OUT", "RINGING_OUT", "RINGING_IN", "IN_CALL"].includes(phoneState || ""), "OR inCall:", inCall, "OR currentDialingNumber:", !!currentDialingNumber);
+        console.log("================================================");
         // Determine call modal mode
         if (phoneState === "RINGING_IN") {
             this._callModalMode = "incoming";
