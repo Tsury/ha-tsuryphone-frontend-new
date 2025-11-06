@@ -279,9 +279,33 @@ export class TsuryPhoneCard extends LitElement {
     if (callHistoryEntity?.attributes) {
       const historyAttrs = callHistoryEntity.attributes as any;
 
+      console.log(
+        `[TsuryPhone] Call history sensor state:`,
+        {
+          state: callHistoryEntity.state,
+          capacity: historyAttrs.capacity,
+          entriesCount: historyAttrs.entries?.length || 0,
+          hasEntries: !!historyAttrs.entries,
+          isArray: Array.isArray(historyAttrs.entries)
+        }
+      );
+
       if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
+        console.log(
+          `[TsuryPhone] Loading call history from sensor (updated()):`,
+          `${historyAttrs.entries.length} calls`
+        );
         this._callHistoryCache = historyAttrs.entries;
+      } else {
+        console.log(
+          `[TsuryPhone] No entries in call_history_size sensor attributes`
+        );
       }
+    } else {
+      console.log(
+        `[TsuryPhone] Call history sensor not found or no attributes:`,
+        callHistoryEntityId
+      );
     }
 
     // Update call modal state
@@ -353,6 +377,10 @@ export class TsuryPhoneCard extends LitElement {
     if (callHistoryEntity?.attributes) {
       const historyAttrs = callHistoryEntity.attributes as any;
       if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
+        console.log(
+          `[TsuryPhone] Loading call history from sensor (setConfig()):`,
+          `${historyAttrs.entries.length} calls`
+        );
         this._callHistoryCache = historyAttrs.entries;
       }
     }
@@ -792,6 +820,7 @@ export class TsuryPhoneCard extends LitElement {
     );
 
     console.log(`[TsuryPhone] Total calls in history: ${callHistory.length}`);
+    console.log(`[TsuryPhone] _callHistoryCache size: ${this._callHistoryCache.length}`);
 
     return html`
       <div class="view home-view fade-in">
