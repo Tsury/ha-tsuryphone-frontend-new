@@ -5946,7 +5946,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         console.log("[TsuryPhone] Should open modal?", "phoneState check:", ["DIALING", "CALLING_OUT", "RINGING_OUT", "RINGING_IN", "IN_CALL"].includes(phoneState || ""), "OR inCall:", inCall, "OR currentDialingNumber:", !!currentDialingNumber);
         console.log("================================================");
         // Determine call modal mode
-        if (phoneState === "RINGING_IN") {
+        if (phoneState === "Ringing") {
             this._callModalMode = "incoming";
             this._callModalOpen = true;
             this._callModalMinimized = false; // Reset on new incoming call
@@ -5962,9 +5962,9 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
                 };
             }
         }
-        else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT") {
-            // Show modal when actively dialing out or calling (NOT just when typing digits)
-            console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state, opening call modal");
+        else if (phoneState === "Dialing" || phoneState === "In Call") {
+            // Show modal when actively dialing out or in call
+            console.log("[TsuryPhone] Detected Dialing/In Call state, opening call modal");
             this._callModalMode = "active";
             if (!this._callModalMinimized) {
                 this._callModalOpen = true;
@@ -5987,7 +5987,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             // Keep modal open if it was already open, or if not manually minimized
             if (!this._callModalOpen &&
                 !this._callModalMinimized &&
-                phoneState !== "IDLE") {
+                phoneState !== "Idle") {
                 this._callModalOpen = true;
             }
             // Get active call info
