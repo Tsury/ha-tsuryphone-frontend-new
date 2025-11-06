@@ -77,7 +77,7 @@ export class TsuryPhoneNavigation extends LitElement {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          background: var(--tsury-primary-background-color, var(--primary-background-color));
+          background: color-mix(in srgb, var(--card-background-color) 85%, var(--primary-background-color) 15%);
           border-top: 1px solid var(--tsury-divider-color);
           padding: var(--tsury-spacing-xs) 0;
           min-height: 56px;
@@ -132,14 +132,20 @@ export class TsuryPhoneNavigation extends LitElement {
           outline-offset: -2px;
         }
 
+        .nav-tab ha-icon {
+          --mdc-icon-size: 24px;
+          display: block;
+          padding: 8px;
+          border-radius: 12px;
+          transition: background-color 0.2s ease;
+        }
+
         .nav-tab.active {
           color: var(--tsury-primary-color);
         }
 
         .nav-tab.active ha-icon {
           background: rgba(var(--rgb-primary-color, 128, 128, 128), 0.2);
-          padding: 8px;
-          border-radius: 12px;
         }
 
         .nav-tab.active::before {
@@ -164,11 +170,6 @@ export class TsuryPhoneNavigation extends LitElement {
             width: 64px;
             opacity: 1;
           }
-        }
-
-        .nav-tab ha-icon {
-          --mdc-icon-size: 24px;
-          display: block;
         }
 
         .nav-label {
