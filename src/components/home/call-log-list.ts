@@ -103,23 +103,34 @@ export class TsuryPhoneCallLogList extends LitElement {
       `;
     }
 
+    console.log('[CallLogList] render() with defaultDialCode:', this.defaultDialCode);
+    console.log('[CallLogList] Number of groups:', this.groupedCalls.length);
+
     return html`
       <div class="call-log-list">
         ${this.groupedCalls.map(
-          group => html`
-            <div class="group">
-              <div class="group-header">${group.groupLabel}</div>
-              ${group.calls.map(
-                (call, index) => html`
-                  <tsuryphone-call-log-item 
-                    .call=${call} 
-                    .defaultDialCode=${this.defaultDialCode}
-                  ></tsuryphone-call-log-item>
-                  ${index < group.calls.length - 1 ? html`<div class="divider"></div>` : ''}
-                `
-              )}
-            </div>
-          `
+          (group, groupIndex) => {
+            console.log(`[CallLogList] Rendering group ${groupIndex}: ${group.groupLabel}, ${group.calls.length} calls`);
+            return html`
+              <div class="group">
+                <div class="group-header">${group.groupLabel}</div>
+                ${group.calls.map(
+                  (call, index) => {
+                    if (index === 0) {
+                      console.log(`[CallLogList] First call in group, passing defaultDialCode:`, this.defaultDialCode);
+                    }
+                    return html`
+                      <tsuryphone-call-log-item 
+                        .call=${call} 
+                        .defaultDialCode=${this.defaultDialCode}
+                      ></tsuryphone-call-log-item>
+                      ${index < group.calls.length - 1 ? html`<div class="divider"></div>` : ''}
+                    `;
+                  }
+                )}
+              </div>
+            `;
+          }
         )}
       </div>
     `;

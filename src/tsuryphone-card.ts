@@ -263,11 +263,24 @@ export class TsuryPhoneCard extends LitElement {
       }
 
       // Update default dial code
+      console.log('[TsuryPhone] Checking dialing_context:', {
+        hasDialingContext: !!attrs.dialing_context,
+        dialingContext: attrs.dialing_context,
+        hasDefaultCode: !!(attrs.dialing_context && attrs.dialing_context.default_code),
+        defaultCode: attrs.dialing_context?.default_code
+      });
+      
       if (attrs.dialing_context && attrs.dialing_context.default_code) {
         this._defaultDialCode = attrs.dialing_context.default_code;
-        console.log('[TsuryPhone] Default dial code set to:', this._defaultDialCode);
+        console.log('[TsuryPhone] ✓ Default dial code SET to:', this._defaultDialCode);
+      } else {
+        console.warn('[TsuryPhone] ✗ Default dial code NOT set - dialing_context missing or empty');
       }
+    } else {
+      console.warn('[TsuryPhone] ✗ Phone state entity has NO attributes');
     }
+
+    console.log('[TsuryPhone] Current _defaultDialCode value:', this._defaultDialCode);
 
     // Update call history from call_history_size sensor
     // Build entity ID based on extracted device prefix

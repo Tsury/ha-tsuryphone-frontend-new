@@ -10,6 +10,17 @@ export class TsuryPhoneCallLogItem extends LitElement {
   @property({ type: Object }) call!: CallHistoryEntry;
   @property({ type: String }) defaultDialCode = "";
 
+  // Log when defaultDialCode changes
+  willUpdate(changedProperties: Map<string, any>) {
+    if (changedProperties.has('defaultDialCode')) {
+      console.log('[CallLogItem] defaultDialCode changed:', {
+        oldValue: changedProperties.get('defaultDialCode'),
+        newValue: this.defaultDialCode,
+        callNumber: this.call?.phoneNumber
+      });
+    }
+  }
+
   static styles = css`
     :host {
       display: block;

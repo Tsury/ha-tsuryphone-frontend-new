@@ -1294,16 +1294,37 @@ function getAvatarLetter(name) {
  * If number starts with the default dial code (e.g., +972), replace it with 0
  */
 function normalizePhoneNumberForDisplay(number, defaultDialCode) {
-    if (!number || !defaultDialCode)
+    console.log('[formatters] normalizePhoneNumberForDisplay called:', {
+        inputNumber: number,
+        inputDefaultDialCode: defaultDialCode,
+        numberType: typeof number,
+        dialCodeType: typeof defaultDialCode,
+        numberEmpty: !number,
+        dialCodeEmpty: !defaultDialCode
+    });
+    if (!number) {
+        console.log('[formatters] ✗ No number provided, returning empty');
         return number;
+    }
+    if (!defaultDialCode) {
+        console.log('[formatters] ✗ No defaultDialCode provided, returning original number:', number);
+        return number;
+    }
     // Remove any + prefix and whitespace from both number and code
     const cleanNumber = number.replace(/^\+/, "").replace(/\s/g, "");
     const cleanDefaultCode = defaultDialCode.replace(/^\+/, "").replace(/\s/g, "");
+    console.log('[formatters] After cleaning:', {
+        cleanNumber: cleanNumber,
+        cleanDefaultCode: cleanDefaultCode,
+        startsWithCode: cleanNumber.startsWith(cleanDefaultCode)
+    });
     // Check if number starts with the default code
     if (cleanNumber.startsWith(cleanDefaultCode)) {
-        // Replace with 0 and the rest of the number
-        return "0" + cleanNumber.substring(cleanDefaultCode.length);
+        const normalized = "0" + cleanNumber.substring(cleanDefaultCode.length);
+        console.log('[formatters] ✓ Normalized:', number, '→', normalized);
+        return normalized;
     }
+    console.log('[formatters] → No normalization needed, returning original:', number);
     return number;
 }
 
@@ -1311,6 +1332,16 @@ let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
     constructor() {
         super(...arguments);
         this.defaultDialCode = "";
+    }
+    // Log when defaultDialCode changes
+    willUpdate(changedProperties) {
+        if (changedProperties.has('defaultDialCode')) {
+            console.log('[CallLogItem] defaultDialCode changed:', {
+                oldValue: changedProperties.get('defaultDialCode'),
+                newValue: this.defaultDialCode,
+                callNumber: this.call?.phoneNumber
+            });
+        }
     }
     _getCallTypeIcon() {
         switch (this.call.type) {
@@ -1931,20 +1962,30 @@ let TsuryPhoneCallLogList = class TsuryPhoneCallLogList extends i {
         ></tsuryphone-empty-state>
       `;
         }
+        console.log('[CallLogList] render() with defaultDialCode:', this.defaultDialCode);
+        console.log('[CallLogList] Number of groups:', this.groupedCalls.length);
         return x `
       <div class="call-log-list">
-        ${this.groupedCalls.map(group => x `
-            <div class="group">
-              <div class="group-header">${group.groupLabel}</div>
-              ${group.calls.map((call, index) => x `
-                  <tsuryphone-call-log-item 
-                    .call=${call} 
-                    .defaultDialCode=${this.defaultDialCode}
-                  ></tsuryphone-call-log-item>
-                  ${index < group.calls.length - 1 ? x `<div class="divider"></div>` : ''}
-                `)}
-            </div>
-          `)}
+        ${this.groupedCalls.map((group, groupIndex) => {
+            console.log(`[CallLogList] Rendering group ${groupIndex}: ${group.groupLabel}, ${group.calls.length} calls`);
+            return x `
+              <div class="group">
+                <div class="group-header">${group.groupLabel}</div>
+                ${group.calls.map((call, index) => {
+                if (index === 0) {
+                    console.log(`[CallLogList] First call in group, passing defaultDialCode:`, this.defaultDialCode);
+                }
+                return x `
+                      <tsuryphone-call-log-item 
+                        .call=${call} 
+                        .defaultDialCode=${this.defaultDialCode}
+                      ></tsuryphone-call-log-item>
+                      ${index < group.calls.length - 1 ? x `<div class="divider"></div>` : ''}
+                    `;
+            })}
+              </div>
+            `;
+        })}
       </div>
     `;
     }
@@ -2054,6 +2095,7 @@ let TsuryPhoneHomeView = class TsuryPhoneHomeView extends i {
         }));
     }
     render() {
+        console.log('[HomeView] render() called with defaultDialCode:', this.defaultDialCode);
         // Filter and group call history
         const filteredCalls = filterCallHistory(this.callHistory, this._activeFilter);
         const groupedCalls = groupCallHistory(filteredCalls);
@@ -2061,6 +2103,7 @@ let TsuryPhoneHomeView = class TsuryPhoneHomeView extends i {
         const frequentContacts = getFrequentContacts(this.callHistory, 6);
         // Show frequent contacts only if we have calls and filter is 'all'
         const showFrequentContacts = this._activeFilter === "all" && frequentContacts.length > 0;
+        console.log('[HomeView] Passing defaultDialCode to call-log-list:', this.defaultDialCode);
         return x `
       <div class="home-view">
         <tsuryphone-call-log-filters
@@ -5761,11 +5804,24 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
                 this._priorityNumbers = new Set(attrs.priority_numbers);
             }
             // Update default dial code
+            console.log('[TsuryPhone] Checking dialing_context:', {
+                hasDialingContext: !!attrs.dialing_context,
+                dialingContext: attrs.dialing_context,
+                hasDefaultCode: !!(attrs.dialing_context && attrs.dialing_context.default_code),
+                defaultCode: attrs.dialing_context?.default_code
+            });
             if (attrs.dialing_context && attrs.dialing_context.default_code) {
                 this._defaultDialCode = attrs.dialing_context.default_code;
-                console.log('[TsuryPhone] Default dial code set to:', this._defaultDialCode);
+                console.log('[TsuryPhone] ✓ Default dial code SET to:', this._defaultDialCode);
+            }
+            else {
+                console.warn('[TsuryPhone] ✗ Default dial code NOT set - dialing_context missing or empty');
             }
         }
+        else {
+            console.warn('[TsuryPhone] ✗ Phone state entity has NO attributes');
+        }
+        console.log('[TsuryPhone] Current _defaultDialCode value:', this._defaultDialCode);
         // Update call history from call_history_size sensor
         // Build entity ID based on extracted device prefix
         const callHistoryEntityId = deviceId

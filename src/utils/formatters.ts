@@ -171,17 +171,42 @@ export function normalizePhoneNumberForDisplay(
   number: string,
   defaultDialCode: string
 ): string {
-  if (!number || !defaultDialCode) return number;
+  console.log('[formatters] normalizePhoneNumberForDisplay called:', {
+    inputNumber: number,
+    inputDefaultDialCode: defaultDialCode,
+    numberType: typeof number,
+    dialCodeType: typeof defaultDialCode,
+    numberEmpty: !number,
+    dialCodeEmpty: !defaultDialCode
+  });
+
+  if (!number) {
+    console.log('[formatters] ✗ No number provided, returning empty');
+    return number;
+  }
+  
+  if (!defaultDialCode) {
+    console.log('[formatters] ✗ No defaultDialCode provided, returning original number:', number);
+    return number;
+  }
 
   // Remove any + prefix and whitespace from both number and code
   const cleanNumber = number.replace(/^\+/, "").replace(/\s/g, "");
   const cleanDefaultCode = defaultDialCode.replace(/^\+/, "").replace(/\s/g, "");
 
+  console.log('[formatters] After cleaning:', {
+    cleanNumber: cleanNumber,
+    cleanDefaultCode: cleanDefaultCode,
+    startsWithCode: cleanNumber.startsWith(cleanDefaultCode)
+  });
+
   // Check if number starts with the default code
   if (cleanNumber.startsWith(cleanDefaultCode)) {
-    // Replace with 0 and the rest of the number
-    return "0" + cleanNumber.substring(cleanDefaultCode.length);
+    const normalized = "0" + cleanNumber.substring(cleanDefaultCode.length);
+    console.log('[formatters] ✓ Normalized:', number, '→', normalized);
+    return normalized;
   }
 
+  console.log('[formatters] → No normalization needed, returning original:', number);
   return number;
 }
