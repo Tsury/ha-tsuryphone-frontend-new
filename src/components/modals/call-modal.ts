@@ -8,6 +8,7 @@ import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import { triggerHaptic } from "../../utils/haptics";
+import { normalizePhoneNumberForDisplay } from "../../utils/formatters";
 
 export type CallModalMode = "incoming" | "active" | "waiting";
 
@@ -80,13 +81,13 @@ export class TsuryPhoneCallModal extends LitElement {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--divider-color);
       background: var(--card-background-color);
     }
 
     .modal-title {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 500;
       color: var(--primary-text-color);
     }
@@ -95,9 +96,9 @@ export class TsuryPhoneCallModal extends LitElement {
       background: none;
       border: none;
       cursor: pointer;
-      padding: 8px;
+      padding: 4px;
       color: var(--primary-text-color);
-      font-size: 24px;
+      font-size: 20px;
       line-height: 1;
       opacity: 0.6;
       transition: opacity 0.2s;
@@ -583,6 +584,19 @@ export class TsuryPhoneCallModal extends LitElement {
     this.requestUpdate();
   }
 
+  /**
+   * Get normalized phone number for display
+   */
+  private _getNormalizedNumber(number: string): string {
+    if (!this.entityId) return number;
+    
+    const phoneStateEntity = this.hass.states[this.entityId];
+    const dialingContext = phoneStateEntity?.attributes?.dialing_context;
+    const defaultDialCode = dialingContext?.default_code || "";
+    
+    return normalizePhoneNumberForDisplay(number, defaultDialCode);
+  }
+
   private async _handleSwapCalls(): Promise<void> {
     triggerHaptic("medium");
 
@@ -623,11 +637,13 @@ export class TsuryPhoneCallModal extends LitElement {
     const { callInfo } = this;
     if (!callInfo) return html``;
 
+    const displayNumber = this._getNormalizedNumber(callInfo.number);
+
     return html`
       <div class="caller-info">
-        <div class="caller-name">${callInfo.name || callInfo.number}</div>
+        <div class="caller-name">${callInfo.name || displayNumber}</div>
         ${callInfo.name
-          ? html`<div class="caller-number">${callInfo.number}</div>`
+          ? html`<div class="caller-number">${displayNumber}</div>`
           : ""}
         ${callInfo.isPriority
           ? html` <div class="priority-badge">⭐ Priority Caller</div> `
@@ -673,11 +689,13 @@ export class TsuryPhoneCallModal extends LitElement {
     const isDialing = phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT";
     const callStatus = isDialing ? "Dialing..." : this._formatDuration(this._currentDuration);
 
+    const displayNumber = this._getNormalizedNumber(callInfo.number);
+
     return html`
       <div class="caller-info">
-        <div class="caller-name">${callInfo.name || callInfo.number}</div>
+        <div class="caller-name">${callInfo.name || displayNumber}</div>
         ${callInfo.name
-          ? html`<div class="caller-number">${callInfo.number}</div>`
+          ? html`<div class="caller-number">${displayNumber}</div>`
           : ""}
       </div>
 
@@ -731,14 +749,16 @@ export class TsuryPhoneCallModal extends LitElement {
     const { waitingCall } = this;
     if (!waitingCall) return html``;
 
+    const displayNumber = this._getNormalizedNumber(waitingCall.number);
+
     return html`
       <div class="waiting-call">
         <div class="waiting-call-info">
           <div class="waiting-call-name">
-            ${waitingCall.name || waitingCall.number}
+            ${waitingCall.name || displayNumber}
           </div>
           ${waitingCall.name
-            ? html`<div class="waiting-call-number">${waitingCall.number}</div>`
+            ? html`<div class="waiting-call-number">${displayNumber}</div>`
             : ""}
           ${waitingCall.isPriority
             ? html`<div class="priority-badge">⭐ Priority</div>`

@@ -4655,6 +4655,17 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         this._showKeypad = !this._showKeypad;
         this.requestUpdate();
     }
+    /**
+     * Get normalized phone number for display
+     */
+    _getNormalizedNumber(number) {
+        if (!this.entityId)
+            return number;
+        const phoneStateEntity = this.hass.states[this.entityId];
+        const dialingContext = phoneStateEntity?.attributes?.dialing_context;
+        const defaultDialCode = dialingContext?.default_code || "";
+        return normalizePhoneNumberForDisplay(number, defaultDialCode);
+    }
     async _handleSwapCalls() {
         triggerHaptic("medium");
         try {
@@ -4683,11 +4694,12 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         const { callInfo } = this;
         if (!callInfo)
             return x ``;
+        const displayNumber = this._getNormalizedNumber(callInfo.number);
         return x `
       <div class="caller-info">
-        <div class="caller-name">${callInfo.name || callInfo.number}</div>
+        <div class="caller-name">${callInfo.name || displayNumber}</div>
         ${callInfo.name
-            ? x `<div class="caller-number">${callInfo.number}</div>`
+            ? x `<div class="caller-number">${displayNumber}</div>`
             : ""}
         ${callInfo.isPriority
             ? x ` <div class="priority-badge">⭐ Priority Caller</div> `
@@ -4730,11 +4742,12 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
         const isDialing = phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT";
         const callStatus = isDialing ? "Dialing..." : this._formatDuration(this._currentDuration);
+        const displayNumber = this._getNormalizedNumber(callInfo.number);
         return x `
       <div class="caller-info">
-        <div class="caller-name">${callInfo.name || callInfo.number}</div>
+        <div class="caller-name">${callInfo.name || displayNumber}</div>
         ${callInfo.name
-            ? x `<div class="caller-number">${callInfo.number}</div>`
+            ? x `<div class="caller-number">${displayNumber}</div>`
             : ""}
       </div>
 
@@ -4787,14 +4800,15 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         const { waitingCall } = this;
         if (!waitingCall)
             return x ``;
+        const displayNumber = this._getNormalizedNumber(waitingCall.number);
         return x `
       <div class="waiting-call">
         <div class="waiting-call-info">
           <div class="waiting-call-name">
-            ${waitingCall.name || waitingCall.number}
+            ${waitingCall.name || displayNumber}
           </div>
           ${waitingCall.name
-            ? x `<div class="waiting-call-number">${waitingCall.number}</div>`
+            ? x `<div class="waiting-call-number">${displayNumber}</div>`
             : ""}
           ${waitingCall.isPriority
             ? x `<div class="priority-badge">⭐ Priority</div>`
@@ -4879,13 +4893,13 @@ TsuryPhoneCallModal.styles = i$3 `
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--divider-color);
       background: var(--card-background-color);
     }
 
     .modal-title {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 500;
       color: var(--primary-text-color);
     }
@@ -4894,9 +4908,9 @@ TsuryPhoneCallModal.styles = i$3 `
       background: none;
       border: none;
       cursor: pointer;
-      padding: 8px;
+      padding: 4px;
       color: var(--primary-text-color);
-      font-size: 24px;
+      font-size: 20px;
       line-height: 1;
       opacity: 0.6;
       transition: opacity 0.2s;
