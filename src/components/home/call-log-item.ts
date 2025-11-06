@@ -193,7 +193,7 @@ export class TsuryPhoneCallLogItem extends LitElement {
     
     const displayNumber = normalizePhoneNumberForDisplay(
       this.call.phoneNumber,
-      this.defaultDialCode || "972" // Fallback to Israel if not provided
+      this.defaultDialCode
     );
 
     // Debug logging for number normalization
@@ -201,7 +201,6 @@ export class TsuryPhoneCallLogItem extends LitElement {
       console.log('[CallLogItem] Number normalization:', {
         originalNumber: this.call.phoneNumber,
         defaultDialCode: this.defaultDialCode,
-        fallbackUsed: !this.defaultDialCode,
         displayNumber: displayNumber
       });
       this.setAttribute('number-debug-logged', 'true');

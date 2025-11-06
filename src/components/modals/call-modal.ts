@@ -603,11 +603,10 @@ export class TsuryPhoneCallModal extends LitElement {
       attributes: phoneStateEntity?.attributes,
       dialingContext: dialingContext,
       defaultDialCode: defaultDialCode,
-      inputNumber: number,
-      fallbackCode: defaultDialCode || "972"
+      inputNumber: number
     });
     
-    const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode || "972");
+    const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode);
     console.log("[CallModal] Normalized result:", normalized);
     
     return normalized;

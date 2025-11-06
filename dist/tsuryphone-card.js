@@ -1370,14 +1370,12 @@ let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
             });
             this.setAttribute('debug-logged', 'true');
         }
-        const displayNumber = normalizePhoneNumberForDisplay(this.call.phoneNumber, this.defaultDialCode || "972" // Fallback to Israel if not provided
-        );
+        const displayNumber = normalizePhoneNumberForDisplay(this.call.phoneNumber, this.defaultDialCode);
         // Debug logging for number normalization
         if (!this.hasAttribute('number-debug-logged')) {
             console.log('[CallLogItem] Number normalization:', {
                 originalNumber: this.call.phoneNumber,
                 defaultDialCode: this.defaultDialCode,
-                fallbackUsed: !this.defaultDialCode,
                 displayNumber: displayNumber
             });
             this.setAttribute('number-debug-logged', 'true');
@@ -4674,10 +4672,9 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
             attributes: phoneStateEntity?.attributes,
             dialingContext: dialingContext,
             defaultDialCode: defaultDialCode,
-            inputNumber: number,
-            fallbackCode: defaultDialCode || "972"
+            inputNumber: number
         });
-        const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode || "972");
+        const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode);
         console.log("[CallModal] Normalized result:", normalized);
         return normalized;
     }
