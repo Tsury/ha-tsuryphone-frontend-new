@@ -750,12 +750,17 @@ export class TsuryPhoneCard extends LitElement {
     const callHistory: CallHistoryEntryType[] = this._callHistoryCache.map(
       (call: any, index: number) => {
         // Map call_type to our CallType enum
-        // Blocked calls should be treated as missed incoming calls
+        // Backend sends: 'incoming_answered', 'outgoing_answered', 'incoming_missed', 'blocked', etc.
         let callType: CallType;
+        
         if (call.call_type === "blocked") {
           callType = "missed";
-        } else if (call.call_type === "incoming" || call.call_type === "outgoing" || call.call_type === "missed") {
-          callType = call.call_type;
+        } else if (call.call_type.startsWith("incoming_missed") || call.call_type.startsWith("outgoing_missed")) {
+          callType = "missed";
+        } else if (call.call_type.startsWith("incoming")) {
+          callType = "incoming";
+        } else if (call.call_type.startsWith("outgoing")) {
+          callType = "outgoing";
         } else {
           // Default to missed for unknown types
           callType = "missed";
@@ -785,6 +790,8 @@ export class TsuryPhoneCard extends LitElement {
         return entry;
       }
     );
+
+    console.log(`[TsuryPhone] Total calls in history: ${callHistory.length}`);
 
     return html`
       <div class="view home-view fade-in">

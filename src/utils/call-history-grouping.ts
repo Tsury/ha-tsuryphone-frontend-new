@@ -85,6 +85,11 @@ export function groupCallHistory(
   const groupOrder = ["Today", "Yesterday", "Older"];
   const result: GroupedCallHistory[] = [];
 
+  console.log(`[CallHistoryGrouping] Grouped ${sortedCalls.length} calls into ${groups.size} groups`);
+  groups.forEach((calls, label) => {
+    console.log(`  - ${label}: ${calls.length} items (after stacking)`);
+  });
+
   // Add known groups in order
   groupOrder.forEach((label) => {
     if (groups.has(label)) {

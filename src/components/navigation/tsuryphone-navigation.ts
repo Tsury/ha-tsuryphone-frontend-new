@@ -77,7 +77,7 @@ export class TsuryPhoneNavigation extends LitElement {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          background: var(--tsury-secondary-background-color, var(--secondary-background-color));
+          background: var(--tsury-primary-background-color, var(--primary-background-color));
           border-top: 1px solid var(--tsury-divider-color);
           padding: var(--tsury-spacing-xs) 0;
           min-height: 56px;
@@ -134,6 +134,12 @@ export class TsuryPhoneNavigation extends LitElement {
 
         .nav-tab.active {
           color: var(--tsury-primary-color);
+        }
+
+        .nav-tab.active ha-icon {
+          background: rgba(var(--rgb-primary-color, 128, 128, 128), 0.2);
+          padding: 8px;
+          border-radius: 12px;
         }
 
         .nav-tab.active::before {
