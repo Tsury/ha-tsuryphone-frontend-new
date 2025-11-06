@@ -196,6 +196,16 @@ export class TsuryPhoneCallLogItem extends LitElement {
       this.defaultDialCode
     );
 
+    // Debug logging for number normalization
+    if (!this.hasAttribute('number-debug-logged')) {
+      console.log('[CallLogItem] Number normalization:', {
+        originalNumber: this.call.phoneNumber,
+        defaultDialCode: this.defaultDialCode,
+        displayNumber: displayNumber
+      });
+      this.setAttribute('number-debug-logged', 'true');
+    }
+
     return html`
       <div class="call-item" @click=${this._handleClick}>
         <div class="avatar" style="background-color: ${avatarColor}">

@@ -265,6 +265,7 @@ export class TsuryPhoneCard extends LitElement {
       // Update default dial code
       if (attrs.dialing_context && attrs.dialing_context.default_code) {
         this._defaultDialCode = attrs.dialing_context.default_code;
+        console.log('[TsuryPhone] Default dial code set to:', this._defaultDialCode);
       }
     }
 
@@ -430,9 +431,9 @@ export class TsuryPhoneCard extends LitElement {
           isIncoming: true,
         };
       }
-    } else if (phoneState === "DIALING" || phoneState === "RINGING_OUT") {
-      // Show modal when dialing out
-      console.log("[TsuryPhone] Detected DIALING/RINGING_OUT state, opening call modal");
+    } else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT") {
+      // Show modal when dialing out or calling
+      console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state, opening call modal");
       this._callModalMode = "active";
       if (!this._callModalMinimized) {
         this._callModalOpen = true;

@@ -670,7 +670,7 @@ export class TsuryPhoneCallModal extends LitElement {
     
     // Check phone state to determine if we're dialing
     const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
-    const isDialing = phoneState === "DIALING" || phoneState === "RINGING_OUT";
+    const isDialing = phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT";
     const callStatus = isDialing ? "Dialing..." : this._formatDuration(this._currentDuration);
 
     return html`

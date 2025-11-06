@@ -122,7 +122,11 @@ const haThemeVariables = i$3 `
   --tsury-border-radius-xl: 16px;
 
   /* Typography */
-  --tsury-font-family: var(--paper-font-common-base_-_font-family, 'Roboto', sans-serif);
+  --tsury-font-family: var(
+    --paper-font-common-base_-_font-family,
+    "Roboto",
+    sans-serif
+  );
   --tsury-font-size-sm: 12px;
   --tsury-font-size-md: 14px;
   --tsury-font-size-lg: 16px;
@@ -139,7 +143,7 @@ const haThemeVariables = i$3 `
 /**
  * Helper function to determine if dark mode is active
  */
-function isDarkMode(hass) {
+function isDarkMode$1(hass) {
     return hass?.themes?.darkMode ?? false;
 }
 /**
@@ -154,7 +158,8 @@ const haButtonStyles = i$3 `
     border-radius: var(--tsury-border-radius-md);
     padding: var(--tsury-spacing-sm) var(--tsury-spacing-md);
     cursor: pointer;
-    transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+    transition: all var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
     outline: none;
     position: relative;
     overflow: hidden;
@@ -201,7 +206,7 @@ const haButtonStyles = i$3 `
 
   /* Ripple effect */
   button::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -210,7 +215,9 @@ const haButtonStyles = i$3 `
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.3);
     transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition:
+      width 0.6s,
+      height 0.6s;
   }
 
   button:active::before {
@@ -250,16 +257,23 @@ i$3 `
     padding: var(--tsury-spacing-md);
     min-height: 48px;
     cursor: pointer;
-    transition: background-color var(--tsury-transition-duration) var(--tsury-transition-timing);
+    transition: background-color var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
     border-radius: var(--tsury-border-radius-md);
   }
 
   .list-item:hover {
-    background-color: rgba(var(--rgb-primary-color), var(--tsury-state-hover-opacity));
+    background-color: rgba(
+      var(--rgb-primary-color),
+      var(--tsury-state-hover-opacity)
+    );
   }
 
   .list-item:active {
-    background-color: rgba(var(--rgb-primary-color), var(--tsury-state-pressed-opacity));
+    background-color: rgba(
+      var(--rgb-primary-color),
+      var(--tsury-state-pressed-opacity)
+    );
   }
 
   .list-item-avatar {
@@ -362,7 +376,7 @@ const commonStyles = i$3 `
   }
 
   .scrollable::-webkit-scrollbar {
-    width: 4px;
+    width: 8px;
   }
 
   .scrollable::-webkit-scrollbar-track {
@@ -370,12 +384,12 @@ const commonStyles = i$3 `
   }
 
   .scrollable::-webkit-scrollbar-thumb {
-    background-color: rgba(128, 128, 128, 0.2);
-    border-radius: 2px;
+    background-color: rgba(128, 128, 128, 0.3);
+    border-radius: 4px;
   }
 
   .scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(128, 128, 128, 0.4);
+    background-color: rgba(128, 128, 128, 0.5);
   }
 
   /* Fade animations */
@@ -420,19 +434,23 @@ const commonStyles = i$3 `
   }
 
   .fade-in {
-    animation: fadeIn var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: fadeIn var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 
   .fade-out {
-    animation: fadeOut var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: fadeOut var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 
   .slide-in-up {
-    animation: slideInUp var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: slideInUp var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 
   .slide-out-down {
-    animation: slideOutDown var(--tsury-transition-duration) var(--tsury-transition-timing);
+    animation: slideOutDown var(--tsury-transition-duration)
+      var(--tsury-transition-timing);
   }
 `;
 
@@ -443,7 +461,7 @@ const commonStyles = i$3 `
 let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
     constructor() {
         super(...arguments);
-        this.activeTab = 'home';
+        this.activeTab = "home";
         this.disabled = false;
     }
     _handleTabClick(tab) {
@@ -451,7 +469,7 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
             return;
         }
         // Dispatch custom event for parent to handle
-        this.dispatchEvent(new CustomEvent('tab-change', {
+        this.dispatchEvent(new CustomEvent("tab-change", {
             detail: { tab },
             bubbles: true,
             composed: true,
@@ -459,11 +477,10 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
     }
     render() {
         return x `
-      <nav class="navigation ${this.disabled ? 'disabled' : ''}" role="tablist">
-        ${this._renderTab('home', 'mdi:home', 'Home')}
-        ${this._renderTab('keypad', 'mdi:dialpad', 'Keypad')}
-        ${this._renderTab('contacts', 'mdi:contacts', 'Contacts')}
-        ${this._renderTab('blocked', 'mdi:block-helper', 'Blocked')}
+      <nav class="navigation ${this.disabled ? "disabled" : ""}" role="tablist">
+        ${this._renderTab("contacts", "mdi:contacts", "Contacts")}
+        ${this._renderTab("home", "mdi:home", "Home")}
+        ${this._renderTab("keypad", "mdi:dialpad", "Keypad")}
       </nav>
     `;
     }
@@ -471,7 +488,7 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
         const isActive = this.activeTab === tab;
         return x `
       <button
-        class="nav-tab ${isActive ? 'active' : ''}"
+        class="nav-tab ${isActive ? "active" : ""}"
         role="tab"
         aria-selected="${isActive}"
         aria-label="${label}"
@@ -495,7 +512,7 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          background: var(--tsury-card-background-color);
+          background: color-mix(in srgb, var(--card-background-color) 85%, var(--primary-background-color) 15%);
           border-top: 1px solid var(--tsury-divider-color);
           padding: var(--tsury-spacing-xs) 0;
           min-height: 56px;
@@ -519,7 +536,8 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
           border: none;
           cursor: pointer;
           color: var(--tsury-secondary-text-color);
-          transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+          transition: all var(--tsury-transition-duration)
+            var(--tsury-transition-timing);
           position: relative;
           min-width: 64px;
           outline: none;
@@ -531,11 +549,17 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
         }
 
         .nav-tab:not(:disabled):hover {
-          background: rgba(var(--rgb-primary-color, 128, 128, 128), var(--tsury-state-hover-opacity));
+          background: rgba(
+            var(--rgb-primary-color, 128, 128, 128),
+            var(--tsury-state-hover-opacity)
+          );
         }
 
         .nav-tab:not(:disabled):active {
-          background: rgba(var(--rgb-primary-color, 128, 128, 128), var(--tsury-state-pressed-opacity));
+          background: rgba(
+            var(--rgb-primary-color, 128, 128, 128),
+            var(--tsury-state-pressed-opacity)
+          );
         }
 
         .nav-tab:not(:disabled):focus-visible {
@@ -543,12 +567,24 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
           outline-offset: -2px;
         }
 
+        .nav-tab ha-icon {
+          --mdc-icon-size: 24px;
+          display: block;
+          padding: 8px;
+          border-radius: 12px;
+          transition: background-color 0.2s ease;
+        }
+
         .nav-tab.active {
           color: var(--tsury-primary-color);
         }
 
+        .nav-tab.active ha-icon {
+          background: rgba(var(--rgb-primary-color, 128, 128, 128), 0.2);
+        }
+
         .nav-tab.active::before {
-          content: '';
+          content: "";
           position: absolute;
           top: 0;
           left: 50%;
@@ -571,11 +607,6 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
           }
         }
 
-        .nav-tab ha-icon {
-          --mdc-icon-size: 24px;
-          display: block;
-        }
-
         .nav-label {
           font-size: 12px;
           font-weight: var(--tsury-font-weight-medium);
@@ -584,7 +615,7 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
 
         /* Ripple effect on tap */
         .nav-tab::after {
-          content: '';
+          content: "";
           position: absolute;
           top: 50%;
           left: 50%;
@@ -593,7 +624,9 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
           border-radius: 50%;
           background: rgba(var(--rgb-primary-color, 128, 128, 128), 0.2);
           transform: translate(-50%, -50%);
-          transition: width 0.4s, height 0.4s;
+          transition:
+            width 0.4s,
+            height 0.4s;
           pointer-events: none;
         }
 
@@ -638,7 +671,7 @@ __decorate([
     n({ type: Boolean })
 ], TsuryPhoneNavigation.prototype, "disabled", void 0);
 TsuryPhoneNavigation = __decorate([
-    t('tsuryphone-navigation')
+    t("tsuryphone-navigation")
 ], TsuryPhoneNavigation);
 
 /**
@@ -648,15 +681,14 @@ TsuryPhoneNavigation = __decorate([
  * Format a timestamp for display in call log
  */
 function formatCallTime(timestamp) {
-    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+    const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const diffMinutes = Math.floor(diff / 60000);
     const diffHours = Math.floor(diff / 3600000);
-    const diffDays = Math.floor(diff / 86400000);
     // Just now (< 1 minute)
     if (diffMinutes < 1) {
-        return 'Just now';
+        return "Just now";
     }
     // Minutes ago (< 1 hour)
     if (diffMinutes < 60) {
@@ -666,42 +698,61 @@ function formatCallTime(timestamp) {
     if (diffHours < 24) {
         return `${diffHours}h ago`;
     }
-    // Days ago (< 7 days)
+    // For calls within the same week, show day and time (e.g., "Fri 23:50")
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const callDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffDays = Math.floor((today.getTime() - callDate.getTime()) / 86400000);
     if (diffDays < 7) {
-        return `${diffDays}d ago`;
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const dayName = days[date.getDay()];
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        return `${dayName} ${hours}:${minutes}`;
     }
-    // Date format for older calls
-    const month = date.getMonth() + 1;
+    // For older calls, show month, day, and time (e.g., "Oct 25, 16:23")
+    const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ];
+    const monthName = months[date.getMonth()];
     const day = date.getDate();
-    return `${month}/${day}`;
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${monthName} ${day}, ${hours}:${minutes}`;
 }
 /**
  * Get group label for call history grouping
  */
 function getCallHistoryGroup(timestamp) {
-    const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+    const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
     const now = new Date();
     // Reset time to midnight for comparison
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const callDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const diffTime = today.getTime() - callDate.getTime();
     const diffDays = Math.floor(diffTime / 86400000);
+    // Cap at 365 days
+    if (diffDays > 365) {
+        return ""; // Will be filtered out
+    }
     if (diffDays === 0) {
-        return 'Today';
+        return "Today";
     }
     if (diffDays === 1) {
-        return 'Yesterday';
+        return "Yesterday";
     }
-    if (diffDays < 7) {
-        return 'This Week';
-    }
-    if (diffDays < 30) {
-        return 'This Month';
-    }
-    // Format as "Month Year" for older calls
-    const months = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
-    return `${months[date.getMonth()]} ${date.getFullYear()}`;
+    // Everything else is "Older"
+    return "Older";
 }
 /**
  * Format call duration in seconds to readable format
@@ -713,7 +764,9 @@ function formatDuration(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     if (minutes < 60) {
-        return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+        return remainingSeconds > 0
+            ? `${minutes}m ${remainingSeconds}s`
+            : `${minutes}m`;
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
@@ -727,10 +780,10 @@ function formatDuration(seconds) {
  * Filter call history by type
  */
 function filterCallHistory(calls, filter) {
-    if (filter === 'all') {
+    if (filter === "all") {
         return calls;
     }
-    return calls.filter(call => call.type === filter);
+    return calls.filter((call) => call.type === filter);
 }
 /**
  * Group call history by date ranges
@@ -742,41 +795,46 @@ function groupCallHistory(calls) {
     const sortedCalls = [...calls].sort((a, b) => {
         return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
     });
-    // Group calls
-    sortedCalls.forEach(call => {
+    // Group calls and stack adjacent calls from same contact
+    sortedCalls.forEach((call) => {
         const groupLabel = getCallHistoryGroup(call.timestamp);
+        // Filter out calls older than 365 days
+        if (!groupLabel) {
+            return;
+        }
         if (!groups.has(groupLabel)) {
             groups.set(groupLabel, []);
         }
-        groups.get(groupLabel).push(call);
+        const groupCalls = groups.get(groupLabel);
+        const lastCall = groupCalls[groupCalls.length - 1];
+        // Stack if: same phone number, same type, and adjacent
+        if (lastCall &&
+            lastCall.phoneNumber === call.phoneNumber &&
+            lastCall.type === call.type) {
+            // Increment count on the last call
+            lastCall.count = (lastCall.count || 1) + 1;
+            // Don't add the current call - it's now stacked
+        }
+        else {
+            // Add as new call (count defaults to undefined, showing as single call)
+            groupCalls.push({ ...call });
+        }
     });
     // Convert to array and maintain order
-    const groupOrder = ['Today', 'Yesterday', 'This Week', 'This Month'];
+    const groupOrder = ["Today", "Yesterday", "Older"];
     const result = [];
+    console.log(`[CallHistoryGrouping] Grouped ${sortedCalls.length} calls into ${groups.size} groups`);
+    groups.forEach((calls, label) => {
+        console.log(`  - ${label}: ${calls.length} items (after stacking)`);
+    });
     // Add known groups in order
-    groupOrder.forEach(label => {
+    groupOrder.forEach((label) => {
         if (groups.has(label)) {
             result.push({
                 groupLabel: label,
                 calls: groups.get(label),
             });
-            groups.delete(label);
         }
-    });
-    // Add remaining groups (month/year groups) in chronological order
-    const remainingGroups = Array.from(groups.entries())
-        .map(([groupLabel, calls]) => ({
-        groupLabel,
-        calls,
-        // Use first call's timestamp for sorting
-        timestamp: new Date(calls[0].timestamp).getTime(),
-    }))
-        .sort((a, b) => b.timestamp - a.timestamp);
-    remainingGroups.forEach(group => {
-        result.push({
-            groupLabel: group.groupLabel,
-            calls: group.calls,
-        });
     });
     return result;
 }
@@ -786,7 +844,7 @@ function groupCallHistory(calls) {
 function getFrequentContacts(calls, limit = 6) {
     // Count calls per contact
     const contactCounts = new Map();
-    calls.forEach(call => {
+    calls.forEach((call) => {
         const key = call.phoneNumber;
         if (contactCounts.has(key)) {
             contactCounts.get(key).count++;
@@ -803,7 +861,7 @@ function getFrequentContacts(calls, limit = 6) {
     return Array.from(contactCounts.values())
         .sort((a, b) => b.count - a.count)
         .slice(0, limit)
-        .map(contact => ({
+        .map((contact) => ({
         contactName: contact.name,
         phoneNumber: contact.phone,
         callCount: contact.count,
@@ -813,11 +871,11 @@ function getFrequentContacts(calls, limit = 6) {
 let TsuryPhoneCallLogFilters = class TsuryPhoneCallLogFilters extends i {
     constructor() {
         super(...arguments);
-        this.activeFilter = 'all';
+        this.activeFilter = "all";
     }
     _handleFilterClick(filter) {
         this.activeFilter = filter;
-        this.dispatchEvent(new CustomEvent('filter-changed', {
+        this.dispatchEvent(new CustomEvent("filter-changed", {
             detail: { filter },
             bubbles: true,
             composed: true,
@@ -827,8 +885,8 @@ let TsuryPhoneCallLogFilters = class TsuryPhoneCallLogFilters extends i {
         return x `
       <div class="filters">
         <div
-          class="filter-chip ${this.activeFilter === 'all' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('all')}
+          class="filter-chip ${this.activeFilter === "all" ? "active" : ""}"
+          @click=${() => this._handleFilterClick("all")}
           role="button"
           tabindex="0"
           aria-label="Show all calls"
@@ -836,8 +894,8 @@ let TsuryPhoneCallLogFilters = class TsuryPhoneCallLogFilters extends i {
           All
         </div>
         <div
-          class="filter-chip ${this.activeFilter === 'missed' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('missed')}
+          class="filter-chip ${this.activeFilter === "missed" ? "active" : ""}"
+          @click=${() => this._handleFilterClick("missed")}
           role="button"
           tabindex="0"
           aria-label="Show missed calls"
@@ -845,8 +903,10 @@ let TsuryPhoneCallLogFilters = class TsuryPhoneCallLogFilters extends i {
           Missed
         </div>
         <div
-          class="filter-chip ${this.activeFilter === 'outgoing' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('outgoing')}
+          class="filter-chip ${this.activeFilter === "outgoing"
+            ? "active"
+            : ""}"
+          @click=${() => this._handleFilterClick("outgoing")}
           role="button"
           tabindex="0"
           aria-label="Show outgoing calls"
@@ -854,8 +914,10 @@ let TsuryPhoneCallLogFilters = class TsuryPhoneCallLogFilters extends i {
           Outgoing
         </div>
         <div
-          class="filter-chip ${this.activeFilter === 'incoming' ? 'active' : ''}"
-          @click=${() => this._handleFilterClick('incoming')}
+          class="filter-chip ${this.activeFilter === "incoming"
+            ? "active"
+            : ""}"
+          @click=${() => this._handleFilterClick("incoming")}
           role="button"
           tabindex="0"
           aria-label="Show incoming calls"
@@ -919,26 +981,71 @@ __decorate([
     n({ type: String })
 ], TsuryPhoneCallLogFilters.prototype, "activeFilter", void 0);
 TsuryPhoneCallLogFilters = __decorate([
-    t('tsuryphone-call-log-filters')
+    t("tsuryphone-call-log-filters")
 ], TsuryPhoneCallLogFilters);
 
 /**
  * Generate consistent avatar colors based on contact name
  */
-const AVATAR_COLORS = [
-    '#1976d2', // Blue
-    '#388e3c', // Green
-    '#d32f2f', // Red
-    '#7b1fa2', // Purple
-    '#f57c00', // Orange
-    '#0097a7', // Cyan
-    '#c2185b', // Pink
-    '#5d4037', // Brown
-    '#455a64', // Blue Grey
-    '#689f38', // Light Green
-    '#0288d1', // Light Blue
-    '#e64a19', // Deep Orange
+const AVATAR_COLORS_DARK = [
+    "#1565c0", // Darker Blue
+    "#2e7d32", // Darker Green
+    "#c62828", // Darker Red
+    "#6a1b9a", // Darker Purple
+    "#e65100", // Darker Orange
+    "#00838f", // Darker Cyan
+    "#ad1457", // Darker Pink
+    "#4e342e", // Darker Brown
+    "#37474f", // Darker Blue Grey
+    "#558b2f", // Darker Light Green
+    "#01579b", // Darker Light Blue
+    "#bf360c", // Darker Deep Orange
 ];
+const AVATAR_COLORS_LIGHT = [
+    "#42a5f5", // Lighter Blue
+    "#66bb6a", // Lighter Green
+    "#ef5350", // Lighter Red
+    "#ab47bc", // Lighter Purple
+    "#ffa726", // Lighter Orange
+    "#26c6da", // Lighter Cyan
+    "#ec407a", // Lighter Pink
+    "#8d6e63", // Lighter Brown
+    "#78909c", // Lighter Blue Grey
+    "#9ccc65", // Lighter Light Green
+    "#29b6f6", // Lighter Light Blue
+    "#ff7043", // Lighter Deep Orange
+];
+/**
+ * Check if the UI is in dark mode
+ */
+function isDarkMode() {
+    // Check if the document has a dark theme class or attribute
+    if (typeof document !== 'undefined') {
+        const html = document.documentElement;
+        const bodyTheme = document.body.getAttribute('data-theme');
+        // Check for common dark mode indicators
+        if (bodyTheme === 'dark' || html.classList.contains('dark-mode')) {
+            return true;
+        }
+        // Check CSS variable for theme
+        const themeStyle = getComputedStyle(html);
+        const cardBg = themeStyle.getPropertyValue('--card-background-color');
+        // If background is dark (low lightness), assume dark mode
+        if (cardBg) {
+            // Simple heuristic: if it starts with # and looks dark
+            const rgb = themeStyle.getPropertyValue('--primary-background-color') || cardBg;
+            if (rgb.includes('rgb')) {
+                const values = rgb.match(/\d+/g);
+                if (values && values.length >= 3) {
+                    const brightness = (parseInt(values[0]) + parseInt(values[1]) + parseInt(values[2])) / 3;
+                    return brightness < 128;
+                }
+            }
+        }
+    }
+    // Default to dark mode if we can't determine
+    return true;
+}
 /**
  * Simple hash function for strings
  */
@@ -956,25 +1063,22 @@ function hashCode(str) {
  */
 function getAvatarColor(name) {
     if (!name) {
-        return AVATAR_COLORS[0];
+        return isDarkMode() ? AVATAR_COLORS_DARK[0] : AVATAR_COLORS_LIGHT[0];
     }
-    const index = hashCode(name) % AVATAR_COLORS.length;
-    return AVATAR_COLORS[index];
+    const colors = isDarkMode() ? AVATAR_COLORS_DARK : AVATAR_COLORS_LIGHT;
+    const index = hashCode(name) % colors.length;
+    return colors[index];
 }
 /**
  * Get initials from a name (up to 2 characters)
  */
 function getInitials(name) {
     if (!name) {
-        return '?';
+        return "?";
     }
     const words = name.trim().split(/\s+/);
-    if (words.length === 1) {
-        // Single word: take first 2 chars
-        return words[0].substring(0, 2).toUpperCase();
-    }
-    // Multiple words: take first char of first two words
-    return (words[0][0] + words[1][0]).toUpperCase();
+    // Always return just the first letter
+    return words[0][0].toUpperCase();
 }
 
 let TsuryPhoneFrequentContacts = class TsuryPhoneFrequentContacts extends i {
@@ -993,7 +1097,7 @@ let TsuryPhoneFrequentContacts = class TsuryPhoneFrequentContacts extends i {
         if (this.contacts.length === 0) {
             return x `
         <div class="frequent-contacts">
-          <div class="section-header">Frequent Contacts</div>
+          <div class="section-header">Frequents</div>
           <div class="empty-state">
             <ha-icon class="empty-icon" icon="mdi:account-multiple-outline"></ha-icon>
             <div class="empty-text">No frequent contacts yet</div>
@@ -1003,7 +1107,7 @@ let TsuryPhoneFrequentContacts = class TsuryPhoneFrequentContacts extends i {
         }
         return x `
       <div class="frequent-contacts">
-        <div class="section-header">Frequent Contacts</div>
+        <div class="section-header">Frequents</div>
         <div class="contacts-grid">
           ${this.contacts.map(contact => x `
               <div
@@ -1133,38 +1237,131 @@ TsuryPhoneFrequentContacts = __decorate([
     t('tsuryphone-frequent-contacts')
 ], TsuryPhoneFrequentContacts);
 
+/**
+ * Formatting Utilities
+ * Reusable formatters for phone numbers, dates, durations
+ */
+/**
+ * Format phone number for display
+ */
+function formatPhoneNumber(number) {
+    if (!number)
+        return "";
+    // Remove non-digit characters
+    const digits = number.replace(/\D/g, "");
+    // Format based on length
+    if (digits.length === 10) {
+        // US format: (555) 123-4567
+        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    else if (digits.length === 11 && digits[0] === "1") {
+        // US format with country code: +1 (555) 123-4567
+        return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+    else if (digits.length > 11) {
+        // International format: +XX XXX XXX XXXX
+        return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+    }
+    // Default: return as-is
+    return number;
+}
+/**
+ * Generate consistent color from string (for avatars)
+ */
+function generateColor(input) {
+    if (!input)
+        return "hsl(200, 60%, 45%)"; // Default color
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+        hash = input.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash % 360);
+    // Check if dark mode - simple heuristic
+    const isDark = (() => {
+        if (typeof document !== 'undefined') {
+            const html = document.documentElement;
+            const themeStyle = getComputedStyle(html);
+            const cardBg = themeStyle.getPropertyValue('--card-background-color');
+            if (cardBg && cardBg.includes('rgb')) {
+                const values = cardBg.match(/\d+/g);
+                if (values && values.length >= 3) {
+                    const brightness = (parseInt(values[0]) + parseInt(values[1]) + parseInt(values[2])) / 3;
+                    return brightness < 128;
+                }
+            }
+        }
+        return true; // default to dark
+    })();
+    // Dark mode: darker, more saturated colors
+    // Light mode: lighter, less saturated colors
+    if (isDark) {
+        return `hsl(${hue}, 65%, 45%)`; // Darker for dark mode
+    }
+    else {
+        return `hsl(${hue}, 60%, 60%)`; // Lighter for light mode
+    }
+}
+/**
+ * Get first letter of name for avatar
+ */
+function getAvatarLetter(name) {
+    if (!name)
+        return "?";
+    return name.trim()[0].toUpperCase();
+}
+/**
+ * Normalize phone number for display based on default dial code
+ * If number starts with the default dial code (e.g., +972), replace it with 0
+ */
+function normalizePhoneNumberForDisplay(number, defaultDialCode) {
+    if (!number || !defaultDialCode)
+        return number;
+    // Remove any + prefix and whitespace from both number and code
+    const cleanNumber = number.replace(/^\+/, "").replace(/\s/g, "");
+    const cleanDefaultCode = defaultDialCode.replace(/^\+/, "").replace(/\s/g, "");
+    // Check if number starts with the default code
+    if (cleanNumber.startsWith(cleanDefaultCode)) {
+        // Replace with 0 and the rest of the number
+        return "0" + cleanNumber.substring(cleanDefaultCode.length);
+    }
+    return number;
+}
+
 let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
+    constructor() {
+        super(...arguments);
+        this.defaultDialCode = "";
+    }
     _getCallTypeIcon() {
         switch (this.call.type) {
-            case 'incoming':
+            case "incoming":
                 return x `
           <div class="call-type-icon incoming" title="Incoming call">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 15.5c-1.2 0-2.4-.2-3.5-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1zM19 12h2c0-4.97-4.03-9-9-9v2c3.87 0 7 3.13 7 7zm-4 0h2c0-2.76-2.24-5-5-5v2c1.66 0 3 1.34 3 3z"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 4 L4 20 M4 20 L4 12 M4 20 L12 20" />
             </svg>
           </div>
         `;
-            case 'outgoing':
+            case "outgoing":
                 return x `
           <div class="call-type-icon outgoing" title="Outgoing call">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 15.5c-1.2 0-2.4-.2-3.5-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.3-1.1-.5-2.3-.5-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1zM9 1v2c3.87 0 7 3.13 7 7h2c0-4.97-4.03-9-9-9zm4 4v2c1.66 0 3 1.34 3 3h2c0-2.76-2.24-5-5-5z"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20 L20 4 M20 4 L20 12 M20 4 L12 4" />
             </svg>
           </div>
         `;
-            case 'missed':
+            case "missed":
                 return x `
           <div class="call-type-icon missed" title="Missed call">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19.23 15.26l-2.54-.29c-.61-.07-1.21.14-1.64.57l-1.84 1.84c-2.83-1.44-5.15-3.75-6.59-6.59l1.85-1.85c.43-.43.64-1.03.57-1.64l-.29-2.52c-.12-1.01-.97-1.77-1.99-1.77H5.03c-1.13 0-2.07.94-2 2.07.53 8.54 7.36 15.36 15.89 15.89 1.13.07 2.07-.87 2.07-2v-1.73c.01-1.01-.75-1.86-1.76-1.98z"/>
-              <path d="M21.7 2.3L2.3 21.7 3.7 23.1 23.1 3.7z"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 4 L12 12 M8 16 L4 20 M4 20 L4 12 M4 20 L12 20" />
             </svg>
           </div>
         `;
         }
     }
     _handleClick() {
-        this.dispatchEvent(new CustomEvent('call-item-clicked', {
+        this.dispatchEvent(new CustomEvent("call-item-clicked", {
             detail: { call: this.call },
             bubbles: true,
             composed: true,
@@ -1174,7 +1371,35 @@ let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
         const avatarColor = getAvatarColor(this.call.contactName);
         const initials = getInitials(this.call.contactName);
         const timeFormatted = formatCallTime(this.call.timestamp);
-        const duration = this.call.duration > 0 ? formatDuration(this.call.duration) : null;
+        // Show duration for answered calls, "Missed" for missed/blocked calls
+        let durationDisplay = null;
+        if (this.call.type === "missed" || this.call.isBlocked) {
+            durationDisplay = x `<span>• Missed</span>`;
+        }
+        else if (this.call.duration > 0) {
+            durationDisplay = x `<span>• ${formatDuration(this.call.duration)}</span>`;
+        }
+        // Debug logging for first call item
+        if (!this.hasAttribute('debug-logged')) {
+            console.log('[CallLogItem] Rendering call:', {
+                type: this.call.type,
+                duration: this.call.duration,
+                isBlocked: this.call.isBlocked,
+                durationDisplay: durationDisplay ? 'shown' : 'hidden',
+                contactName: this.call.contactName
+            });
+            this.setAttribute('debug-logged', 'true');
+        }
+        const displayNumber = normalizePhoneNumberForDisplay(this.call.phoneNumber, this.defaultDialCode);
+        // Debug logging for number normalization
+        if (!this.hasAttribute('number-debug-logged')) {
+            console.log('[CallLogItem] Number normalization:', {
+                originalNumber: this.call.phoneNumber,
+                defaultDialCode: this.defaultDialCode,
+                displayNumber: displayNumber
+            });
+            this.setAttribute('number-debug-logged', 'true');
+        }
         return x `
       <div class="call-item" @click=${this._handleClick}>
         <div class="avatar" style="background-color: ${avatarColor}">
@@ -1184,11 +1409,16 @@ let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
           <div class="call-header">
             <span class="contact-name">${this.call.contactName}</span>
             ${this._getCallTypeIcon()}
-            ${this.call.isBlocked ? x `<span class="blocked-badge">Blocked</span>` : ''}
+            ${this.call.count && this.call.count > 1
+            ? x `<span class="count-badge">(${this.call.count})</span>`
+            : ""}
+            ${this.call.isBlocked
+            ? x `<span class="blocked-badge">Blocked</span>`
+            : ""}
           </div>
           <div class="call-details">
-            <span class="phone-number">${this.call.phoneNumber}</span>
-            ${duration ? x `<span>• ${duration}</span>` : ''}
+            <span class="phone-number">${displayNumber}</span>
+            ${durationDisplay}
           </div>
         </div>
         <div class="call-time">${timeFormatted}</div>
@@ -1211,7 +1441,7 @@ TsuryPhoneCallLogItem.styles = i$3 `
     }
 
     .call-item:hover {
-      background: var(--sidebar-background-color, rgba(0, 0, 0, 0.05));
+      background: var(--secondary-background-color);
     }
 
     .call-item:active {
@@ -1263,15 +1493,15 @@ TsuryPhoneCallLogItem.styles = i$3 `
     }
 
     .call-type-icon.incoming {
-      color: var(--success-color, #4caf50);
+      color: var(--success-color);
     }
 
     .call-type-icon.outgoing {
-      color: var(--info-color, #2196f3);
+      color: var(--info-color);
     }
 
     .call-type-icon.missed {
-      color: var(--error-color, #f44336);
+      color: var(--error-color);
     }
 
     .call-details {
@@ -1296,11 +1526,18 @@ TsuryPhoneCallLogItem.styles = i$3 `
     }
 
     .blocked-badge {
-      background: var(--error-color, #f44336);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
       font-size: 11px;
       padding: 2px 6px;
       border-radius: 4px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .count-badge {
+      color: var(--secondary-text-color);
+      font-size: 13px;
       font-weight: 500;
       flex-shrink: 0;
     }
@@ -1308,8 +1545,11 @@ TsuryPhoneCallLogItem.styles = i$3 `
 __decorate([
     n({ type: Object })
 ], TsuryPhoneCallLogItem.prototype, "call", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneCallLogItem.prototype, "defaultDialCode", void 0);
 TsuryPhoneCallLogItem = __decorate([
-    t('tsuryphone-call-log-item')
+    t("tsuryphone-call-log-item")
 ], TsuryPhoneCallLogItem);
 
 /**
@@ -1354,18 +1594,18 @@ const listItemStyles = i$3 `
     align-items: center;
     padding: 12px 16px;
     gap: 12px;
-    background: var(--card-background-color, #fff);
-    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    background: var(--card-background-color);
+    border-bottom: 1px solid var(--divider-color);
     cursor: pointer;
     transition: background-color 0.2s;
   }
 
   .list-item:hover {
-    background: var(--secondary-background-color, #f5f5f5);
+    background: var(--secondary-background-color);
   }
 
   .list-item:active {
-    background: var(--divider-color, #e0e0e0);
+    background: var(--divider-color);
   }
 
   .list-item-content {
@@ -1379,7 +1619,7 @@ const listItemStyles = i$3 `
   .list-item-title {
     font-size: 16px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1387,7 +1627,7 @@ const listItemStyles = i$3 `
 
   .list-item-subtitle {
     font-size: 14px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1407,8 +1647,8 @@ const buttonStyles = i$3 `
     padding: 8px 16px;
     border-radius: 8px;
     border: none;
-    background: var(--primary-color, #03a9f4);
-    color: white;
+    background: var(--primary-color);
+    color: var(--text-primary-color, white);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -1419,7 +1659,7 @@ const buttonStyles = i$3 `
   }
 
   .action-button:hover {
-    background: var(--dark-primary-color, #0288d1);
+    background: var(--dark-primary-color, var(--primary-color));
     transform: scale(1.02);
   }
 
@@ -1428,17 +1668,19 @@ const buttonStyles = i$3 `
   }
 
   .action-button:disabled {
-    background: var(--disabled-color, #9e9e9e);
+    background: var(--disabled-color);
+    opacity: 0.5;
     cursor: not-allowed;
   }
 
   .action-button.secondary {
-    background: var(--secondary-background-color, #f5f5f5);
-    color: var(--primary-text-color, #000);
+    background: var(--secondary-background-color);
+    color: var(--primary-text-color);
   }
 
   .action-button.danger {
-    background: var(--error-color, #f44336);
+    background: var(--error-color);
+    color: var(--text-primary-color, white);
   }
 
   .icon-button {
@@ -1447,7 +1689,7 @@ const buttonStyles = i$3 `
     border-radius: 50%;
     border: none;
     background: transparent;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1456,11 +1698,11 @@ const buttonStyles = i$3 `
   }
 
   .icon-button:hover {
-    background: var(--secondary-background-color, #f5f5f5);
+    background: var(--secondary-background-color);
   }
 
   .icon-button:active {
-    background: var(--divider-color, #e0e0e0);
+    background: var(--divider-color);
     transform: scale(0.95);
   }
 `;
@@ -1474,7 +1716,7 @@ i$3 `
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.5));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1483,19 +1725,22 @@ i$3 `
   }
 
   .modal {
-    background: var(--card-background-color, #fff);
+    background: var(--card-background-color);
     border-radius: 16px;
     max-width: 500px;
     width: 100%;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: var(
+      --ha-card-box-shadow,
+      0 8px 32px rgba(0, 0, 0, 0.3)
+    );
   }
 
   .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid var(--divider-color, #e0e0e0);
+    border-bottom: 1px solid var(--divider-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1504,7 +1749,7 @@ i$3 `
   .modal-title {
     font-size: 20px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
   }
 
   .modal-body {
@@ -1515,7 +1760,7 @@ i$3 `
 
   .modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid var(--divider-color, #e0e0e0);
+    border-top: 1px solid var(--divider-color);
     display: flex;
     gap: 12px;
     justify-content: flex-end;
@@ -1533,41 +1778,41 @@ i$3 `
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
     margin-bottom: 8px;
   }
 
   .form-input {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid var(--divider-color, #e0e0e0);
+    border: 1px solid var(--divider-color);
     border-radius: 8px;
     font-size: 16px;
     font-family: inherit;
-    color: var(--primary-text-color, #000);
-    background: var(--card-background-color, #fff);
+    color: var(--primary-text-color);
+    background: var(--card-background-color);
     box-sizing: border-box;
     transition: border-color 0.2s;
   }
 
   .form-input:focus {
     outline: none;
-    border-color: var(--primary-color, #03a9f4);
+    border-color: var(--primary-color);
   }
 
   .form-input::placeholder {
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
   }
 
   .form-helper {
     font-size: 12px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     margin-top: 4px;
   }
 
   .form-error {
     font-size: 12px;
-    color: var(--error-color, #f44336);
+    color: var(--error-color);
     margin-top: 4px;
   }
 `;
@@ -1587,7 +1832,7 @@ const emptyStateStyles = i$3 `
   .empty-state-icon {
     width: 64px;
     height: 64px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     margin-bottom: 16px;
     opacity: 0.5;
   }
@@ -1595,13 +1840,13 @@ const emptyStateStyles = i$3 `
   .empty-state-title {
     font-size: 18px;
     font-weight: 500;
-    color: var(--primary-text-color, #000);
+    color: var(--primary-text-color);
     margin-bottom: 8px;
   }
 
   .empty-state-message {
     font-size: 14px;
-    color: var(--secondary-text-color, #666);
+    color: var(--secondary-text-color);
     margin-bottom: 24px;
   }
 `;
@@ -1676,6 +1921,8 @@ let TsuryPhoneCallLogList = class TsuryPhoneCallLogList extends i {
         super(...arguments);
         this.groupedCalls = [];
         this.loading = false;
+        this.hasAnyCalls = false; // Whether there are any calls (before filtering)
+        this.defaultDialCode = "";
     }
     render() {
         if (this.loading) {
@@ -1686,6 +1933,16 @@ let TsuryPhoneCallLogList = class TsuryPhoneCallLogList extends i {
       `;
         }
         if (this.groupedCalls.length === 0) {
+            // Different message if we have calls but filter matched nothing
+            if (this.hasAnyCalls) {
+                return x `
+          <tsuryphone-empty-state
+            icon="mdi:filter-off-outline"
+            title="No matching calls"
+            message="Try changing the filter to see more call history."
+          ></tsuryphone-empty-state>
+        `;
+            }
             return x `
         <tsuryphone-empty-state
           icon="mdi:phone-outline"
@@ -1700,7 +1957,10 @@ let TsuryPhoneCallLogList = class TsuryPhoneCallLogList extends i {
             <div class="group">
               <div class="group-header">${group.groupLabel}</div>
               ${group.calls.map((call, index) => x `
-                  <tsuryphone-call-log-item .call=${call}></tsuryphone-call-log-item>
+                  <tsuryphone-call-log-item 
+                    .call=${call} 
+                    .defaultDialCode=${this.defaultDialCode}
+                  ></tsuryphone-call-log-item>
                   ${index < group.calls.length - 1 ? x `<div class="divider"></div>` : ''}
                 `)}
             </div>
@@ -1776,6 +2036,12 @@ __decorate([
 __decorate([
     n({ type: Boolean })
 ], TsuryPhoneCallLogList.prototype, "loading", void 0);
+__decorate([
+    n({ type: Boolean })
+], TsuryPhoneCallLogList.prototype, "hasAnyCalls", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneCallLogList.prototype, "defaultDialCode", void 0);
 TsuryPhoneCallLogList = __decorate([
     t('tsuryphone-call-log-list')
 ], TsuryPhoneCallLogList);
@@ -1785,14 +2051,15 @@ let TsuryPhoneHomeView = class TsuryPhoneHomeView extends i {
         super(...arguments);
         this.callHistory = [];
         this.loading = false;
-        this._activeFilter = 'all';
+        this.defaultDialCode = "";
+        this._activeFilter = "all";
     }
     _handleFilterChanged(e) {
         this._activeFilter = e.detail.filter;
     }
     _handleContactClicked(e) {
         // Bubble up the event for parent to handle (e.g., open call modal)
-        this.dispatchEvent(new CustomEvent('dial-contact', {
+        this.dispatchEvent(new CustomEvent("dial-contact", {
             detail: e.detail,
             bubbles: true,
             composed: true,
@@ -1800,7 +2067,7 @@ let TsuryPhoneHomeView = class TsuryPhoneHomeView extends i {
     }
     _handleCallItemClicked(e) {
         // Bubble up the event for parent to handle (e.g., open call details)
-        this.dispatchEvent(new CustomEvent('call-details', {
+        this.dispatchEvent(new CustomEvent("call-details", {
             detail: e.detail,
             bubbles: true,
             composed: true,
@@ -1813,7 +2080,7 @@ let TsuryPhoneHomeView = class TsuryPhoneHomeView extends i {
         // Get frequent contacts (only from all calls, not filtered)
         const frequentContacts = getFrequentContacts(this.callHistory, 6);
         // Show frequent contacts only if we have calls and filter is 'all'
-        const showFrequentContacts = this._activeFilter === 'all' && frequentContacts.length > 0;
+        const showFrequentContacts = this._activeFilter === "all" && frequentContacts.length > 0;
         return x `
       <div class="home-view">
         <tsuryphone-call-log-filters
@@ -1830,10 +2097,12 @@ let TsuryPhoneHomeView = class TsuryPhoneHomeView extends i {
                 ></tsuryphone-frequent-contacts>
                 <div class="divider"></div>
               `
-            : ''}
+            : ""}
 
           <tsuryphone-call-log-list
             .groupedCalls=${groupedCalls}
+            .hasAnyCalls=${this.callHistory.length > 0}
+            .defaultDialCode=${this.defaultDialCode}
             .loading=${this.loading}
             @call-item-clicked=${this._handleCallItemClicked}
           ></tsuryphone-call-log-list>
@@ -1899,10 +2168,13 @@ __decorate([
     n({ type: Boolean })
 ], TsuryPhoneHomeView.prototype, "loading", void 0);
 __decorate([
+    n({ type: String })
+], TsuryPhoneHomeView.prototype, "defaultDialCode", void 0);
+__decorate([
     r()
 ], TsuryPhoneHomeView.prototype, "_activeFilter", void 0);
 TsuryPhoneHomeView = __decorate([
-    t('tsuryphone-home-view')
+    t("tsuryphone-home-view")
 ], TsuryPhoneHomeView);
 
 /**
@@ -1986,6 +2258,36 @@ async function getCachedTsuryPhoneEntities(hass, phoneStateEntityId) {
     const entities = await discoverTsuryPhoneEntities(hass, phoneStateEntityId);
     entityCache.set(phoneStateEntityId, entities);
     return entities;
+}
+
+/**
+ * Haptic Feedback Utility
+ * Uses Home Assistant Companion app's haptic feedback system
+ * https://companion.home-assistant.io/docs/integrations/haptics/
+ */
+/**
+ * Trigger haptic feedback using Home Assistant Companion app
+ * Falls back to vibration API if not in HA app
+ */
+function triggerHaptic(type = "light") {
+    // Fire haptic event for Home Assistant Companion app
+    window.dispatchEvent(new CustomEvent("haptic", {
+        detail: type,
+    }));
+    // Fallback to vibration API for browsers without HA Companion app
+    if ("vibrate" in navigator) {
+        const fallbackPatterns = {
+            success: 50,
+            warning: [30, 10, 30],
+            failure: [50, 10, 50, 10, 50],
+            light: 10,
+            medium: 20,
+            heavy: 30,
+            selection: 5,
+        };
+        const pattern = fallbackPatterns[type];
+        navigator.vibrate(pattern);
+    }
 }
 
 /**
@@ -2142,6 +2444,7 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
         super(...arguments);
         this._longPressTimer = null;
         this._longPressTriggered = false;
+        this._pressedButton = null;
         this._buttons = [
             { digit: '1', letters: '' },
             { digit: '2', letters: 'ABC' },
@@ -2186,7 +2489,7 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
         font-weight: 300;
         color: var(--primary-text-color);
         transition: background 0.15s, transform 0.1s;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
         user-select: none;
         -webkit-tap-highlight-color: transparent;
         position: relative;
@@ -2197,7 +2500,7 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
         background: var(--secondary-background-color);
       }
 
-      .keypad-button:active {
+      .keypad-button.pressed {
         transform: scale(0.95);
         background: var(--divider-color);
       }
@@ -2220,6 +2523,13 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
         margin-top: 4px;
         opacity: 0.6;
         text-transform: uppercase;
+        height: 14px;
+        line-height: 14px;
+      }
+
+      .letters-placeholder {
+        height: 14px;
+        margin-top: 4px;
       }
 
       .long-press-hint {
@@ -2248,16 +2558,19 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
     }
     _handlePointerDown(button) {
         this._longPressTriggered = false;
+        this._pressedButton = button.digit;
         // Start long press timer if button supports it
         if (button.longPressDigit) {
             this._longPressTimer = window.setTimeout(() => {
                 this._longPressTriggered = true;
                 this._emitDigit(button.longPressDigit);
-                this._triggerHaptic('medium');
+                triggerHaptic('selection');
             }, 500);
         }
     }
     _handlePointerUp(button) {
+        // Clear pressed state
+        this._pressedButton = null;
         // Clear long press timer
         if (this._longPressTimer) {
             clearTimeout(this._longPressTimer);
@@ -2270,9 +2583,11 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
         }
         // Emit the regular digit
         this._emitDigit(button.digit);
-        this._triggerHaptic('light');
+        triggerHaptic('selection');
     }
     _handlePointerCancel() {
+        // Clear pressed state
+        this._pressedButton = null;
         // Clear long press timer if pointer is cancelled (e.g., scrolling)
         if (this._longPressTimer) {
             clearTimeout(this._longPressTimer);
@@ -2287,21 +2602,12 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
             composed: true,
         }));
     }
-    _triggerHaptic(type) {
-        if (!navigator.vibrate)
-            return;
-        const durations = {
-            light: 10,
-            medium: 20,
-        };
-        navigator.vibrate(durations[type]);
-    }
     render() {
         return x `
       <div class="keypad-grid">
         ${this._buttons.map((button) => x `
             <button
-              class="keypad-button"
+              class="keypad-button ${this._pressedButton === button.digit ? 'pressed' : ''}"
               @pointerdown=${() => this._handlePointerDown(button)}
               @pointerup=${() => this._handlePointerUp(button)}
               @pointercancel=${() => this._handlePointerCancel()}
@@ -2311,7 +2617,7 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
               <span class="digit">${button.digit}</span>
               ${button.letters
             ? x `<span class="letters">${button.letters}</span>`
-            : ''}
+            : x `<span class="letters-placeholder"></span>`}
               ${button.longPressDigit && button.longPressDigit !== button.letters
             ? x `<span class="long-press-hint">${button.longPressDigit}</span>`
             : ''}
@@ -2321,6 +2627,9 @@ let TsuryPhoneKeypadGrid = class TsuryPhoneKeypadGrid extends i {
     `;
     }
 };
+__decorate([
+    r()
+], TsuryPhoneKeypadGrid.prototype, "_pressedButton", void 0);
 TsuryPhoneKeypadGrid = __decorate([
     t('tsuryphone-keypad-grid')
 ], TsuryPhoneKeypadGrid);
@@ -2407,7 +2716,7 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--success-color, #4caf50);
+        background: var(--success-color);
         border: none;
         cursor: pointer;
         display: flex;
@@ -2417,12 +2726,12 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         transition:
           transform 0.1s,
           box-shadow 0.2s;
-        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+        box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
       }
 
       .call-button:hover {
         transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        filter: brightness(1.1);
       }
 
       .call-button:active {
@@ -2430,24 +2739,26 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
       }
 
       .call-button:disabled {
-        background: var(--disabled-color, #9e9e9e);
+        background: var(--disabled-color);
+        opacity: 0.5;
         cursor: not-allowed;
         box-shadow: none;
       }
 
       .call-button:disabled:hover {
         transform: none;
+        filter: none;
       }
 
       .call-icon {
         width: 32px;
         height: 32px;
-        fill: white;
+        fill: var(--text-primary-color, white);
       }
     `;
     }
     async _handleDigitPress(digit) {
-        this._triggerHaptic("light");
+        triggerHaptic("selection");
         console.log("[KeypadView] Dialing digit:", digit, "to entity:", this._getPhoneStateEntityId());
         try {
             // Send digit to backend - no optimistic update
@@ -2460,7 +2771,7 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         }
         catch (error) {
             console.error("Failed to dial digit:", error);
-            this._triggerHaptic("heavy");
+            triggerHaptic("failure");
         }
     }
     async _handleBackspace() {
@@ -2472,16 +2783,16 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             await this.hass.callService("tsuryphone", "delete_last_digit", {}, {
                 entity_id: this._getPhoneStateEntityId(),
             });
-            this._triggerHaptic("light");
+            triggerHaptic("selection");
         }
         catch (err) {
             console.error("Failed to delete last digit:", err);
-            this._triggerHaptic("heavy");
+            triggerHaptic("failure");
         }
     }
     _handleClear() {
         // Clear is just deleting all digits - let user delete one by one
-        this._triggerHaptic("light");
+        triggerHaptic("selection");
     }
     async _handleCall() {
         if (!this._canCall())
@@ -2489,7 +2800,7 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         const numberToDial = this._getCurrentDialingNumber() || this._getLastCalledNumber();
         if (!numberToDial)
             return;
-        this._triggerHaptic("medium");
+        triggerHaptic("medium");
         try {
             // Call the dial service
             await this.hass.callService("tsuryphone", "dial", {
@@ -2501,7 +2812,7 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         }
         catch (error) {
             console.error("Failed to dial number:", error);
-            this._triggerHaptic("heavy");
+            triggerHaptic("failure");
         }
     }
     _canCall() {
@@ -2542,16 +2853,6 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
         // Get the most recent call
         const lastCall = callHistory[0];
         return lastCall.number || null;
-    }
-    _triggerHaptic(type) {
-        if (!navigator.vibrate)
-            return;
-        const durations = {
-            light: 10,
-            medium: 20,
-            heavy: 30,
-        };
-        navigator.vibrate(durations[type]);
     }
     render() {
         const dialedNumber = this._getCurrentDialingNumber();
@@ -2601,74 +2902,6 @@ __decorate([
 TsuryPhoneKeypadView = __decorate([
     t("tsuryphone-keypad-view")
 ], TsuryPhoneKeypadView);
-
-/**
- * Formatting Utilities
- * Reusable formatters for phone numbers, dates, durations
- */
-/**
- * Format phone number for display
- */
-function formatPhoneNumber(number) {
-    if (!number)
-        return "";
-    // Remove non-digit characters
-    const digits = number.replace(/\D/g, "");
-    // Format based on length
-    if (digits.length === 10) {
-        // US format: (555) 123-4567
-        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    }
-    else if (digits.length === 11 && digits[0] === "1") {
-        // US format with country code: +1 (555) 123-4567
-        return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
-    }
-    else if (digits.length > 11) {
-        // International format: +XX XXX XXX XXXX
-        return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
-    }
-    // Default: return as-is
-    return number;
-}
-/**
- * Generate consistent color from string (for avatars)
- */
-function generateColor(input) {
-    if (!input)
-        return "hsl(200, 50%, 70%)"; // Default color
-    let hash = 0;
-    for (let i = 0; i < input.length; i++) {
-        hash = input.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = Math.abs(hash % 360);
-    return `hsl(${hue}, 50%, 70%)`; // Pastel colors
-}
-/**
- * Get first letter of name for avatar
- */
-function getAvatarLetter(name) {
-    if (!name)
-        return "?";
-    return name.trim()[0].toUpperCase();
-}
-
-/**
- * Haptic Feedback Utility
- * Centralized haptic feedback using browser Vibration API
- */
-const HAPTIC_PATTERNS = {
-    light: 10,
-    medium: 20,
-    heavy: 30,
-};
-/**
- * Trigger haptic feedback if supported
- */
-function triggerHaptic(intensity = "light") {
-    if ("vibrate" in navigator) {
-        navigator.vibrate(HAPTIC_PATTERNS[intensity]);
-    }
-}
 
 /**
  * Avatar Circle Component
@@ -2739,6 +2972,29 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
           min-width: 0;
         }
 
+        .avatar-container {
+          position: relative;
+        }
+
+        .priority-badge {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--warning-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .priority-badge ha-icon {
+          --mdc-icon-size: 14px;
+          color: var(--text-primary-color, white);
+        }
+
         .contact-details {
           flex: 1;
           min-width: 0;
@@ -2747,7 +3003,7 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
         .contact-name {
           font-size: 16px;
           font-weight: 500;
-          color: var(--primary-text-color, #000);
+          color: var(--primary-text-color);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -2755,7 +3011,7 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
 
         .contact-number {
           font-size: 14px;
-          color: var(--secondary-text-color, #666);
+          color: var(--secondary-text-color);
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
@@ -2771,8 +3027,8 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
           height: 40px;
           border-radius: 50%;
           border: none;
-          background: var(--primary-color, #03a9f4);
-          color: white;
+          background: var(--primary-color);
+          color: var(--text-primary-color, white);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -2781,16 +3037,12 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
         }
 
         .call-button:hover {
-          background: var(--dark-primary-color, #0288d1);
+          background: var(--dark-primary-color, var(--primary-color));
           transform: scale(1.05);
         }
 
         .call-button:active {
           transform: scale(0.95);
-        }
-
-        .priority-star {
-          color: var(--warning-color, #ffa726);
         }
       `,
         ];
@@ -2818,7 +3070,7 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
         }
     }
     _handleEdit() {
-        triggerHaptic("light");
+        triggerHaptic("selection");
         this.dispatchEvent(new CustomEvent("edit-contact", {
             detail: { contact: this.contact },
             bubbles: true,
@@ -2835,16 +3087,19 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
         return x `
       <div class="list-item" @click=${this._handleEdit}>
         <div class="contact-info">
-          <tsuryphone-avatar .name=${this.contact.name}></tsuryphone-avatar>
+          <div class="avatar-container">
+            <tsuryphone-avatar .name=${this.contact.name}></tsuryphone-avatar>
+            ${isPriority
+            ? x `
+                  <div class="priority-badge">
+                    <ha-icon icon="mdi:star"></ha-icon>
+                  </div>
+                `
+            : ""}
+          </div>
           <div class="contact-details">
             <div class="contact-name">
               ${this.contact.name}
-              ${isPriority
-            ? x `<ha-icon
-                    class="priority-star"
-                    icon="mdi:star"
-                  ></ha-icon>`
-            : ""}
             </div>
             <div class="contact-number">${formattedNumber}</div>
           </div>
@@ -2887,6 +3142,7 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
         super(...arguments);
         this._searchQuery = "";
         this._showAddModal = false;
+        this._showMenu = false;
     }
     static get styles() {
         return i$3 `
@@ -2894,15 +3150,19 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
         display: flex;
         flex-direction: column;
         height: 100%;
-        background: var(--card-background-color, #fff);
+        background: var(--card-background-color);
       }
 
       .contacts-header {
         padding: 16px;
-        border-bottom: 1px solid var(--divider-color, #e0e0e0);
+        border-bottom: 1px solid var(--divider-color);
         display: flex;
         flex-direction: column;
         gap: 12px;
+        position: sticky;
+        top: 0;
+        background: var(--card-background-color);
+        z-index: 2;
       }
 
       .search-bar {
@@ -2910,8 +3170,76 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
         align-items: center;
         gap: 8px;
         padding: 8px 12px;
-        background: var(--secondary-background-color, #f5f5f5);
+        background: var(--secondary-background-color);
         border-radius: 8px;
+        flex: 1;
+      }
+
+      .search-bar-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .menu-button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        color: var(--primary-text-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        position: relative;
+      }
+
+      .menu-button:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .menu-button:active {
+        transform: scale(0.95);
+      }
+
+      .menu-dropdown {
+        position: absolute;
+        top: 48px;
+        right: 16px;
+        background: var(--card-background-color);
+        border-radius: 8px;
+        box-shadow: var(
+          --ha-card-box-shadow,
+          0 4px 12px rgba(0, 0, 0, 0.15)
+        );
+        min-width: 160px;
+        z-index: 10;
+        overflow: hidden;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        color: var(--primary-text-color);
+        font-size: 14px;
+        transition: background 0.2s;
+      }
+
+      .menu-item:hover {
+        background: var(--secondary-background-color);
+      }
+
+      .menu-item:active {
+        background: var(--divider-color);
       }
 
       .search-input {
@@ -2919,12 +3247,12 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
         border: none;
         background: transparent;
         font-size: 16px;
-        color: var(--primary-text-color, #000);
+        color: var(--primary-text-color);
         outline: none;
       }
 
       .search-input::placeholder {
-        color: var(--secondary-text-color, #666);
+        color: var(--secondary-text-color);
       }
 
       .add-button {
@@ -2932,8 +3260,8 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
         padding: 12px;
         border-radius: 8px;
         border: none;
-        background: var(--primary-color, #03a9f4);
-        color: white;
+        background: var(--primary-color);
+        color: var(--text-primary-color, white);
         font-size: 16px;
         font-weight: 500;
         cursor: pointer;
@@ -2945,7 +3273,7 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
       }
 
       .add-button:hover {
-        background: var(--dark-primary-color, #0288d1);
+        background: var(--dark-primary-color, var(--primary-color));
       }
 
       .add-button:active {
@@ -2959,10 +3287,10 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
 
       .section-header {
         padding: 12px 16px;
-        background: var(--secondary-background-color, #f5f5f5);
+        background: var(--secondary-background-color);
         font-size: 14px;
         font-weight: 500;
-        color: var(--secondary-text-color, #666);
+        color: var(--secondary-text-color);
         position: sticky;
         top: 0;
         z-index: 1;
@@ -3017,33 +3345,72 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
             composed: true,
         }));
     }
+    _toggleMenu() {
+        this._showMenu = !this._showMenu;
+    }
+    _handleBlockedClick() {
+        this._showMenu = false;
+        this.dispatchEvent(new CustomEvent("navigate-blocked", {
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    _handleClickOutside(e) {
+        const target = e.target;
+        if (this._showMenu && !target.closest('.menu-button') && !target.closest('.menu-dropdown')) {
+            this._showMenu = false;
+        }
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        document.addEventListener('click', this._handleClickOutside.bind(this));
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        document.removeEventListener('click', this._handleClickOutside.bind(this));
+    }
     render() {
         const contacts = this._getContacts();
         const groupedContacts = this._groupContactsByLetter();
         return x `
       <div class="contacts-header">
-        <div class="search-bar">
-          <ha-icon icon="mdi:magnify"></ha-icon>
-          <input
-            class="search-input"
-            type="text"
-            placeholder="Search contacts..."
-            .value=${this._searchQuery}
-            @input=${this._handleSearch}
-          />
-          ${this._searchQuery
+        <div class="search-bar-container">
+          <div class="search-bar">
+            <ha-icon icon="mdi:magnify"></ha-icon>
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Search contacts"
+              .value=${this._searchQuery}
+              @input=${this._handleSearch}
+            />
+            ${this._searchQuery
             ? x `
-                <ha-icon
-                  icon="mdi:close"
-                  @click=${() => (this._searchQuery = "")}
-                  style="cursor: pointer"
-                ></ha-icon>
+                  <ha-icon
+                    icon="mdi:close"
+                    @click=${() => (this._searchQuery = "")}
+                    style="cursor: pointer"
+                  ></ha-icon>
+                `
+            : ""}
+          </div>
+          <button class="menu-button" @click=${this._toggleMenu} title="More options">
+            <ha-icon icon="mdi:dots-vertical"></ha-icon>
+          </button>
+          ${this._showMenu
+            ? x `
+                <div class="menu-dropdown">
+                  <button class="menu-item" @click=${this._handleBlockedClick}>
+                    <ha-icon icon="mdi:block-helper"></ha-icon>
+                    Blocked
+                  </button>
+                </div>
               `
             : ""}
         </div>
         <button class="add-button" @click=${this._handleAddContact}>
           <ha-icon icon="mdi:plus"></ha-icon>
-          Add Contact
+          Create contact
         </button>
       </div>
 
@@ -3054,7 +3421,7 @@ let TsuryPhoneContactsView = class TsuryPhoneContactsView extends i {
                 icon="mdi:contacts-outline"
                 title="No contacts yet"
                 message="Add your first contact to get started"
-                actionLabel="Add Contact"
+                actionLabel="Create contact"
                 .onAction=${() => this._handleAddContact()}
               ></tsuryphone-empty-state>
             `
@@ -3092,6 +3459,9 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneContactsView.prototype, "_showAddModal", void 0);
+__decorate([
+    r()
+], TsuryPhoneContactsView.prototype, "_showMenu", void 0);
 TsuryPhoneContactsView = __decorate([
     t("tsuryphone-contacts-view")
 ], TsuryPhoneContactsView);
@@ -3340,8 +3710,8 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
           padding: var(--tsury-spacing-md);
           border-radius: 8px;
           border: none;
-          background: var(--tsury-error-color, #f44336);
-          color: white;
+          background: var(--tsury-error-color, var(--error-color));
+          color: var(--text-primary-color, white);
           font-size: 16px;
           font-weight: 500;
           cursor: pointer;
@@ -3354,9 +3724,9 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
         }
 
         .add-button:hover {
-          background: var(--tsury-error-dark-color, #d32f2f);
+          filter: brightness(0.9);
           transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+          box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
         }
 
         .add-button:active {
@@ -3389,7 +3759,7 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
 
         /* Scrollbar styling */
         .blocked-list::-webkit-scrollbar {
-          width: 4px;
+          width: 6px;
         }
 
         .blocked-list::-webkit-scrollbar-track {
@@ -3397,12 +3767,12 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
         }
 
         .blocked-list::-webkit-scrollbar-thumb {
-          background: rgba(128, 128, 128, 0.2);
-          border-radius: 2px;
+          background: var(--tsury-scrollbar-thumb-color);
+          border-radius: 3px;
         }
 
         .blocked-list::-webkit-scrollbar-thumb:hover {
-          background: rgba(128, 128, 128, 0.4);
+          background: var(--tsury-scrollbar-thumb-hover-color);
         }
       `,
         ];
@@ -3463,8 +3833,7 @@ let ContactModal = class ContactModal extends i {
     }
     _getPhoneStateId() {
         // Find the phone_state sensor entity
-        return (Object.keys(this.hass.states).find((id) => id.startsWith("sensor.") &&
-            id.includes("phone_state")) || null);
+        return (Object.keys(this.hass.states).find((id) => id.startsWith("sensor.") && id.includes("phone_state")) || null);
     }
     _isContactPriority(contact) {
         const phoneStateId = this._getPhoneStateId();
@@ -3477,7 +3846,7 @@ let ContactModal = class ContactModal extends i {
     _handleClose() {
         if (this.saving)
             return;
-        triggerHaptic("light");
+        triggerHaptic("selection");
         this.open = false;
         this.dispatchEvent(new CustomEvent("close"));
     }
@@ -3526,24 +3895,23 @@ let ContactModal = class ContactModal extends i {
     }
     async _handleSave() {
         if (!this._validate()) {
-            triggerHaptic("heavy");
+            triggerHaptic("warning");
             return;
         }
         this.saving = true;
         triggerHaptic("medium");
         try {
             if (this.mode === "edit" && this.contact) {
-                // Edit mode: delete old + add new
-                await this._deleteContact(this.contact.id);
-                await this._addContact();
+                // Edit mode: use edit_contact service which handles priority internally
+                await this._editContact();
             }
             else {
                 // Add mode
                 await this._addContact();
+                // Handle priority changes for new contacts
+                await this._handlePriorityChange();
             }
-            // Handle priority changes
-            await this._handlePriorityChange();
-            triggerHaptic("medium");
+            triggerHaptic("success");
             this.open = false;
             this.dispatchEvent(new CustomEvent("contact-saved", {
                 detail: { mode: this.mode },
@@ -3551,7 +3919,7 @@ let ContactModal = class ContactModal extends i {
         }
         catch (error) {
             console.error("Error saving contact:", error);
-            triggerHaptic("heavy");
+            triggerHaptic("failure");
             this.dispatchEvent(new CustomEvent("error", {
                 detail: { message: "Failed to save contact" },
             }));
@@ -3572,7 +3940,25 @@ let ContactModal = class ContactModal extends i {
         if (this.formData.code.trim()) {
             serviceData.code = this.formData.code.trim();
         }
-        await this.hass.callService("tsuryphone", "quick_dial_add", serviceData, { entity_id: phoneStateId });
+        await this.hass.callService("tsuryphone", "quick_dial_add", serviceData, {
+            entity_id: phoneStateId,
+        });
+    }
+    async _editContact() {
+        const phoneStateId = this._getPhoneStateId();
+        if (!phoneStateId || !this.contact) {
+            throw new Error("Phone state entity or contact not found");
+        }
+        const serviceData = {
+            id: this.contact.id,
+            number: this.formData.number.trim(),
+            name: this.formData.name.trim(),
+            code: this.formData.code.trim() || "",
+            priority: this.formData.priority,
+        };
+        await this.hass.callService("tsuryphone", "edit_contact", serviceData, {
+            entity_id: phoneStateId,
+        });
     }
     async _deleteContact(id) {
         const phoneStateId = this._getPhoneStateId();
@@ -3609,14 +3995,14 @@ let ContactModal = class ContactModal extends i {
         this.showDeleteConfirm = true;
     }
     _handleDeleteCancel() {
-        triggerHaptic("light");
+        triggerHaptic("selection");
         this.showDeleteConfirm = false;
     }
     async _handleDeleteConfirm() {
         if (!this.contact)
             return;
         this.saving = true;
-        triggerHaptic("heavy");
+        triggerHaptic("warning");
         try {
             await this._deleteContact(this.contact.id);
             // Also remove from priority if it's a priority contact
@@ -3640,7 +4026,7 @@ let ContactModal = class ContactModal extends i {
         }
         catch (error) {
             console.error("Error deleting contact:", error);
-            triggerHaptic("heavy");
+            triggerHaptic("failure");
             this.dispatchEvent(new CustomEvent("error", {
                 detail: { message: "Failed to delete contact" },
             }));
@@ -3668,30 +4054,30 @@ let ContactModal = class ContactModal extends i {
 
           ${this.showDeleteConfirm
             ? x `
-                <div class="delete-confirm">
-                  <div class="delete-confirm-text">
-                    Are you sure you want to delete this contact? This action
-                    cannot be undone.
-                  </div>
-                  <div class="delete-confirm-actions">
-                    <button
-                      @click=${this._handleDeleteCancel}
-                      ?disabled=${this.saving}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      class="button-delete"
-                      @click=${this._handleDeleteConfirm}
-                      ?disabled=${this.saving}
-                    >
-                      ${this.saving
+                  <div class="delete-confirm">
+                    <div class="delete-confirm-text">
+                      Are you sure you want to delete this contact? This action
+                      cannot be undone.
+                    </div>
+                    <div class="delete-confirm-actions">
+                      <button
+                        @click=${this._handleDeleteCancel}
+                        ?disabled=${this.saving}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        class="button-delete"
+                        @click=${this._handleDeleteConfirm}
+                        ?disabled=${this.saving}
+                      >
+                        ${this.saving
                 ? x `<div class="spinner"></div>`
                 : "Delete"}
-                    </button>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              `
+                `
             : ""}
 
           <div class="form">
@@ -3767,16 +4153,16 @@ let ContactModal = class ContactModal extends i {
 
           ${this.mode === "edit" && !this.showDeleteConfirm
             ? x `
-                <button
-                  class="button-delete"
-                  @click=${this._handleDeleteClick}
-                  ?disabled=${this.saving}
-                  style="width: 100%; margin-top: 24px;"
-                >
-                  <ha-icon icon="mdi:delete"></ha-icon>
-                  Delete Contact
-                </button>
-              `
+                  <button
+                    class="button-delete"
+                    @click=${this._handleDeleteClick}
+                    ?disabled=${this.saving}
+                    style="width: 100%; margin-top: 24px;"
+                  >
+                    <ha-icon icon="mdi:delete"></ha-icon>
+                    Delete Contact
+                  </button>
+                `
             : ""}
 
           <div class="actions">
@@ -3826,7 +4212,7 @@ ContactModal.styles = i$3 `
       flex-direction: column;
       width: 100%;
       height: 100%;
-      background: var(--card-background-color, #fff);
+      background: var(--card-background-color);
       padding: 24px;
       overflow-y: auto;
       animation: slideUp 0.3s ease-out;
@@ -3871,7 +4257,7 @@ ContactModal.styles = i$3 `
     }
 
     .close-button:hover {
-      background-color: var(--divider-color, rgba(0, 0, 0, 0.1));
+      background-color: var(--secondary-background-color);
     }
 
     .close-button ha-icon {
@@ -3897,7 +4283,7 @@ ContactModal.styles = i$3 `
     }
 
     .form-field label .required {
-      color: var(--error-color, #db4437);
+      color: var(--error-color);
     }
 
     .form-field label .optional {
@@ -3908,7 +4294,7 @@ ContactModal.styles = i$3 `
 
     .form-field input {
       padding: 12px 16px;
-      border: 1px solid var(--divider-color, #e0e0e0);
+      border: 1px solid var(--divider-color);
       border-radius: 12px;
       font-size: 16px;
       font-family: inherit;
@@ -3923,12 +4309,12 @@ ContactModal.styles = i$3 `
     }
 
     .form-field input.error {
-      border-color: var(--error-color, #db4437);
+      border-color: var(--error-color);
     }
 
     .form-field .error-message {
       font-size: 12px;
-      color: var(--error-color, #db4437);
+      color: var(--error-color);
       margin-top: 4px;
     }
 
@@ -3958,7 +4344,7 @@ ContactModal.styles = i$3 `
 
     .priority-toggle ha-icon {
       --mdc-icon-size: 20px;
-      color: var(--warning-color, #f57c00);
+      color: var(--warning-color);
     }
 
     .actions {
@@ -3990,16 +4376,16 @@ ContactModal.styles = i$3 `
     .button-cancel {
       background: transparent;
       color: var(--primary-text-color);
-      border: 1px solid var(--divider-color, #e0e0e0);
+      border: 1px solid var(--divider-color);
     }
 
     .button-cancel:hover:not(:disabled) {
-      background: var(--divider-color, rgba(0, 0, 0, 0.05));
+      background: var(--secondary-background-color);
     }
 
     .button-save {
       background: var(--primary-color);
-      color: var(--text-primary-color, #fff);
+      color: var(--text-primary-color, white);
     }
 
     .button-save:hover:not(:disabled) {
@@ -4007,8 +4393,8 @@ ContactModal.styles = i$3 `
     }
 
     .button-delete {
-      background: var(--error-color, #db4437);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
       margin-bottom: 12px;
     }
 
@@ -4097,7 +4483,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     constructor() {
         super(...arguments);
         this.open = false;
-        this.mode = 'incoming';
+        this.mode = "incoming";
         this.callWaitingAvailable = false;
         this._isAnswering = false;
         this._isDeclining = false;
@@ -4111,7 +4497,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     }
     connectedCallback() {
         super.connectedCallback();
-        if (this.mode === 'active' && this.callInfo?.duration !== undefined) {
+        if (this.mode === "active" && this.callInfo?.duration !== undefined) {
             this._currentDuration = this.callInfo.duration;
             this._startDurationTimer();
         }
@@ -4120,9 +4506,20 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         super.disconnectedCallback();
         this._stopDurationTimer();
     }
+    willUpdate(changedProps) {
+        super.willUpdate(changedProps);
+        // Sync mute state from HA entity
+        if (this.entityId && this.hass?.states[this.entityId]) {
+            const phoneState = this.hass.states[this.entityId];
+            const isMuted = phoneState.attributes?.is_muted ?? false;
+            if (isMuted !== this._isMuted) {
+                this._isMuted = isMuted;
+            }
+        }
+    }
     updated(changedProps) {
-        if (changedProps.has('mode')) {
-            if (this.mode === 'active') {
+        if (changedProps.has("mode")) {
+            if (this.mode === "active") {
                 this._startDurationTimer();
             }
             else {
@@ -4146,11 +4543,11 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     _formatDuration(seconds) {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
     _handleClose() {
-        this._triggerHaptic('light');
-        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+        triggerHaptic("selection");
+        this.dispatchEvent(new CustomEvent("close", { bubbles: true, composed: true }));
     }
     _handleSwipeStart(e) {
         this._swipeStartX = e.touches[0].clientX;
@@ -4187,21 +4584,21 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     }
     async _handleAnswer() {
         this._isAnswering = true;
-        this._triggerHaptic('medium');
+        triggerHaptic("medium");
         try {
             if (!this.entityId) {
-                throw new Error('Entity ID is required');
+                throw new Error("Entity ID is required");
             }
-            await this.hass.callService('tsuryphone', 'answer_call', {}, { entity_id: this.entityId });
-            this.dispatchEvent(new CustomEvent('call-answered', { bubbles: true, composed: true }));
+            await this.hass.callService("tsuryphone", "answer_call", {}, { entity_id: this.entityId });
+            this.dispatchEvent(new CustomEvent("call-answered", { bubbles: true, composed: true }));
         }
         catch (error) {
-            console.error('Failed to answer call:', error);
-            this._triggerHaptic('heavy');
-            this.dispatchEvent(new CustomEvent('error', {
-                detail: { message: 'Failed to answer call' },
+            console.error("Failed to answer call:", error);
+            triggerHaptic("failure");
+            this.dispatchEvent(new CustomEvent("error", {
+                detail: { message: "Failed to answer call" },
                 bubbles: true,
-                composed: true
+                composed: true,
             }));
         }
         finally {
@@ -4210,21 +4607,21 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     }
     async _handleDecline() {
         this._isDeclining = true;
-        this._triggerHaptic('medium');
+        triggerHaptic("medium");
         try {
             if (!this.entityId) {
-                throw new Error('Entity ID is required');
+                throw new Error("Entity ID is required");
             }
-            await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
-            this.dispatchEvent(new CustomEvent('call-declined', { bubbles: true, composed: true }));
+            await this.hass.callService("tsuryphone", "hangup", {}, { entity_id: this.entityId });
+            this.dispatchEvent(new CustomEvent("call-declined", { bubbles: true, composed: true }));
         }
         catch (error) {
-            console.error('Failed to decline call:', error);
-            this._triggerHaptic('heavy');
-            this.dispatchEvent(new CustomEvent('error', {
-                detail: { message: 'Failed to decline call' },
+            console.error("Failed to decline call:", error);
+            triggerHaptic("failure");
+            this.dispatchEvent(new CustomEvent("error", {
+                detail: { message: "Failed to decline call" },
                 bubbles: true,
-                composed: true
+                composed: true,
             }));
         }
         finally {
@@ -4232,81 +4629,72 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         }
     }
     async _handleHangup() {
-        this._triggerHaptic('medium');
+        triggerHaptic("medium");
         try {
             if (!this.entityId) {
-                throw new Error('Entity ID is required');
+                throw new Error("Entity ID is required");
             }
-            await this.hass.callService('tsuryphone', 'hangup', {}, { entity_id: this.entityId });
-            this.dispatchEvent(new CustomEvent('call-ended', { bubbles: true, composed: true }));
+            await this.hass.callService("tsuryphone", "hangup", {}, { entity_id: this.entityId });
+            this.dispatchEvent(new CustomEvent("call-ended", { bubbles: true, composed: true }));
         }
         catch (error) {
-            console.error('Failed to hang up:', error);
-            this._triggerHaptic('heavy');
+            console.error("Failed to hang up:", error);
+            triggerHaptic("failure");
         }
     }
     async _handleMute() {
-        this._triggerHaptic('light');
-        this._isMuted = !this._isMuted;
+        triggerHaptic("selection");
         try {
-            // TODO: Backend doesn't have toggle_mute service yet
-            // await this.hass.callService('tsuryphone', 'toggle_mute', {});
-            console.warn('Mute functionality not yet implemented in backend');
+            if (!this.entityId) {
+                throw new Error("Entity ID is required");
+            }
+            await this.hass.callService("tsuryphone", "toggle_mute", {}, { entity_id: this.entityId });
+            // State will be updated via HA state changes
         }
         catch (error) {
-            console.error('Failed to toggle mute:', error);
-            this._isMuted = !this._isMuted; // Revert on error
+            console.error("Failed to toggle mute:", error);
+            triggerHaptic("failure");
         }
     }
     async _handleSpeaker() {
-        this._triggerHaptic('light');
+        triggerHaptic("selection");
         try {
             if (!this.entityId) {
-                throw new Error('Entity ID is required');
+                throw new Error("Entity ID is required");
             }
-            await this.hass.callService('tsuryphone', 'toggle_volume_mode', {}, { entity_id: this.entityId });
+            await this.hass.callService("tsuryphone", "toggle_volume_mode", {}, { entity_id: this.entityId });
         }
         catch (error) {
-            console.error('Failed to toggle speaker:', error);
+            console.error("Failed to toggle speaker:", error);
         }
     }
     _handleKeypad() {
-        this._triggerHaptic('light');
+        triggerHaptic("selection");
         this._showKeypad = !this._showKeypad;
         this.requestUpdate();
     }
     async _handleSwapCalls() {
-        this._triggerHaptic('medium');
+        triggerHaptic("medium");
         try {
             if (!this.entityId) {
-                throw new Error('Entity ID is required');
+                throw new Error("Entity ID is required");
             }
-            await this.hass.callService('tsuryphone', 'swap_calls', {}, { entity_id: this.entityId });
+            await this.hass.callService("tsuryphone", "swap_calls", {}, { entity_id: this.entityId });
         }
         catch (error) {
-            console.error('Failed to swap calls:', error);
+            console.error("Failed to swap calls:", error);
         }
     }
     async _handleMergeCalls() {
-        this._triggerHaptic('medium');
+        triggerHaptic("medium");
         try {
             if (!this.entityId) {
-                throw new Error('Entity ID is required');
+                throw new Error("Entity ID is required");
             }
-            await this.hass.callService('tsuryphone', 'merge_calls', {}, { entity_id: this.entityId });
+            await this.hass.callService("tsuryphone", "merge_calls", {}, { entity_id: this.entityId });
         }
         catch (error) {
-            console.error('Failed to merge calls:', error);
-        }
-    }
-    _triggerHaptic(type) {
-        if ('vibrate' in navigator) {
-            const patterns = {
-                light: 10,
-                medium: 20,
-                heavy: 30
-            };
-            navigator.vibrate(patterns[type]);
+            console.error("Failed to merge calls:", error);
         }
     }
     _renderIncomingCall() {
@@ -4316,26 +4704,32 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         return x `
       <div class="caller-info">
         <div class="caller-name">${callInfo.name || callInfo.number}</div>
-        ${callInfo.name ? x `<div class="caller-number">${callInfo.number}</div>` : ''}
-        ${callInfo.isPriority ? x `
-          <div class="priority-badge">
-            ⭐ Priority Caller
-          </div>
-        ` : ''}
+        ${callInfo.name
+            ? x `<div class="caller-number">${callInfo.number}</div>`
+            : ""}
+        ${callInfo.isPriority
+            ? x ` <div class="priority-badge">⭐ Priority Caller</div> `
+            : ""}
       </div>
 
       <div class="call-status">Incoming call...</div>
 
-      <div class="swipe-slider"
-           @touchstart=${this._handleSwipeStart}
-           @touchmove=${this._handleSwipeMove}
-           @touchend=${this._handleSwipeEnd}>
+      <div
+        class="swipe-slider"
+        @touchstart=${this._handleSwipeStart}
+        @touchmove=${this._handleSwipeMove}
+        @touchend=${this._handleSwipeEnd}
+      >
         <div class="swipe-track">
           <span class="swipe-label">Decline</span>
           <span class="swipe-label">Answer</span>
         </div>
-        <div class="swipe-handle ${this._isSwipingLeft ? 'swiping-left' : ''} ${this._isSwipingRight ? 'swiping-right' : ''}"
-             style="transform: translateX(${this._swipeDistance}px)">
+        <div
+          class="swipe-handle ${this._isSwipingLeft
+            ? "swiping-left"
+            : ""} ${this._isSwipingRight ? "swiping-right" : ""}"
+          style="transform: translateX(${this._swipeDistance}px)"
+        >
           ${this._isSwipingLeft
             ? x `<ha-icon icon="mdi:close"></ha-icon>`
             : this._isSwipingRight
@@ -4349,39 +4743,59 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         const { callInfo } = this;
         if (!callInfo)
             return x ``;
-        const isSpeaker = callInfo.audioOutput === 'speaker';
+        const isSpeaker = callInfo.audioOutput === "speaker";
+        // Check phone state to determine if we're dialing
+        const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
+        const isDialing = phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT";
+        const callStatus = isDialing ? "Dialing..." : this._formatDuration(this._currentDuration);
         return x `
       <div class="caller-info">
         <div class="caller-name">${callInfo.name || callInfo.number}</div>
-        ${callInfo.name ? x `<div class="caller-number">${callInfo.number}</div>` : ''}
+        ${callInfo.name
+            ? x `<div class="caller-number">${callInfo.number}</div>`
+            : ""}
       </div>
 
-      <div class="call-timer">${this._formatDuration(this._currentDuration)}</div>
+      <div class="call-timer">
+        ${callStatus}
+      </div>
 
-      ${this.callWaitingAvailable && this.waitingCall ? this._renderWaitingCall() : ''}
+      ${this.callWaitingAvailable && this.waitingCall
+            ? this._renderWaitingCall()
+            : ""}
 
       <div class="call-controls">
-        <button class="control-button ${this._isMuted ? 'muted' : ''}"
-                @click=${this._handleMute}
-                title="Mute">
-          <ha-icon icon="${this._isMuted ? 'mdi:microphone-off' : 'mdi:microphone'}"></ha-icon>
+        <button
+          class="control-button ${this._isMuted ? "muted" : ""}"
+          @click=${this._handleMute}
+          title="Mute"
+        >
+          <ha-icon
+            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
+          ></ha-icon>
         </button>
 
-        <button class="control-button ${this._showKeypad ? 'active' : ''}"
-                @click=${this._handleKeypad}
-                title="Keypad">
+        <button
+          class="control-button ${this._showKeypad ? "active" : ""}"
+          @click=${this._handleKeypad}
+          title="Keypad"
+        >
           <ha-icon icon="mdi:dialpad"></ha-icon>
         </button>
 
-        <button class="control-button ${isSpeaker ? 'active' : ''}"
-                @click=${this._handleSpeaker}
-                title="Speaker">
+        <button
+          class="control-button ${isSpeaker ? "active" : ""}"
+          @click=${this._handleSpeaker}
+          title="Speaker"
+        >
           �
         </button>
 
-        <button class="control-button hangup-button"
-                @click=${this._handleHangup}
-                title="Hang up">
+        <button
+          class="control-button hangup-button"
+          @click=${this._handleHangup}
+          title="Hang up"
+        >
           <ha-icon icon="mdi:phone-hangup"></ha-icon>
         </button>
       </div>
@@ -4394,15 +4808,27 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         return x `
       <div class="waiting-call">
         <div class="waiting-call-info">
-          <div class="waiting-call-name">${waitingCall.name || waitingCall.number}</div>
-          ${waitingCall.name ? x `<div class="waiting-call-number">${waitingCall.number}</div>` : ''}
-          ${waitingCall.isPriority ? x `<div class="priority-badge">⭐ Priority</div>` : ''}
+          <div class="waiting-call-name">
+            ${waitingCall.name || waitingCall.number}
+          </div>
+          ${waitingCall.name
+            ? x `<div class="waiting-call-number">${waitingCall.number}</div>`
+            : ""}
+          ${waitingCall.isPriority
+            ? x `<div class="priority-badge">⭐ Priority</div>`
+            : ""}
         </div>
         <div class="waiting-actions">
-          <button class="waiting-action-button swap-button" @click=${this._handleSwapCalls}>
+          <button
+            class="waiting-action-button swap-button"
+            @click=${this._handleSwapCalls}
+          >
             Swap
           </button>
-          <button class="waiting-action-button merge-button" @click=${this._handleMergeCalls}>
+          <button
+            class="waiting-action-button merge-button"
+            @click=${this._handleMergeCalls}
+          >
             Merge
           </button>
         </div>
@@ -4411,20 +4837,30 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     }
     render() {
         const titleMap = {
-            incoming: 'Incoming Call',
-            active: 'Active Call',
-            waiting: 'Call Waiting'
+            incoming: "Incoming Call",
+            active: "Active Call",
+            waiting: "Call Waiting",
         };
         return x `
       <div class="modal-header">
         <h2 class="modal-title">${titleMap[this.mode]}</h2>
-        <button class="close-button" @click=${this._handleClose} title="Minimize">
+        <button
+          class="close-button"
+          @click=${this._handleClose}
+          title="Minimize"
+        >
           −
         </button>
       </div>
 
-      <div class="modal-content ${this._isAnswering || this._isDeclining ? 'loading' : ''}">
-        ${this.mode === 'incoming' ? this._renderIncomingCall() : this._renderActiveCall()}
+      <div
+        class="modal-content ${this._isAnswering || this._isDeclining
+            ? "loading"
+            : ""}"
+      >
+        ${this.mode === "incoming"
+            ? this._renderIncomingCall()
+            : this._renderActiveCall()}
       </div>
     `;
     }
@@ -4438,7 +4874,7 @@ TsuryPhoneCallModal.styles = i$3 `
       width: 100%;
       height: 100%;
       z-index: 100;
-      background: var(--card-background-color, #fff);
+      background: var(--card-background-color);
       box-sizing: border-box;
     }
 
@@ -4462,14 +4898,14 @@ TsuryPhoneCallModal.styles = i$3 `
       align-items: center;
       justify-content: space-between;
       padding: 16px;
-      border-bottom: 1px solid var(--divider-color, #e0e0e0);
-      background: var(--card-background-color, #fff);
+      border-bottom: 1px solid var(--divider-color);
+      background: var(--card-background-color);
     }
 
     .modal-title {
       font-size: 20px;
       font-weight: 500;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
     }
 
     .close-button {
@@ -4477,7 +4913,7 @@ TsuryPhoneCallModal.styles = i$3 `
       border: none;
       cursor: pointer;
       padding: 8px;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
       font-size: 24px;
       line-height: 1;
       opacity: 0.6;
@@ -4508,13 +4944,13 @@ TsuryPhoneCallModal.styles = i$3 `
     .caller-name {
       font-size: 32px;
       font-weight: 500;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
       margin-bottom: 8px;
     }
 
     .caller-number {
       font-size: 18px;
-      color: var(--secondary-text-color, #666);
+      color: var(--secondary-text-color);
     }
 
     .priority-badge {
@@ -4522,8 +4958,8 @@ TsuryPhoneCallModal.styles = i$3 `
       align-items: center;
       gap: 4px;
       padding: 4px 12px;
-      background: var(--warning-color, #ff9800);
-      color: white;
+      background: var(--warning-color);
+      color: var(--text-primary-color, white);
       border-radius: 12px;
       font-size: 14px;
       font-weight: 500;
@@ -4532,7 +4968,7 @@ TsuryPhoneCallModal.styles = i$3 `
 
     .call-status {
       font-size: 16px;
-      color: var(--secondary-text-color, #666);
+      color: var(--secondary-text-color);
       margin-bottom: 24px;
     }
 
@@ -4541,7 +4977,7 @@ TsuryPhoneCallModal.styles = i$3 `
       width: 100%;
       max-width: 320px;
       height: 72px;
-      background: var(--divider-color, #e0e0e0);
+      background: var(--divider-color);
       border-radius: 36px;
       position: relative;
       overflow: hidden;
@@ -4564,7 +5000,7 @@ TsuryPhoneCallModal.styles = i$3 `
     .swipe-label {
       font-size: 14px;
       font-weight: 500;
-      color: var(--secondary-text-color, #666);
+      color: var(--secondary-text-color);
       pointer-events: none;
     }
 
@@ -4574,14 +5010,16 @@ TsuryPhoneCallModal.styles = i$3 `
       left: 6px;
       width: 60px;
       height: 60px;
-      background: white;
+      background: var(--card-background-color);
       border-radius: 30px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: grab;
-      transition: transform 0.2s ease-out, background-color 0.2s;
+      transition:
+        transform 0.2s ease-out,
+        background-color 0.2s;
       z-index: 2;
     }
 
@@ -4590,18 +5028,18 @@ TsuryPhoneCallModal.styles = i$3 `
     }
 
     .swipe-handle.swiping-left {
-      background: var(--error-color, #f44336);
+      background: var(--error-color);
     }
 
     .swipe-handle.swiping-right {
-      background: var(--success-color, #4caf50);
+      background: var(--success-color);
     }
 
     /* Active Call Controls */
     .call-timer {
       font-size: 48px;
       font-weight: 300;
-      color: var(--primary-text-color, #000);
+      color: var(--primary-text-color);
       margin-bottom: 48px;
       font-variant-numeric: tabular-nums;
     }
@@ -4620,14 +5058,14 @@ TsuryPhoneCallModal.styles = i$3 `
       height: 72px;
       border-radius: 50%;
       border: none;
-      background: var(--card-background-color, #f5f5f5);
-      color: var(--primary-text-color, #000);
+      background: var(--secondary-background-color);
+      color: var(--primary-text-color);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
       justify-self: center;
     }
 
@@ -4636,7 +5074,7 @@ TsuryPhoneCallModal.styles = i$3 `
     }
 
     .control-button:hover {
-      background: var(--divider-color, #e0e0e0);
+      background: var(--divider-color);
     }
 
     .control-button:active {
@@ -4644,26 +5082,26 @@ TsuryPhoneCallModal.styles = i$3 `
     }
 
     .control-button.active {
-      background: var(--primary-color, #03a9f4);
-      color: white;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
     }
 
     .control-button.muted {
-      background: var(--error-color, #f44336);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
     }
 
     .hangup-button {
       grid-column: 1 / -1;
       width: 72px;
       height: 72px;
-      background: var(--error-color, #f44336);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
       justify-self: center;
     }
 
     .hangup-button:hover {
-      background: var(--error-color, #d32f2f);
+      filter: brightness(0.9);
     }
 
     /* Call Waiting */
@@ -4671,7 +5109,7 @@ TsuryPhoneCallModal.styles = i$3 `
       width: 100%;
       max-width: 400px;
       padding: 16px;
-      background: var(--divider-color, #f5f5f5);
+      background: var(--secondary-background-color);
       border-radius: 12px;
       margin-bottom: 24px;
     }
@@ -4770,7 +5208,7 @@ __decorate([
     r()
 ], TsuryPhoneCallModal.prototype, "_isSwipingRight", void 0);
 TsuryPhoneCallModal = __decorate([
-    t('tsuryphone-call-modal')
+    t("tsuryphone-call-modal")
 ], TsuryPhoneCallModal);
 
 /**
@@ -5157,6 +5595,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         this._blockedCache = [];
         this._callHistoryCache = [];
         this._priorityNumbers = new Set();
+        this._defaultDialCode = "";
         // Connection state
         this._isConnected = true;
         this._errorMessage = "";
@@ -5269,7 +5708,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         }
         this._isConnected = true;
         this._errorMessage = "";
-        this._isDarkMode = isDarkMode(this.hass);
+        this._isDarkMode = isDarkMode$1(this.hass);
         // Update cached data from coordinator state
         // Support both direct entity config and device_id pattern
         let deviceId = this.config?.device_id || "tsuryphone";
@@ -5313,6 +5752,11 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             if (attrs.priority_numbers && Array.isArray(attrs.priority_numbers)) {
                 this._priorityNumbers = new Set(attrs.priority_numbers);
             }
+            // Update default dial code
+            if (attrs.dialing_context && attrs.dialing_context.default_code) {
+                this._defaultDialCode = attrs.dialing_context.default_code;
+                console.log('[TsuryPhone] Default dial code set to:', this._defaultDialCode);
+            }
         }
         // Update call history from call_history_size sensor
         // Build entity ID based on extracted device prefix
@@ -5322,9 +5766,23 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         const callHistoryEntity = this.hass.states[callHistoryEntityId];
         if (callHistoryEntity?.attributes) {
             const historyAttrs = callHistoryEntity.attributes;
+            console.log(`[TsuryPhone] Call history sensor state:`, {
+                state: callHistoryEntity.state,
+                capacity: historyAttrs.capacity,
+                entriesCount: historyAttrs.entries?.length || 0,
+                hasEntries: !!historyAttrs.entries,
+                isArray: Array.isArray(historyAttrs.entries)
+            });
             if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
+                console.log(`[TsuryPhone] Loading call history from sensor (updated()):`, `${historyAttrs.entries.length} calls`);
                 this._callHistoryCache = historyAttrs.entries;
             }
+            else {
+                console.log(`[TsuryPhone] No entries in call_history_size sensor attributes`);
+            }
+        }
+        else {
+            console.log(`[TsuryPhone] Call history sensor not found or no attributes:`, callHistoryEntityId);
         }
         // Update call modal state
         this._updateCallModalState();
@@ -5387,6 +5845,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         if (callHistoryEntity?.attributes) {
             const historyAttrs = callHistoryEntity.attributes;
             if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
+                console.log(`[TsuryPhone] Loading call history from sensor (setConfig()):`, `${historyAttrs.entries.length} calls`);
                 this._callHistoryCache = historyAttrs.entries;
             }
         }
@@ -5406,6 +5865,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             : `binary_sensor.in_call`;
         const phoneState = this.hass.states[phoneStateEntityId]?.state;
         const inCall = this.hass.states[inCallEntityId]?.state === "on";
+        console.log("[TsuryPhone] _updateCallModalState:", "phoneState=", phoneState, "inCall=", inCall, "_callModalOpen=", this._callModalOpen);
         // Determine call modal mode
         if (phoneState === "RINGING_IN") {
             this._callModalMode = "incoming";
@@ -5420,6 +5880,26 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
                     name: attrs.name,
                     isPriority: attrs.is_priority || false,
                     isIncoming: true,
+                };
+            }
+        }
+        else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT") {
+            // Show modal when dialing out or calling
+            console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state, opening call modal");
+            this._callModalMode = "active";
+            if (!this._callModalMinimized) {
+                this._callModalOpen = true;
+            }
+            // Get dialing call info
+            const currentCallEntity = this.hass.states[deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`];
+            if (currentCallEntity?.attributes) {
+                const attrs = currentCallEntity.attributes;
+                this._currentCallInfo = {
+                    number: attrs.number || "Unknown",
+                    name: attrs.name,
+                    isPriority: attrs.is_priority || false,
+                    isIncoming: false,
+                    duration: 0, // No duration yet while dialing
                 };
             }
         }
@@ -5698,19 +6178,54 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
      */
     _renderHomeView() {
         // Convert call history to the format expected by home-view
-        const callHistory = this._callHistoryCache.map((call) => ({
-            id: call.seq || `${call.received_ts}-${call.number}`,
-            contactName: call.name || call.number,
-            phoneNumber: call.number,
-            timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
-            duration: call.duration_s || 0,
-            type: call.call_type, // 'incoming', 'outgoing', 'missed', 'blocked'
-            isBlocked: call.call_type === "blocked",
-        }));
+        const callHistory = this._callHistoryCache.map((call, index) => {
+            // Map call_type to our CallType enum
+            // Backend sends: 'incoming_answered', 'outgoing_answered', 'incoming_missed', 'blocked', etc.
+            let callType;
+            if (call.call_type === "blocked") {
+                callType = "missed";
+            }
+            else if (call.call_type.startsWith("incoming_missed") || call.call_type.startsWith("outgoing_missed")) {
+                callType = "missed";
+            }
+            else if (call.call_type.startsWith("incoming")) {
+                callType = "incoming";
+            }
+            else if (call.call_type.startsWith("outgoing")) {
+                callType = "outgoing";
+            }
+            else {
+                // Default to missed for unknown types
+                callType = "missed";
+            }
+            const entry = {
+                id: call.seq || `${call.received_ts}-${call.number}`,
+                contactName: call.name || call.number,
+                phoneNumber: call.number,
+                timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
+                duration: call.duration_s || 0,
+                type: callType,
+                isBlocked: call.call_type === "blocked",
+            };
+            // Log first few calls to debug
+            if (index < 3) {
+                console.log(`[TsuryPhone] Call ${index}:`, {
+                    raw_call_type: call.call_type,
+                    duration_s: call.duration_s,
+                    mapped_type: entry.type,
+                    isBlocked: entry.isBlocked,
+                    name: entry.contactName
+                });
+            }
+            return entry;
+        });
+        console.log(`[TsuryPhone] Total calls in history: ${callHistory.length}`);
+        console.log(`[TsuryPhone] _callHistoryCache size: ${this._callHistoryCache.length}`);
         return x `
       <div class="view home-view fade-in">
         <tsuryphone-home-view
           .callHistory=${callHistory}
+          .defaultDialCode=${this._defaultDialCode}
           .loading=${false}
           @dial-contact=${this._handleDialContact}
           @call-details=${this._handleCallDetails}
@@ -5729,10 +6244,33 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     /**
      * Handle call details event from home view
      */
-    _handleCallDetails(e) {
+    async _handleCallDetails(e) {
         const { call } = e.detail;
-        console.log("Show call details:", call);
-        // TODO: Open call details modal in Phase 8
+        // Initiate a call to the number from call history
+        if (call && call.phoneNumber) {
+            try {
+                await this.hass.callService("tsuryphone", "dial", {
+                    number: call.phoneNumber,
+                }, {
+                    entity_id: this._getPhoneStateEntityId(),
+                });
+            }
+            catch (error) {
+                console.error("Failed to dial number from call history:", error);
+            }
+        }
+    }
+    /**
+     * Get phone state entity ID
+     */
+    _getPhoneStateEntityId() {
+        const deviceId = this.config?.device_id || "tsuryphone";
+        if (this.config?.entity) {
+            return this.config.entity.startsWith("sensor.")
+                ? this.config.entity
+                : `sensor.${this.config.entity}`;
+        }
+        return `sensor.${deviceId}_phone_state`;
     }
     /**
      * Render keypad view
@@ -5881,7 +6419,8 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
         .tsuryphone-container {
           display: flex;
           flex-direction: column;
-          height: 761px;
+          height: 100vh;
+          max-height: 900px;
           background: var(--tsury-card-background-color);
           color: var(--tsury-primary-text-color);
           font-family: var(--tsury-font-family);
@@ -6120,6 +6659,9 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_priorityNumbers", void 0);
+__decorate([
+    r()
+], TsuryPhoneCard.prototype, "_defaultDialCode", void 0);
 __decorate([
     r()
 ], TsuryPhoneCard.prototype, "_isConnected", void 0);
