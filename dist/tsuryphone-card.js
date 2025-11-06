@@ -935,6 +935,7 @@ TsuryPhoneCallLogFilters.styles = i$3 `
 
     .filters {
       display: flex;
+      justify-content: center;
       gap: 8px;
       padding: 16px;
       overflow-x: auto;
