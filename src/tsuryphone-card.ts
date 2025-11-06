@@ -402,12 +402,15 @@ export class TsuryPhoneCard extends LitElement {
       : `binary_sensor.in_call`;
 
     const phoneState = this.hass.states[phoneStateEntityId]?.state;
+    const phoneStateAttrs = this.hass.states[phoneStateEntityId]?.attributes as any;
     const inCall = this.hass.states[inCallEntityId]?.state === "on";
+    const currentDialingNumber = phoneStateAttrs?.current_dialing_number || "";
 
     console.log(
       "[TsuryPhone] _updateCallModalState:",
       "phoneState=", phoneState,
       "inCall=", inCall,
+      "currentDialingNumber=", currentDialingNumber,
       "_callModalOpen=", this._callModalOpen
     );
 
@@ -431,9 +434,9 @@ export class TsuryPhoneCard extends LitElement {
           isIncoming: true,
         };
       }
-    } else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT") {
-      // Show modal when dialing out or calling
-      console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state, opening call modal");
+    } else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT" || currentDialingNumber) {
+      // Show modal when dialing out or calling (or if current_dialing_number is set)
+      console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state or dialing number, opening call modal");
       this._callModalMode = "active";
       if (!this._callModalMinimized) {
         this._callModalOpen = true;
@@ -447,7 +450,7 @@ export class TsuryPhoneCard extends LitElement {
       if (currentCallEntity?.attributes) {
         const attrs = currentCallEntity.attributes as any;
         this._currentCallInfo = {
-          number: attrs.number || "Unknown",
+          number: attrs.number || currentDialingNumber || "Unknown",
           name: attrs.name,
           isPriority: attrs.is_priority || false,
           isIncoming: false,

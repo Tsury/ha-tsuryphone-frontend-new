@@ -1245,27 +1245,6 @@ TsuryPhoneFrequentContacts = __decorate([
 /**
  * Format phone number for display
  */
-function formatPhoneNumber(number) {
-    if (!number)
-        return "";
-    // Remove non-digit characters
-    const digits = number.replace(/\D/g, "");
-    // Format based on length
-    if (digits.length === 10) {
-        // US format: (555) 123-4567
-        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    }
-    else if (digits.length === 11 && digits[0] === "1") {
-        // US format with country code: +1 (555) 123-4567
-        return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
-    }
-    else if (digits.length > 11) {
-        // International format: +XX XXX XXX XXXX
-        return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
-    }
-    // Default: return as-is
-    return number;
-}
 /**
  * Generate consistent color from string (for avatars)
  */
@@ -3079,9 +3058,11 @@ let TsuryPhoneContactItem = class TsuryPhoneContactItem extends i {
         }));
     }
     render() {
-        const formattedNumber = formatPhoneNumber(this.contact.display_number || this.contact.number);
-        // Check if contact is priority by looking in priority_callers list
+        // Get default dial code from phone state
         const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
+        const defaultDialCode = phoneState?.attributes?.dialing_context?.default_code || "";
+        const formattedNumber = normalizePhoneNumberForDisplay(this.contact.display_number || this.contact.number, defaultDialCode);
+        // Check if contact is priority by looking in priority_callers list
         const priorityCallers = phoneState?.attributes?.priority_callers || [];
         const isPriority = priorityCallers.some((p) => p.number === this.contact.number // Both are normalized E.164 format
         );
@@ -5865,8 +5846,10 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             ? `binary_sensor.${deviceId}_in_call`
             : `binary_sensor.in_call`;
         const phoneState = this.hass.states[phoneStateEntityId]?.state;
+        const phoneStateAttrs = this.hass.states[phoneStateEntityId]?.attributes;
         const inCall = this.hass.states[inCallEntityId]?.state === "on";
-        console.log("[TsuryPhone] _updateCallModalState:", "phoneState=", phoneState, "inCall=", inCall, "_callModalOpen=", this._callModalOpen);
+        const currentDialingNumber = phoneStateAttrs?.current_dialing_number || "";
+        console.log("[TsuryPhone] _updateCallModalState:", "phoneState=", phoneState, "inCall=", inCall, "currentDialingNumber=", currentDialingNumber, "_callModalOpen=", this._callModalOpen);
         // Determine call modal mode
         if (phoneState === "RINGING_IN") {
             this._callModalMode = "incoming";
@@ -5884,9 +5867,9 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
                 };
             }
         }
-        else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT") {
-            // Show modal when dialing out or calling
-            console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state, opening call modal");
+        else if (phoneState === "DIALING" || phoneState === "CALLING_OUT" || phoneState === "RINGING_OUT" || currentDialingNumber) {
+            // Show modal when dialing out or calling (or if current_dialing_number is set)
+            console.log("[TsuryPhone] Detected DIALING/CALLING_OUT/RINGING_OUT state or dialing number, opening call modal");
             this._callModalMode = "active";
             if (!this._callModalMinimized) {
                 this._callModalOpen = true;
@@ -5896,7 +5879,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
             if (currentCallEntity?.attributes) {
                 const attrs = currentCallEntity.attributes;
                 this._currentCallInfo = {
-                    number: attrs.number || "Unknown",
+                    number: attrs.number || currentDialingNumber || "Unknown",
                     name: attrs.name,
                     isPriority: attrs.is_priority || false,
                     isIncoming: false,

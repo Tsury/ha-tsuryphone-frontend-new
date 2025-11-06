@@ -7,7 +7,7 @@ import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import { TsuryPhoneCardConfig, QuickDialEntry } from "../../types/tsuryphone";
-import { formatPhoneNumber } from "../../utils/formatters";
+import { normalizePhoneNumberForDisplay } from "../../utils/formatters";
 import { triggerHaptic } from "../../utils/haptics";
 import { listItemStyles, buttonStyles } from "../../styles/shared-styles";
 import "../shared/avatar";
@@ -154,12 +154,16 @@ export class TsuryPhoneContactItem extends LitElement {
   }
 
   protected render(): TemplateResult {
-    const formattedNumber = formatPhoneNumber(
-      this.contact.display_number || this.contact.number
+    // Get default dial code from phone state
+    const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
+    const defaultDialCode = (phoneState?.attributes as any)?.dialing_context?.default_code || "";
+    
+    const formattedNumber = normalizePhoneNumberForDisplay(
+      this.contact.display_number || this.contact.number,
+      defaultDialCode
     );
 
     // Check if contact is priority by looking in priority_callers list
-    const phoneState = this.hass?.states[this._getPhoneStateEntityId()];
     const priorityCallers = phoneState?.attributes?.priority_callers || [];
     const isPriority = priorityCallers.some(
       (p: any) => p.number === this.contact.number // Both are normalized E.164 format
