@@ -1370,12 +1370,14 @@ let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
             });
             this.setAttribute('debug-logged', 'true');
         }
-        const displayNumber = normalizePhoneNumberForDisplay(this.call.phoneNumber, this.defaultDialCode);
+        const displayNumber = normalizePhoneNumberForDisplay(this.call.phoneNumber, this.defaultDialCode || "972" // Fallback to Israel if not provided
+        );
         // Debug logging for number normalization
         if (!this.hasAttribute('number-debug-logged')) {
             console.log('[CallLogItem] Number normalization:', {
                 originalNumber: this.call.phoneNumber,
                 defaultDialCode: this.defaultDialCode,
+                fallbackUsed: !this.defaultDialCode,
                 displayNumber: displayNumber
             });
             this.setAttribute('number-debug-logged', 'true');
