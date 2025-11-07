@@ -90,20 +90,25 @@ export class TsuryPhoneKeypadView extends LitElement {
       }
 
       .call-button {
-        width: 64px;
+        min-width: 96px;
         height: 64px;
-        border-radius: 50%;
+        padding: 0 24px;
+        border-radius: 32px;
         background: var(--success-color);
         border: none;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 8px;
         margin: 0 auto;
         transition:
           transform 0.1s,
           box-shadow 0.2s;
         box-shadow: var(--ha-card-box-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
+        color: var(--text-primary-color, white);
+        font-size: 16px;
+        font-weight: 500;
       }
 
       .call-button:hover {
@@ -128,9 +133,9 @@ export class TsuryPhoneKeypadView extends LitElement {
       }
 
       .call-icon {
-        width: 32px;
-        height: 32px;
-        fill: var(--text-primary-color, white);
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
       }
     `;
   }
@@ -287,6 +292,7 @@ export class TsuryPhoneKeypadView extends LitElement {
                 d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"
               />
             </svg>
+            <span>Call</span>
           </button>
         </div>
       </div>

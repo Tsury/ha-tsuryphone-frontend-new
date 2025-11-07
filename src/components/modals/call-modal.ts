@@ -274,7 +274,7 @@ export class TsuryPhoneCallModal extends LitElement {
 
     .hangup-button {
       grid-column: 1 / -1;
-      width: 72px;
+      width: 144px;
       height: 72px;
       background: var(--error-color);
       color: var(--text-primary-color, white);
@@ -681,41 +681,53 @@ export class TsuryPhoneCallModal extends LitElement {
         ? this._renderWaitingCall()
         : ""}
 
-      <div class="call-controls">
-        <button
-          class="control-button ${this._isMuted ? "muted" : ""}"
-          @click=${this._handleMute}
-          title="Mute"
-        >
-          <ha-icon
-            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
-          ></ha-icon>
-        </button>
+      ${!isDialing ? html`
+        <div class="call-controls">
+          <button
+            class="control-button ${this._isMuted ? "muted" : ""}"
+            @click=${this._handleMute}
+            title="Mute"
+          >
+            <ha-icon
+              icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
+            ></ha-icon>
+          </button>
 
-        <button
-          class="control-button ${this._showKeypad ? "active" : ""}"
-          @click=${this._handleKeypad}
-          title="Keypad"
-        >
-          <ha-icon icon="mdi:dialpad"></ha-icon>
-        </button>
+          <button
+            class="control-button ${this._showKeypad ? "active" : ""}"
+            @click=${this._handleKeypad}
+            title="Keypad"
+          >
+            <ha-icon icon="mdi:dialpad"></ha-icon>
+          </button>
 
-        <button
-          class="control-button ${isSpeaker ? "active" : ""}"
-          @click=${this._handleSpeaker}
-          title="Speaker"
-        >
-          <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:phone"}"></ha-icon>
-        </button>
+          <button
+            class="control-button ${isSpeaker ? "active" : ""}"
+            @click=${this._handleSpeaker}
+            title="Speaker"
+          >
+            <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:volume-low"}"></ha-icon>
+          </button>
 
-        <button
-          class="control-button hangup-button"
-          @click=${this._handleHangup}
-          title="Hang up"
-        >
-          <ha-icon icon="mdi:phone-hangup"></ha-icon>
-        </button>
-      </div>
+          <button
+            class="control-button hangup-button"
+            @click=${this._handleHangup}
+            title="Hang up"
+          >
+            <ha-icon icon="mdi:phone-hangup"></ha-icon>
+          </button>
+        </div>
+      ` : html`
+        <div class="call-controls">
+          <button
+            class="control-button hangup-button"
+            @click=${this._handleHangup}
+            title="Hang up"
+          >
+            <ha-icon icon="mdi:phone-hangup"></ha-icon>
+          </button>
+        </div>
+      `}
     `;
   }
 

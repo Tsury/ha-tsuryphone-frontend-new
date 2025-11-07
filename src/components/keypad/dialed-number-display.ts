@@ -19,11 +19,12 @@ export class TsuryPhoneDialedNumberDisplay extends LitElement {
       .display-container {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         min-height: 64px;
         padding: 12px 16px;
         background: var(--card-background-color);
         border-bottom: 2px solid var(--divider-color);
+        position: relative;
       }
 
       .number-display {
@@ -48,6 +49,8 @@ export class TsuryPhoneDialedNumberDisplay extends LitElement {
       }
 
       .backspace-button {
+        position: absolute;
+        right: 16px;
         width: 40px;
         height: 40px;
         border: none;
@@ -121,9 +124,7 @@ export class TsuryPhoneDialedNumberDisplay extends LitElement {
     return html`
       <div class="display-container">
         <div class="number-display ${!hasNumber ? 'empty' : ''}">
-          ${hasNumber
-            ? formattedNumber
-            : html`<span class="placeholder">Enter number</span>`}
+          ${hasNumber ? formattedNumber : ''}
         </div>
         <button
           class="backspace-button"
