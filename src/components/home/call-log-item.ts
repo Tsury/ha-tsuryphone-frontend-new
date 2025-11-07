@@ -10,17 +10,6 @@ export class TsuryPhoneCallLogItem extends LitElement {
   @property({ type: Object }) call!: CallHistoryEntry;
   @property({ type: String }) defaultDialCode = "";
 
-  // Log when defaultDialCode changes
-  willUpdate(changedProperties: Map<string, any>) {
-    if (changedProperties.has('defaultDialCode')) {
-      console.log('[CallLogItem] defaultDialCode changed:', {
-        oldValue: changedProperties.get('defaultDialCode'),
-        newValue: this.defaultDialCode,
-        callNumber: this.call?.phoneNumber
-      });
-    }
-  }
-
   static styles = css`
     :host {
       display: block;
@@ -189,33 +178,11 @@ export class TsuryPhoneCallLogItem extends LitElement {
     } else if (this.call.duration > 0) {
       durationDisplay = html`<span>• ${formatDuration(this.call.duration)}</span>`;
     }
-
-    // Debug logging for first call item
-    if (!this.hasAttribute('debug-logged')) {
-      console.log('[CallLogItem] Rendering call:', {
-        type: this.call.type,
-        duration: this.call.duration,
-        isBlocked: this.call.isBlocked,
-        durationDisplay: durationDisplay ? 'shown' : 'hidden',
-        contactName: this.call.contactName
-      });
-      this.setAttribute('debug-logged', 'true');
-    }
     
     const displayNumber = normalizePhoneNumberForDisplay(
       this.call.phoneNumber,
       this.defaultDialCode
     );
-
-    // Debug logging for number normalization
-    if (!this.hasAttribute('number-debug-logged')) {
-      console.log('[CallLogItem] Number normalization:', {
-        originalNumber: this.call.phoneNumber,
-        defaultDialCode: this.defaultDialCode,
-        displayNumber: displayNumber
-      });
-      this.setAttribute('number-debug-logged', 'true');
-    }
 
     return html`
       <div class="call-item" @click=${this._handleClick}>

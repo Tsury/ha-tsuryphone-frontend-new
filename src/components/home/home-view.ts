@@ -97,8 +97,6 @@ export class TsuryPhoneHomeView extends LitElement {
   }
 
   render() {
-    console.log('[HomeView] render() called with defaultDialCode:', this.defaultDialCode);
-    
     // Filter and group call history
     const filteredCalls = filterCallHistory(
       this.callHistory,
@@ -112,8 +110,6 @@ export class TsuryPhoneHomeView extends LitElement {
     // Show frequent contacts only if we have calls and filter is 'all'
     const showFrequentContacts =
       this._activeFilter === "all" && frequentContacts.length > 0;
-
-    console.log('[HomeView] Passing defaultDialCode to call-log-list:', this.defaultDialCode);
 
     return html`
       <div class="home-view">

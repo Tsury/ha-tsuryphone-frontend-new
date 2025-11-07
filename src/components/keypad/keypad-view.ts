@@ -30,7 +30,6 @@ export class TsuryPhoneKeypadView extends LitElement {
       this.hass,
       phoneStateEntityId
     );
-    console.log("[KeypadView] Entities discovered:", this._entities);
     this.requestUpdate(); // Trigger re-render with discovered entities
   }
 
@@ -42,16 +41,8 @@ export class TsuryPhoneKeypadView extends LitElement {
         const oldState = oldHass.states[entityId]?.state;
         const newState = this.hass.states[entityId]?.state;
 
-        console.log("[KeypadView] shouldUpdate check:", {
-          entityId,
-          oldState,
-          newState,
-          changed: oldState !== newState,
-        });
-
         // Force update if the dialing number changed
         if (oldState !== newState) {
-          console.log("[KeypadView] Forcing update due to state change");
           return true;
         }
       }
@@ -147,13 +138,6 @@ export class TsuryPhoneKeypadView extends LitElement {
   private async _handleDigitPress(digit: string): Promise<void> {
     triggerHaptic("selection");
 
-    console.log(
-      "[KeypadView] Dialing digit:",
-      digit,
-      "to entity:",
-      this._getPhoneStateEntityId()
-    );
-
     try {
       // Send digit to backend - no optimistic update
       await this.hass.callService(
@@ -166,7 +150,6 @@ export class TsuryPhoneKeypadView extends LitElement {
           entity_id: this._getPhoneStateEntityId(),
         }
       );
-      console.log("[KeypadView] Digit dialed successfully");
     } catch (error) {
       console.error("Failed to dial digit:", error);
       triggerHaptic("failure");
@@ -237,9 +220,6 @@ export class TsuryPhoneKeypadView extends LitElement {
   private _getCurrentDialingNumber(): string {
     // Use discovered entity if available
     if (!this._entities?.currentDialingNumber) {
-      console.log(
-        "[KeypadView] _getCurrentDialingNumber: Entity not yet discovered"
-      );
       return "";
     }
 
@@ -247,12 +227,6 @@ export class TsuryPhoneKeypadView extends LitElement {
     const entity = this.hass?.states[entityId];
     const result =
       entity?.state && entity.state !== "unknown" ? entity.state : "";
-
-    console.log("[KeypadView] _getCurrentDialingNumber:", {
-      entityId,
-      entityState: entity?.state,
-      result,
-    });
 
     return result;
   }

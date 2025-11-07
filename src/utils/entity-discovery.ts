@@ -61,11 +61,6 @@ export async function discoverTsuryPhoneEntities(
   hass: HomeAssistant,
   phoneStateEntityId: string
 ): Promise<DeviceEntities> {
-  console.log(
-    "[EntityDiscovery] Discovering entities from:",
-    phoneStateEntityId
-  );
-
   // Get the device ID from the phone_state entity
   const deviceId = await getDeviceIdFromEntity(hass, phoneStateEntityId);
   if (!deviceId) {
@@ -81,16 +76,8 @@ export async function discoverTsuryPhoneEntities(
     };
   }
 
-  console.log("[EntityDiscovery] Found device ID:", deviceId);
-
   // Get all entities for this device
   const allEntityIds = await getDeviceEntities(hass, deviceId);
-  console.log(
-    "[EntityDiscovery] Device has",
-    allEntityIds.length,
-    "entities:",
-    allEntityIds
-  );
 
   // Find specific entities by matching patterns in entity_id
   const result: DeviceEntities = {
@@ -101,8 +88,6 @@ export async function discoverTsuryPhoneEntities(
     currentCallNumber:
       allEntityIds.find((id) => id.includes("current_call_number")) || null,
   };
-
-  console.log("[EntityDiscovery] Discovered entities:", result);
 
   return result;
 }
