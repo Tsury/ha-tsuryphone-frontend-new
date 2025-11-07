@@ -91,6 +91,7 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _callWaitingAvailable = false;
   @state() private _showCallToast = false;
   private _callModalMinimized = false;
+  private _lastCallClosedAt = 0;
 
   // Subscriptions
   private _unsubscribers: Array<() => void> = [];
@@ -384,6 +385,7 @@ export class TsuryPhoneCard extends LitElement {
       this._currentCallInfo = undefined;
       this._waitingCallInfo = undefined;
       this._callWaitingAvailable = false;
+      this._lastCallClosedAt = Date.now();
     };
 
     // Handle different phone states
@@ -410,11 +412,7 @@ export class TsuryPhoneCard extends LitElement {
     } else if (phoneState === "Dialing" || phoneState === "In Call") {
       // Show modal when actively dialing out or in call
       this._callModalMode = "active";
-      if (!this._callModalMinimized) {
-        this._callModalOpen = true;
-      }
 
-      // Get call info
       const currentCallEntity =
         this.hass.states[
           deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`
@@ -430,15 +428,106 @@ export class TsuryPhoneCard extends LitElement {
             : `sensor.call_audio_output`
         ];
 
-      if (currentCallEntity?.attributes) {
-        const attrs = currentCallEntity.attributes as any;
+      const currentCallAttrs = currentCallEntity?.attributes as any;
+      const callStatus = (currentCallAttrs?.status as string | undefined) || "idle";
+      const hasNumber = Boolean(currentCallAttrs?.number);
+      const hasDialingNumber = Boolean(currentCallAttrs?.dialing_number);
+      const rawCallId = currentCallAttrs?.call_id;
+      const hasValidCallId = typeof rawCallId === "number" && rawCallId !== -1;
+      const statusSuggestsActive =
+        callStatus === "in_call" ||
+        callStatus === "dialing" ||
+        callStatus === "ringing" ||
+        callStatus === "context";
+
+      const hasActiveContext =
+        statusSuggestsActive ||
+        hasNumber ||
+        hasDialingNumber ||
+        hasValidCallId ||
+        phoneState === "Dialing";
+
+      if (!hasActiveContext) {
+        if (!this._callModalMinimized) {
+          this._callModalOpen = false;
+        }
+        this._currentCallInfo = undefined;
+        this._waitingCallInfo = undefined;
+        this._callWaitingAvailable = false;
+        return;
+      }
+
+      const previousStateLabel =
+        (phoneStateAttrs?.previous_state as string | undefined) || "";
+      const closedRecently =
+        phoneState === "In Call" &&
+        previousStateLabel === "Idle" &&
+        this._lastCallClosedAt > 0 &&
+        Date.now() - this._lastCallClosedAt < 800;
+
+      if (closedRecently && !this._callModalMinimized) {
+        this._callModalOpen = false;
+        this._currentCallInfo = undefined;
+        this._waitingCallInfo = undefined;
+        this._callWaitingAvailable = false;
+        return;
+      }
+
+      if (!this._callModalMinimized) {
+        this._callModalOpen = true;
+      }
+      this._lastCallClosedAt = 0;
+
+      const previousCallInfo = this._currentCallInfo;
+
+      let durationSeconds = previousCallInfo?.duration ?? 0;
+      if (durationEntity) {
+        const rawDuration = durationEntity.state;
+        if (rawDuration !== "unknown" && rawDuration !== "unavailable") {
+          const parsed = Number(rawDuration);
+          if (!Number.isNaN(parsed) && parsed >= 0) {
+            durationSeconds = parsed;
+          }
+        }
+      }
+
+      let audioOutput: CallInfo["audioOutput"] =
+        previousCallInfo?.audioOutput || "earpiece";
+      if (
+        audioOutputEntity &&
+        audioOutputEntity.state !== "unknown" &&
+        audioOutputEntity.state !== "unavailable"
+      ) {
+        audioOutput =
+          (audioOutputEntity.state as CallInfo["audioOutput"]) || "earpiece";
+      }
+
+      if (currentCallAttrs) {
+        const resolvedNumber =
+          currentCallAttrs.number ||
+          currentCallAttrs.normalized_number ||
+          currentCallAttrs.dialing_number ||
+          previousCallInfo?.number ||
+          "Unknown";
+
         this._currentCallInfo = {
-          number: attrs.number || "Unknown",
-          name: attrs.name,
-          isPriority: attrs.is_priority || false,
-          isIncoming: attrs.direction === "incoming",
-          duration: durationEntity ? parseInt(durationEntity.state) : 0,
-          audioOutput: (audioOutputEntity?.state as any) || "earpiece",
+          number: resolvedNumber,
+          name: currentCallAttrs.name,
+          isPriority: Boolean(currentCallAttrs.is_priority),
+          isIncoming:
+            currentCallAttrs.direction === "incoming" ||
+            currentCallAttrs.is_incoming === true,
+          duration: durationSeconds,
+          audioOutput,
+        };
+      } else {
+        this._currentCallInfo = {
+          number: previousCallInfo?.number || "Unknown",
+          name: previousCallInfo?.name,
+          isPriority: previousCallInfo?.isPriority || false,
+          isIncoming: previousCallInfo?.isIncoming || false,
+          duration: durationSeconds,
+          audioOutput,
         };
       }
 

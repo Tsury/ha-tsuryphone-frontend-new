@@ -239,9 +239,9 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .control-button {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
+      width: 88px;
+      height: 64px;
+      border-radius: 32px;
       border: none;
       background: var(--secondary-background-color);
       color: var(--primary-text-color);
@@ -249,13 +249,14 @@ export class TsuryPhoneCallModal extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0 12px;
       transition: all 0.2s;
       box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
       justify-self: center;
     }
 
     .control-button ha-icon {
-      --mdc-icon-size: 28px;
+      --mdc-icon-size: 26px;
     }
 
     .control-button:hover {
@@ -355,14 +356,31 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override willUpdate(changedProps: Map<string, any>): void {
     super.willUpdate(changedProps);
-    
-    // Sync mute state from HA entity
-    if (this.entityId && this.hass?.states[this.entityId]) {
-      const phoneState = this.hass.states[this.entityId];
-      const isMuted = phoneState.attributes?.is_muted ?? false;
-      if (isMuted !== this._isMuted) {
-        this._isMuted = isMuted;
+
+    if (!this.hass) {
+      return;
+    }
+
+    let resolvedMutedState: boolean | undefined;
+    const muteSensorId = this._resolveMutedEntityId();
+
+    if (muteSensorId) {
+      const muteSensorState = this.hass.states[muteSensorId];
+      if (muteSensorState) {
+        resolvedMutedState = muteSensorState.state === "on";
       }
+    }
+
+    if (resolvedMutedState === undefined && this.entityId) {
+      const phoneState = this.hass.states[this.entityId];
+      const attrValue = phoneState?.attributes?.is_muted;
+      if (typeof attrValue === "boolean") {
+        resolvedMutedState = attrValue;
+      }
+    }
+
+    if (typeof resolvedMutedState === "boolean" && resolvedMutedState !== this._isMuted) {
+      this._isMuted = resolvedMutedState;
     }
   }
 
@@ -552,6 +570,34 @@ export class TsuryPhoneCallModal extends LitElement {
     this.requestUpdate();
   }
 
+  // Derive the muted binary sensor entity that matches the configured phone state sensor
+  private _resolveMutedEntityId(): string | undefined {
+    if (!this.entityId) {
+      return undefined;
+    }
+
+    const normalizedId = this.entityId.trim();
+    if (!normalizedId.startsWith("sensor.")) {
+      return undefined;
+    }
+
+    const sensorName = normalizedId.slice("sensor.".length);
+
+    if (sensorName === "phone_state") {
+      return "binary_sensor.muted";
+    }
+
+    if (sensorName.endsWith("_phone_state")) {
+      const devicePrefix = sensorName.slice(0, sensorName.length - "_phone_state".length);
+      if (!devicePrefix) {
+        return "binary_sensor.muted";
+      }
+      return `binary_sensor.${devicePrefix}_muted`;
+    }
+
+    return `binary_sensor.${sensorName}_muted`;
+  }
+
   /**
    * Get normalized phone number for display
    */
@@ -654,19 +700,21 @@ export class TsuryPhoneCallModal extends LitElement {
     const { callInfo } = this;
     if (!callInfo) return html``;
 
-  const audioOutput = (callInfo.audioOutput || "").toLowerCase();
-  const isSpeaker = audioOutput === "speaker";
+    const audioOutput = (callInfo.audioOutput || "").toLowerCase();
+    const isSpeaker = audioOutput === "speaker";
 
-  // Check phone state to determine if we're dialing
-  const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
-  const isDialing = phoneState === "Dialing";
+    // Check phone state to determine if we're dialing
+    const phoneState = this.entityId
+      ? this.hass.states[this.entityId]?.state
+      : null;
+    const isDialing = phoneState === "Dialing";
 
-  // Use backend duration directly - simple and robust
-  const duration = callInfo.duration ?? 0;
-  const formattedDuration = this._formatDuration(duration);
-  const callTimerAriaLabel = isDialing ? "Dialing" : formattedDuration;
+    // Use backend duration directly - simple and robust
+    const duration = callInfo.duration ?? 0;
+    const formattedDuration = this._formatDuration(duration);
+    const callTimerAriaLabel = isDialing ? "Dialing" : formattedDuration;
 
-  const displayNumber = this._getNormalizedNumber(callInfo.number);
+    const displayNumber = this._getNormalizedNumber(callInfo.number);
 
     return html`
       <div class="caller-info">
