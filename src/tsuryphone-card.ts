@@ -410,35 +410,25 @@ export class TsuryPhoneCard extends LitElement {
     const phoneStateEntityId = deviceId
       ? `sensor.${deviceId}_phone_state`
       : `sensor.phone_state`;
-    const inCallEntityId = deviceId
-      ? `binary_sensor.${deviceId}_in_call`
-      : `binary_sensor.in_call`;
 
     const phoneStateEntity = this.hass.states[phoneStateEntityId];
     const phoneState = phoneStateEntity?.state;
     const phoneStateAttrs = phoneStateEntity?.attributes as any;
-    const inCall = this.hass.states[inCallEntityId]?.state === "on";
-    const currentDialingNumber = phoneStateAttrs?.current_dialing_number || "";
 
-    // EXTENSIVE DEBUG LOGGING
-    console.log("========== _updateCallModalState DEBUG ==========");
-    console.log("[TsuryPhone] phoneStateEntityId:", phoneStateEntityId);
-    console.log("[TsuryPhone] phoneStateEntity exists:", !!phoneStateEntity);
-    console.log("[TsuryPhone] phoneState:", phoneState);
-    console.log("[TsuryPhone] inCall:", inCall);
-    console.log("[TsuryPhone] phoneStateAttrs:", phoneStateAttrs);
-    console.log("[TsuryPhone] ALL attributes:", Object.keys(phoneStateAttrs || {}));
-    console.log("[TsuryPhone] current_dialing_number attribute:", phoneStateAttrs?.current_dialing_number);
-    console.log("[TsuryPhone] currentDialingNumber (after ||):", currentDialingNumber);
-    console.log("[TsuryPhone] _callModalOpen:", this._callModalOpen);
-    console.log("[TsuryPhone] Should open modal?", 
-      "phoneState check:", ["DIALING", "CALLING_OUT", "RINGING_OUT", "RINGING_IN", "IN_CALL"].includes(phoneState || ""),
-      "OR inCall:", inCall,
-      "OR currentDialingNumber:", !!currentDialingNumber
-    );
-    console.log("================================================");
+    // Single source of truth: phoneState
+    // Don't mix phoneState with binary_sensor.in_call - causes conflicts
+    
+    // Close modal and reset state - default case
+    const closeModal = () => {
+      this._callModalOpen = false;
+      this._callModalMinimized = false;
+      this._showCallToast = false;
+      this._currentCallInfo = undefined;
+      this._waitingCallInfo = undefined;
+      this._callWaitingAvailable = false;
+    };
 
-    // Determine call modal mode
+    // Handle different phone states
     if (phoneState === "Ringing") {
       this._callModalMode = "incoming";
       this._callModalOpen = true;
@@ -460,51 +450,12 @@ export class TsuryPhoneCard extends LitElement {
       }
     } else if (phoneState === "Dialing" || phoneState === "In Call") {
       // Show modal when actively dialing out or in call
-      console.log("[TsuryPhone] Detected Dialing/In Call state, opening call modal");
       this._callModalMode = "active";
       if (!this._callModalMinimized) {
         this._callModalOpen = true;
       }
 
-      // Get dialing call info
-      const currentCallEntity =
-        this.hass.states[
-          deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`
-        ];
-      if (currentCallEntity?.attributes) {
-        const attrs = currentCallEntity.attributes as any;
-        this._currentCallInfo = {
-          number: attrs.number || currentDialingNumber || "Unknown",
-          name: attrs.name,
-          isPriority: attrs.is_priority || false,
-          isIncoming: false,
-          duration: 0, // No duration yet while dialing
-        };
-      }
-    } else if (inCall) {
-      // Only show modal if actually in call AND not in Idle state
-      if (phoneState === "Idle") {
-        // Call just ended but binary sensor hasn't updated yet - close modal
-        this._callModalOpen = false;
-        this._callModalMinimized = false;
-        this._showCallToast = false;
-        this._currentCallInfo = undefined;
-        this._waitingCallInfo = undefined;
-        this._callWaitingAvailable = false;
-        return;
-      }
-      
-      this._callModalMode = "active";
-      // Keep modal open if it was already open, or if not manually minimized
-      if (
-        !this._callModalOpen &&
-        !this._callModalMinimized &&
-        phoneState !== "Idle"
-      ) {
-        this._callModalOpen = true;
-      }
-
-      // Get active call info
+      // Get call info
       const currentCallEntity =
         this.hass.states[
           deviceId ? `sensor.${deviceId}_current_call` : `sensor.current_call`
@@ -563,13 +514,8 @@ export class TsuryPhoneCard extends LitElement {
         ];
       this._callWaitingAvailable = callWaitingAvailableEntity?.state === "on";
     } else {
-      // No call - close modal and clear data
-      this._callModalOpen = false;
-      this._callModalMinimized = false; // Reset when call ends
-      this._showCallToast = false; // Hide toast when call ends
-      this._currentCallInfo = undefined;
-      this._waitingCallInfo = undefined;
-      this._callWaitingAvailable = false;
+      // Any other state (Idle, etc.) - close modal
+      closeModal();
     }
   }
 
