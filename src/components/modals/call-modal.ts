@@ -9,6 +9,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import { triggerHaptic } from "../../utils/haptics";
 import { normalizePhoneNumberForDisplay } from "../../utils/formatters";
+import "../keypad/keypad-grid";
 
 export type CallModalMode = "incoming" | "active" | "waiting";
 
@@ -63,6 +64,7 @@ export class TsuryPhoneCallModal extends LitElement {
       display: flex;
       flex-direction: column;
       animation: slideUp 0.3s ease-out;
+      height: 100%;
     }
 
     @keyframes slideUp {
@@ -72,6 +74,74 @@ export class TsuryPhoneCallModal extends LitElement {
       to {
         transform: translateY(0);
       }
+    }
+
+    /* Fixed header for active calls - sticks to top */
+    .call-header {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: var(--card-background-color);
+      padding: 24px;
+      text-align: center;
+    }
+
+    /* Spacer pushes controls to bottom */
+    .call-content-spacer {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Bottom control panel with rounded top (half-pill) */
+    .call-controls-panel {
+      position: relative;
+      background: var(--secondary-background-color);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 2;
+    }
+
+    /* Keypad container slides from behind panel */
+    .call-keypad-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--secondary-background-color);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 24px 24px 0 0;
+      padding: 56px 16px 16px 16px;
+      z-index: 1;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .call-keypad-container.visible {
+      transform: translateY(-100%);
+      z-index: 3;
+    }
+
+    .keypad-close {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: none;
+      border: none;
+      color: var(--primary-text-color);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s;
+      z-index: 4;
+    }
+
+    .keypad-close:hover {
+      background: var(--divider-color);
+    }
+
+    .keypad-close ha-icon {
+      --mdc-icon-size: 24px;
     }
 
     .modal-header {
@@ -570,6 +640,46 @@ export class TsuryPhoneCallModal extends LitElement {
     this.requestUpdate();
   }
 
+  private _toggleKeypad(): void {
+    this._showKeypad = !this._showKeypad;
+    triggerHaptic("selection");
+  }
+
+  private async _handleDTMFDigit(e: CustomEvent<{ digit: string }>): Promise<void> {
+    const digit = e.detail.digit;
+
+    // Validate DTMF characters (0-9, *, #)
+    if (!/^[0-9*#]$/.test(digit)) {
+      console.error("Invalid DTMF digit:", digit);
+      return;
+    }
+
+    triggerHaptic("light");
+
+    try {
+      if (!this.entityId) {
+        throw new Error("Entity ID is required");
+      }
+
+      await this.hass.callService(
+        "tsuryphone",
+        "send_dtmf",
+        { digit },
+        { entity_id: this.entityId }
+      );
+    } catch (error) {
+      console.error("Failed to send DTMF:", error);
+      triggerHaptic("failure");
+      this.dispatchEvent(
+        new CustomEvent("error", {
+          detail: { message: "Failed to send DTMF tone" },
+          bubbles: true,
+          composed: true,
+        })
+      );
+    }
+  }
+
   // Derive the muted binary sensor entity that matches the configured phone state sensor
   private _resolveMutedEntityId(): string | undefined {
     if (!this.entityId) {
@@ -717,61 +827,77 @@ export class TsuryPhoneCallModal extends LitElement {
     const displayNumber = this._getNormalizedNumber(callInfo.number);
 
     return html`
-      <div class="caller-info">
+      <!-- Fixed header at top -->
+      <div class="call-header">
         <div class="caller-name">${callInfo.name || displayNumber}</div>
         ${callInfo.name
           ? html`<div class="caller-number">${displayNumber}</div>`
           : ""}
+        <div class="call-timer" aria-live="polite" aria-label=${callTimerAriaLabel}>
+          ${isDialing ? html`&nbsp;` : formattedDuration}
+        </div>
       </div>
 
-      <div class="call-timer" aria-live="polite" aria-label=${callTimerAriaLabel}>
-        ${isDialing ? html`&nbsp;` : formattedDuration}
+      <!-- Flexible spacer -->
+      <div class="call-content-spacer">
+        ${this.callWaitingAvailable && this.waitingCall
+          ? this._renderWaitingCall()
+          : ""}
       </div>
 
-      ${this.callWaitingAvailable && this.waitingCall
-        ? this._renderWaitingCall()
-        : ""}
+      <!-- Bottom control panel -->
+      <div class="call-controls-panel">
+        <div class="call-controls">
+          <button
+            class="control-button ${this._isMuted ? "active" : ""}"
+            @click=${this._handleMute}
+            title="Mute"
+            style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+            aria-pressed=${this._isMuted}
+          >
+            <ha-icon
+              icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
+            ></ha-icon>
+          </button>
 
-      <div class="call-controls">
-        <button
-          class="control-button ${this._isMuted ? "active" : ""}"
-          @click=${this._handleMute}
-          title="Mute"
-          style="visibility: ${isDialing ? 'hidden' : 'visible'}"
-          aria-pressed=${this._isMuted}
-        >
-          <ha-icon
-            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
-          ></ha-icon>
-        </button>
+          <button
+            class="control-button ${this._showKeypad ? "active" : ""}"
+            @click=${this._handleKeypad}
+            title="Keypad"
+            style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+            aria-pressed=${this._showKeypad}
+          >
+            <ha-icon icon="mdi:dialpad"></ha-icon>
+          </button>
+
+          <button
+            class="control-button ${isSpeaker ? "active" : ""}"
+            @click=${this._handleSpeaker}
+            title="Speaker"
+            style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+            aria-pressed=${isSpeaker}
+          >
+            <ha-icon icon="mdi:volume-high"></ha-icon>
+          </button>
+        </div>
 
         <button
-          class="control-button ${this._showKeypad ? "active" : ""}"
-          @click=${this._handleKeypad}
-          title="Keypad"
-          style="visibility: ${isDialing ? 'hidden' : 'visible'}"
-          aria-pressed=${this._showKeypad}
-        >
-          <ha-icon icon="mdi:dialpad"></ha-icon>
-        </button>
-
-        <button
-          class="control-button ${isSpeaker ? "active" : ""}"
-          @click=${this._handleSpeaker}
-          title="Speaker"
-          style="visibility: ${isDialing ? 'hidden' : 'visible'}"
-          aria-pressed=${isSpeaker}
-        >
-          <ha-icon icon="mdi:volume-high"></ha-icon>
-        </button>
-
-        <button
-          class="control-button hangup-button"
+          class="hangup-button"
           @click=${this._handleHangup}
           title="Hang up"
         >
           <ha-icon icon="mdi:phone-hangup"></ha-icon>
         </button>
+      </div>
+
+      <!-- Sliding keypad (behind panel, slides up) -->
+      <div class="call-keypad-container ${this._showKeypad ? "visible" : ""}">
+        <button class="keypad-close" @click=${this._toggleKeypad} title="Close keypad">
+          <ha-icon icon="mdi:close"></ha-icon>
+        </button>
+        <tsuryphone-keypad-grid
+          @digit-pressed=${this._handleDTMFDigit}
+        ></tsuryphone-keypad-grid>
       </div>
     `;
   }
