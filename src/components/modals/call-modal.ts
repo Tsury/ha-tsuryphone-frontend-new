@@ -349,10 +349,10 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    // Don't initialize duration from callInfo - let it start at 0 and count up
-    // The backend resets its timer when call becomes active, so we should too
-    if (this.mode === "active") {
-      this._currentDuration = 0;
+    // Initialize duration from backend's calculated value (not firmware duration)
+    // This ensures duration is correct even after page refresh
+    if (this.mode === "active" && this.callInfo?.duration !== undefined) {
+      this._currentDuration = this.callInfo.duration;
       this._startDurationTimer();
     }
   }
@@ -364,6 +364,18 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override willUpdate(changedProps: Map<string, any>): void {
     super.willUpdate(changedProps);
+    
+    // Sync duration from backend if callInfo.duration changes significantly
+    // This handles page refresh and ensures frontend stays in sync with backend timer
+    if (changedProps.has("callInfo") && this.mode === "active") {
+      const backendDuration = this.callInfo?.duration ?? 0;
+      // If backend duration differs by more than 2 seconds, sync to it
+      // (allows for minor drift between frontend/backend timers)
+      if (Math.abs(backendDuration - this._currentDuration) > 2) {
+        console.log(`[CallModal] Syncing duration: frontend=${this._currentDuration}s, backend=${backendDuration}s`);
+        this._currentDuration = backendDuration;
+      }
+    }
     
     // Sync mute state from HA entity
     if (this.entityId && this.hass?.states[this.entityId]) {
