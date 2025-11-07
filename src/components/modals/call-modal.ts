@@ -46,9 +46,6 @@ export class TsuryPhoneCallModal extends LitElement {
   @state() private _isSwipingLeft = false;
   @state() private _isSwipingRight = false;
 
-  private _durationInterval?: number;
-  private _currentDuration = 0;
-
   static override styles: CSSResultGroup = css`
     :host {
       display: none;
@@ -349,33 +346,14 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    // Initialize duration from backend's calculated value (not firmware duration)
-    // This ensures duration is correct even after page refresh
-    if (this.mode === "active" && this.callInfo?.duration !== undefined) {
-      this._currentDuration = this.callInfo.duration;
-      this._startDurationTimer();
-    }
   }
 
   override disconnectedCallback(): void {
     super.disconnectedCallback();
-    this._stopDurationTimer();
   }
 
   override willUpdate(changedProps: Map<string, any>): void {
     super.willUpdate(changedProps);
-    
-    // Sync duration from backend if callInfo.duration changes significantly
-    // This handles page refresh and ensures frontend stays in sync with backend timer
-    if (changedProps.has("callInfo") && this.mode === "active") {
-      const backendDuration = this.callInfo?.duration ?? 0;
-      // If backend duration differs by more than 2 seconds, sync to it
-      // (allows for minor drift between frontend/backend timers)
-      if (Math.abs(backendDuration - this._currentDuration) > 2) {
-        console.log(`[CallModal] Syncing duration: frontend=${this._currentDuration}s, backend=${backendDuration}s`);
-        this._currentDuration = backendDuration;
-      }
-    }
     
     // Sync mute state from HA entity
     if (this.entityId && this.hass?.states[this.entityId]) {
@@ -384,31 +362,6 @@ export class TsuryPhoneCallModal extends LitElement {
       if (isMuted !== this._isMuted) {
         this._isMuted = isMuted;
       }
-    }
-  }
-
-  override updated(changedProps: Map<string, any>): void {
-    if (changedProps.has("mode")) {
-      if (this.mode === "active") {
-        this._startDurationTimer();
-      } else {
-        this._stopDurationTimer();
-      }
-    }
-  }
-
-  private _startDurationTimer(): void {
-    this._stopDurationTimer();
-    this._durationInterval = window.setInterval(() => {
-      this._currentDuration++;
-      this.requestUpdate();
-    }, 1000);
-  }
-
-  private _stopDurationTimer(): void {
-    if (this._durationInterval) {
-      clearInterval(this._durationInterval);
-      this._durationInterval = undefined;
     }
   }
 
@@ -716,7 +669,10 @@ export class TsuryPhoneCallModal extends LitElement {
     // Check phone state to determine if we're dialing
     const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
     const isDialing = phoneState === "Dialing";
-    const callStatus = isDialing ? "Dialing..." : this._formatDuration(this._currentDuration);
+    
+    // Use backend duration directly - simple and robust
+    const duration = callInfo.duration ?? 0;
+    const callStatus = isDialing ? "Dialing..." : this._formatDuration(duration);
 
     const displayNumber = this._getNormalizedNumber(callInfo.number);
 
