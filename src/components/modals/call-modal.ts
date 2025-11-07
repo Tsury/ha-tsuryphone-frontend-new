@@ -654,7 +654,8 @@ export class TsuryPhoneCallModal extends LitElement {
     const { callInfo } = this;
     if (!callInfo) return html``;
 
-  const isSpeaker = callInfo.audioOutput === "speaker";
+  const audioOutput = (callInfo.audioOutput || "").toLowerCase();
+  const isSpeaker = audioOutput === "speaker";
 
   // Check phone state to determine if we're dialing
   const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
@@ -691,7 +692,9 @@ export class TsuryPhoneCallModal extends LitElement {
           style="visibility: ${isDialing ? 'hidden' : 'visible'}"
           aria-pressed=${this._isMuted}
         >
-          <ha-icon icon="mdi:microphone-off"></ha-icon>
+          <ha-icon
+            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
+          ></ha-icon>
         </button>
 
         <button
@@ -711,7 +714,7 @@ export class TsuryPhoneCallModal extends LitElement {
           style="visibility: ${isDialing ? 'hidden' : 'visible'}"
           aria-pressed=${isSpeaker}
         >
-          <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:phone"}"></ha-icon>
+          <ha-icon icon="mdi:volume-high"></ha-icon>
         </button>
 
         <button
