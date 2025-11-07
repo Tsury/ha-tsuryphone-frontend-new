@@ -482,6 +482,18 @@ export class TsuryPhoneCard extends LitElement {
         };
       }
     } else if (inCall) {
+      // Only show modal if actually in call AND not in Idle state
+      if (phoneState === "Idle") {
+        // Call just ended but binary sensor hasn't updated yet - close modal
+        this._callModalOpen = false;
+        this._callModalMinimized = false;
+        this._showCallToast = false;
+        this._currentCallInfo = undefined;
+        this._waitingCallInfo = undefined;
+        this._callWaitingAvailable = false;
+        return;
+      }
+      
       this._callModalMode = "active";
       // Keep modal open if it was already open, or if not manually minimized
       if (
