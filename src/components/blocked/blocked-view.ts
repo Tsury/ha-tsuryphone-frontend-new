@@ -147,7 +147,7 @@ export class TsuryPhoneBlockedView extends LitElement {
             <input
               class="number-input"
               type="tel"
-              placeholder="Enter phone number"
+              placeholder="Phone number"
               .value=${this._newNumber}
               @input=${this._handleNumberInput}
               @keydown=${this._handleAddKeydown}
@@ -156,7 +156,7 @@ export class TsuryPhoneBlockedView extends LitElement {
             <input
               class="name-input"
               type="text"
-              placeholder="Enter contact name"
+              placeholder="Contact name"
               .value=${this._newName}
               @input=${this._handleNameInput}
               @keydown=${this._handleAddKeydown}
@@ -166,6 +166,7 @@ export class TsuryPhoneBlockedView extends LitElement {
               class="add-button"
               @click=${this._handleAddNumber}
               ?disabled=${this._isAdding}
+              aria-label="Block number"
             >
               ${this._isAdding
                 ? html`<span class="spinner" role="progressbar"></span>`
@@ -302,6 +303,7 @@ export class TsuryPhoneBlockedView extends LitElement {
           display: flex;
           gap: 12px;
           align-items: center;
+          flex-wrap: wrap;
         }
 
         .number-input {
@@ -350,6 +352,8 @@ export class TsuryPhoneBlockedView extends LitElement {
           align-items: center;
           justify-content: center;
           transition: opacity 0.2s ease;
+          flex: 0 0 auto;
+          white-space: nowrap;
         }
 
         .add-button:disabled {

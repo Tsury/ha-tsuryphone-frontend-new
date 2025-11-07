@@ -223,6 +223,10 @@ export class TsuryPhoneCallModal extends LitElement {
       color: var(--primary-text-color);
       margin-bottom: 48px;
       font-variant-numeric: tabular-nums;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .call-controls {
@@ -267,11 +271,6 @@ export class TsuryPhoneCallModal extends LitElement {
       color: var(--text-primary-color, white);
     }
 
-    .control-button.muted {
-      background: var(--error-color);
-      color: var(--text-primary-color, white);
-    }
-
     .hangup-button {
       grid-column: 1 / -1;
       width: 120px;
@@ -280,6 +279,7 @@ export class TsuryPhoneCallModal extends LitElement {
       color: var(--text-primary-color, white);
       justify-self: center;
       border-radius: 28px;
+      margin-top: 12px;
     }
 
     .hangup-button:hover {
@@ -654,17 +654,18 @@ export class TsuryPhoneCallModal extends LitElement {
     const { callInfo } = this;
     if (!callInfo) return html``;
 
-    const isSpeaker = callInfo.audioOutput === "speaker";
-    
-    // Check phone state to determine if we're dialing
-    const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
-    const isDialing = phoneState === "Dialing";
-    
-    // Use backend duration directly - simple and robust
-    const duration = callInfo.duration ?? 0;
-    const callStatus = isDialing ? "Dialing..." : this._formatDuration(duration);
+  const isSpeaker = callInfo.audioOutput === "speaker";
 
-    const displayNumber = this._getNormalizedNumber(callInfo.number);
+  // Check phone state to determine if we're dialing
+  const phoneState = this.entityId ? this.hass.states[this.entityId]?.state : null;
+  const isDialing = phoneState === "Dialing";
+
+  // Use backend duration directly - simple and robust
+  const duration = callInfo.duration ?? 0;
+  const formattedDuration = this._formatDuration(duration);
+  const callTimerAriaLabel = isDialing ? "Dialing" : formattedDuration;
+
+  const displayNumber = this._getNormalizedNumber(callInfo.number);
 
     return html`
       <div class="caller-info">
@@ -674,8 +675,8 @@ export class TsuryPhoneCallModal extends LitElement {
           : ""}
       </div>
 
-      <div class="call-timer">
-        ${callStatus}
+      <div class="call-timer" aria-live="polite" aria-label=${callTimerAriaLabel}>
+        ${isDialing ? html`&nbsp;` : formattedDuration}
       </div>
 
       ${this.callWaitingAvailable && this.waitingCall
@@ -684,14 +685,13 @@ export class TsuryPhoneCallModal extends LitElement {
 
       <div class="call-controls">
         <button
-          class="control-button ${this._isMuted ? "muted" : ""}"
+          class="control-button ${this._isMuted ? "active" : ""}"
           @click=${this._handleMute}
           title="Mute"
           style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+          aria-pressed=${this._isMuted}
         >
-          <ha-icon
-            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
-          ></ha-icon>
+          <ha-icon icon="mdi:microphone-off"></ha-icon>
         </button>
 
         <button
@@ -699,6 +699,7 @@ export class TsuryPhoneCallModal extends LitElement {
           @click=${this._handleKeypad}
           title="Keypad"
           style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+          aria-pressed=${this._showKeypad}
         >
           <ha-icon icon="mdi:dialpad"></ha-icon>
         </button>
@@ -708,8 +709,9 @@ export class TsuryPhoneCallModal extends LitElement {
           @click=${this._handleSpeaker}
           title="Speaker"
           style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+          aria-pressed=${isSpeaker}
         >
-          <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:volume-low"}"></ha-icon>
+          <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:phone"}"></ha-icon>
         </button>
 
         <button
