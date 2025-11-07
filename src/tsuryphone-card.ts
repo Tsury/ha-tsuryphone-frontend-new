@@ -429,7 +429,8 @@ export class TsuryPhoneCard extends LitElement {
     };
 
     // Handle different phone states
-    if (phoneState === "Ringing") {
+    // Check for incoming call (firmware alternates between "Incoming Call" and "Ringing")
+    if (phoneState === "Ringing" || phoneState === "Incoming Call") {
       this._callModalMode = "incoming";
       this._callModalOpen = true;
       this._callModalMinimized = false; // Reset on new incoming call
