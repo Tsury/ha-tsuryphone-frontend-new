@@ -3,9 +3,9 @@
  * 3x4 grid of number buttons with *, 0, # on bottom row
  */
 
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { triggerHaptic } from '../../utils/haptics';
+import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { triggerHaptic } from "../../utils/haptics";
 
 interface KeypadButton {
   digit: string;
@@ -13,26 +13,26 @@ interface KeypadButton {
   longPressDigit?: string;
 }
 
-@customElement('tsuryphone-keypad-grid')
+@customElement("tsuryphone-keypad-grid")
 export class TsuryPhoneKeypadGrid extends LitElement {
   private _longPressTimer: number | null = null;
   private _longPressTriggered = false;
-  
+
   @state() private _pressedButton: string | null = null;
 
   private readonly _buttons: KeypadButton[] = [
-    { digit: '1', letters: '' },
-    { digit: '2', letters: 'ABC' },
-    { digit: '3', letters: 'DEF' },
-    { digit: '4', letters: 'GHI' },
-    { digit: '5', letters: 'JKL' },
-    { digit: '6', letters: 'MNO' },
-    { digit: '7', letters: 'PQRS' },
-    { digit: '8', letters: 'TUV' },
-    { digit: '9', letters: 'WXYZ' },
-    { digit: '*', letters: '' },
-    { digit: '0', letters: '+', longPressDigit: '+' },
-    { digit: '#', letters: '' },
+    { digit: "1", letters: "" },
+    { digit: "2", letters: "ABC" },
+    { digit: "3", letters: "DEF" },
+    { digit: "4", letters: "GHI" },
+    { digit: "5", letters: "JKL" },
+    { digit: "6", letters: "MNO" },
+    { digit: "7", letters: "PQRS" },
+    { digit: "8", letters: "TUV" },
+    { digit: "9", letters: "WXYZ" },
+    { digit: "*", letters: "" },
+    { digit: "0", letters: "+", longPressDigit: "+" },
+    { digit: "#", letters: "" },
   ];
 
   static get styles(): CSSResultGroup {
@@ -47,7 +47,8 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         gap: 12px;
         max-width: 320px;
         margin: 0 auto;
-        padding: 16px;
+        padding: 24px 32px;
+        box-sizing: border-box;
       }
 
       .keypad-button {
@@ -63,7 +64,9 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         font-size: 28px;
         font-weight: 300;
         color: var(--primary-text-color);
-        transition: background 0.15s, transform 0.1s;
+        transition:
+          background 0.15s,
+          transform 0.1s;
         box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
         user-select: none;
         -webkit-tap-highlight-color: transparent;
@@ -117,8 +120,8 @@ export class TsuryPhoneKeypadGrid extends LitElement {
 
       @media (max-width: 400px) {
         .keypad-grid {
-          gap: 8px;
-          padding: 12px;
+          gap: 12px;
+          padding: 16px 24px;
         }
 
         .keypad-button {
@@ -141,7 +144,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
       this._longPressTimer = window.setTimeout(() => {
         this._longPressTriggered = true;
         this._emitDigit(button.longPressDigit!);
-        triggerHaptic('selection');
+        triggerHaptic("selection");
       }, 500);
     }
   }
@@ -149,7 +152,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
   private _handlePointerUp(button: KeypadButton): void {
     // Clear pressed state
     this._pressedButton = null;
-    
+
     // Clear long press timer
     if (this._longPressTimer) {
       clearTimeout(this._longPressTimer);
@@ -164,13 +167,13 @@ export class TsuryPhoneKeypadGrid extends LitElement {
 
     // Emit the regular digit
     this._emitDigit(button.digit);
-    triggerHaptic('selection');
+    triggerHaptic("selection");
   }
 
   private _handlePointerCancel(): void {
     // Clear pressed state
     this._pressedButton = null;
-    
+
     // Clear long press timer if pointer is cancelled (e.g., scrolling)
     if (this._longPressTimer) {
       clearTimeout(this._longPressTimer);
@@ -181,7 +184,7 @@ export class TsuryPhoneKeypadGrid extends LitElement {
 
   private _emitDigit(digit: string): void {
     this.dispatchEvent(
-      new CustomEvent('digit-press', {
+      new CustomEvent("digit-press", {
         detail: { digit },
         bubbles: true,
         composed: true,
@@ -195,20 +198,29 @@ export class TsuryPhoneKeypadGrid extends LitElement {
         ${this._buttons.map(
           (button) => html`
             <button
-              class="keypad-button ${this._pressedButton === button.digit ? 'pressed' : ''}"
+              class="keypad-button ${this._pressedButton === button.digit
+                ? "pressed"
+                : ""}"
               @pointerdown=${() => this._handlePointerDown(button)}
               @pointerup=${() => this._handlePointerUp(button)}
               @pointercancel=${() => this._handlePointerCancel()}
-              aria-label="${button.digit}${button.letters ? ` ${button.letters}` : ''}"
-              title="${button.longPressDigit ? `Long press for ${button.longPressDigit}` : ''}"
+              aria-label="${button.digit}${button.letters
+                ? ` ${button.letters}`
+                : ""}"
+              title="${button.longPressDigit
+                ? `Long press for ${button.longPressDigit}`
+                : ""}"
             >
               <span class="digit">${button.digit}</span>
               ${button.letters
                 ? html`<span class="letters">${button.letters}</span>`
                 : html`<span class="letters-placeholder"></span>`}
-              ${button.longPressDigit && button.longPressDigit !== button.letters
-                ? html`<span class="long-press-hint">${button.longPressDigit}</span>`
-                : ''}
+              ${button.longPressDigit &&
+              button.longPressDigit !== button.letters
+                ? html`<span class="long-press-hint"
+                    >${button.longPressDigit}</span
+                  >`
+                : ""}
             </button>
           `
         )}
@@ -219,6 +231,6 @@ export class TsuryPhoneKeypadGrid extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tsuryphone-keypad-grid': TsuryPhoneKeypadGrid;
+    "tsuryphone-keypad-grid": TsuryPhoneKeypadGrid;
   }
 }

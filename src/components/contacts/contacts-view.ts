@@ -17,7 +17,6 @@ export class TsuryPhoneContactsView extends LitElement {
 
   @state() private _searchQuery = "";
   @state() private _showAddModal = false;
-  @state() private _showMenu = false;
 
   static get styles(): CSSResultGroup {
     return css`
@@ -40,26 +39,25 @@ export class TsuryPhoneContactsView extends LitElement {
         z-index: 2;
       }
 
+      .search-bar-container {
+        width: 100%;
+      }
+
       .search-bar {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
+        gap: 12px;
+        padding: 12px 16px;
         background: var(--secondary-background-color);
-        border-radius: 8px;
-        flex: 1;
+        border-radius: 12px;
+        width: 100%;
+        box-sizing: border-box;
       }
 
-      .search-bar-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .menu-button {
+      .hamburger-button {
         width: 40px;
         height: 40px;
-        border-radius: 50%;
+        border-radius: 12px;
         border: none;
         background: transparent;
         color: var(--primary-text-color);
@@ -67,54 +65,42 @@ export class TsuryPhoneContactsView extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s;
-        position: relative;
+        transition: background 0.2s, transform 0.2s;
       }
 
-      .menu-button:hover {
-        background: var(--secondary-background-color);
+      .hamburger-button:hover {
+        background: var(--divider-color);
       }
 
-      .menu-button:active {
+      .hamburger-button:active {
         transform: scale(0.95);
       }
 
-      .menu-dropdown {
-        position: absolute;
-        top: 48px;
-        right: 16px;
-        background: var(--card-background-color);
-        border-radius: 8px;
-        box-shadow: var(
-          --ha-card-box-shadow,
-          0 4px 12px rgba(0, 0, 0, 0.15)
-        );
-        min-width: 160px;
-        z-index: 10;
-        overflow: hidden;
+      .search-icon {
+        color: var(--secondary-text-color);
       }
 
-      .menu-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
+      .clear-button {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
         border: none;
         background: transparent;
-        width: 100%;
-        text-align: left;
+        color: var(--secondary-text-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        color: var(--primary-text-color);
-        font-size: 14px;
-        transition: background 0.2s;
+        transition: background 0.2s, color 0.2s;
       }
 
-      .menu-item:hover {
-        background: var(--secondary-background-color);
-      }
-
-      .menu-item:active {
+      .clear-button:hover {
         background: var(--divider-color);
+        color: var(--primary-text-color);
+      }
+
+      .clear-button ha-icon {
+        --mdc-icon-size: 18px;
       }
 
       .search-input {
@@ -230,6 +216,10 @@ export class TsuryPhoneContactsView extends LitElement {
     this._searchQuery = input.value;
   }
 
+  private _clearSearch(): void {
+    this._searchQuery = "";
+  }
+
   private _handleAddContact(): void {
     this.dispatchEvent(
       new CustomEvent("action", {
@@ -239,35 +229,13 @@ export class TsuryPhoneContactsView extends LitElement {
     );
   }
 
-  private _toggleMenu(): void {
-    this._showMenu = !this._showMenu;
-  }
-
-  private _handleBlockedClick(): void {
-    this._showMenu = false;
+  private _handleMenuOpen(): void {
     this.dispatchEvent(
-      new CustomEvent("navigate-blocked", {
+      new CustomEvent("open-menu", {
         bubbles: true,
         composed: true,
       })
     );
-  }
-
-  private _handleClickOutside(e: MouseEvent): void {
-    const target = e.target as HTMLElement;
-    if (this._showMenu && !target.closest('.menu-button') && !target.closest('.menu-dropdown')) {
-      this._showMenu = false;
-    }
-  }
-
-  connectedCallback(): void {
-    super.connectedCallback();
-    document.addEventListener('click', this._handleClickOutside.bind(this));
-  }
-
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-    document.removeEventListener('click', this._handleClickOutside.bind(this));
   }
 
   protected render(): TemplateResult {
@@ -278,7 +246,15 @@ export class TsuryPhoneContactsView extends LitElement {
       <div class="contacts-header">
         <div class="search-bar-container">
           <div class="search-bar">
-            <ha-icon icon="mdi:magnify"></ha-icon>
+            <button
+              class="hamburger-button"
+              @click=${this._handleMenuOpen}
+              title="Open menu"
+              aria-label="Open menu"
+            >
+              <ha-icon icon="mdi:menu"></ha-icon>
+            </button>
+            <ha-icon class="search-icon" icon="mdi:magnify"></ha-icon>
             <input
               class="search-input"
               type="text"
@@ -288,27 +264,16 @@ export class TsuryPhoneContactsView extends LitElement {
             />
             ${this._searchQuery
               ? html`
-                  <ha-icon
-                    icon="mdi:close"
-                    @click=${() => (this._searchQuery = "")}
-                    style="cursor: pointer"
-                  ></ha-icon>
+                  <button
+                    class="clear-button"
+                    @click=${this._clearSearch}
+                    aria-label="Clear search"
+                  >
+                    <ha-icon icon="mdi:close"></ha-icon>
+                  </button>
                 `
               : ""}
           </div>
-          <button class="menu-button" @click=${this._toggleMenu} title="More options">
-            <ha-icon icon="mdi:dots-vertical"></ha-icon>
-          </button>
-          ${this._showMenu
-            ? html`
-                <div class="menu-dropdown">
-                  <button class="menu-item" @click=${this._handleBlockedClick}>
-                    <ha-icon icon="mdi:block-helper"></ha-icon>
-                    Blocked
-                  </button>
-                </div>
-              `
-            : ""}
         </div>
         <button class="add-button" @click=${this._handleAddContact}>
           <ha-icon icon="mdi:plus"></ha-icon>

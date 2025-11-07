@@ -20,13 +20,13 @@ import {
 } from "./styles/theme";
 import { commonStyles } from "./styles/common";
 import "./components/navigation/tsuryphone-navigation";
+import "./components/navigation/side-menu";
 import "./components/home/home-view";
 import "./components/keypad/keypad-view";
 import "./components/contacts/contacts-view";
 import "./components/blocked/blocked-view";
 import "./components/modals/contact-modal";
 import "./components/modals/call-modal";
-import "./components/modals/block-number-modal";
 import type {
   NavigationTab,
   TabChangeEvent,
@@ -64,7 +64,7 @@ export class TsuryPhoneCard extends LitElement {
   @state() private _activeView: NavigationTab = "home";
   @state() private _showCallModal = false;
   @state() private _showContactModal = false;
-  @state() private _showBlockModal = false;
+  @state() private _isSideMenuOpen = false;
   @state() private _isDarkMode = false;
 
   // Cached data from coordinator
@@ -640,15 +640,31 @@ export class TsuryPhoneCard extends LitElement {
   /**
    * Handle open block modal
    */
-  private _handleOpenBlockModal(): void {
-    this._showBlockModal = true;
+  private _handleOpenSideMenu(): void {
+    this._isSideMenuOpen = true;
   }
 
-  /**
-   * Handle close block modal
-   */
-  private _handleCloseBlockModal(): void {
-    this._showBlockModal = false;
+  private _handleCloseSideMenu(): void {
+    this._isSideMenuOpen = false;
+  }
+
+  private _handleNavigateBackFromBlocked(): void {
+    this._activeView = "contacts";
+  }
+
+  private _handleSideMenuNavigate(
+    e: CustomEvent<{ target: "blocked" | "settings" }>
+  ): void {
+    const target = e.detail.target;
+
+    if (target === "blocked") {
+      this._activeView = "blocked";
+    } else if (target === "settings") {
+      // Settings view will be implemented in Phase 5
+      this._activeView = "contacts";
+    }
+
+    this._isSideMenuOpen = false;
   }
 
   /**
@@ -685,8 +701,8 @@ export class TsuryPhoneCard extends LitElement {
         >
           ${this._callModalOpen ? this._renderCallModal() : ""}
           ${this._contactModalOpen ? this._renderContactModal() : ""}
-          ${this._showBlockModal ? this._renderBlockModal() : ""}
           ${this._showCallToast ? this._renderCallToast() : ""}
+          ${this._renderSideMenu()}
           ${this._renderMainViews()}
         </div>
       </ha-card>
@@ -712,6 +728,16 @@ export class TsuryPhoneCard extends LitElement {
           @tab-change=${this._handleTabChange}
         ></tsuryphone-navigation>
       </div>
+    `;
+  }
+
+  private _renderSideMenu(): TemplateResult {
+    return html`
+      <tsuryphone-side-menu
+        .open=${this._isSideMenuOpen}
+        @close-menu=${this._handleCloseSideMenu}
+        @menu-navigate=${this._handleSideMenuNavigate}
+      ></tsuryphone-side-menu>
     `;
   }
 
@@ -842,6 +868,7 @@ export class TsuryPhoneCard extends LitElement {
         <tsuryphone-contacts-view
           .hass=${this.hass}
           .config=${this.config}
+          @open-menu=${this._handleOpenSideMenu}
         ></tsuryphone-contacts-view>
       </div>
     `;
@@ -920,30 +947,19 @@ export class TsuryPhoneCard extends LitElement {
   /**
    * Render block number modal
    */
-  private _renderBlockModal(): TemplateResult {
-    return html`
-      <tsuryphone-block-number-modal
-        .hass=${this.hass}
-        .config=${this.config}
-        .open=${this._showBlockModal}
-        @close-modal=${this._handleCloseBlockModal}
-      ></tsuryphone-block-number-modal>
-    `;
-  }
-
   /**
-   * Render blocked view (placeholder)
+   * Render blocked view
    */
   private _renderBlockedView(): TemplateResult {
     return html`
       <div
         class="view blocked-view fade-in"
-        @open-block-modal=${this._handleOpenBlockModal}
       >
         <tsuryphone-blocked-view
           .hass=${this.hass}
           .config=${this.config}
           .blockedNumbers=${this._blockedCache}
+          @navigate-back=${this._handleNavigateBackFromBlocked}
         ></tsuryphone-blocked-view>
       </div>
     `;

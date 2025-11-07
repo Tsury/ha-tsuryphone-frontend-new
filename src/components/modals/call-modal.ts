@@ -274,11 +274,12 @@ export class TsuryPhoneCallModal extends LitElement {
 
     .hangup-button {
       grid-column: 1 / -1;
-      width: 144px;
-      height: 72px;
+      width: 120px;
+      height: 56px;
       background: var(--error-color);
       color: var(--text-primary-color, white);
       justify-self: center;
+      border-radius: 28px;
     }
 
     .hangup-button:hover {
@@ -681,53 +682,44 @@ export class TsuryPhoneCallModal extends LitElement {
         ? this._renderWaitingCall()
         : ""}
 
-      ${!isDialing ? html`
-        <div class="call-controls">
-          <button
-            class="control-button ${this._isMuted ? "muted" : ""}"
-            @click=${this._handleMute}
-            title="Mute"
-          >
-            <ha-icon
-              icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
-            ></ha-icon>
-          </button>
+      <div class="call-controls">
+        <button
+          class="control-button ${this._isMuted ? "muted" : ""}"
+          @click=${this._handleMute}
+          title="Mute"
+          style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+        >
+          <ha-icon
+            icon="${this._isMuted ? "mdi:microphone-off" : "mdi:microphone"}"
+          ></ha-icon>
+        </button>
 
-          <button
-            class="control-button ${this._showKeypad ? "active" : ""}"
-            @click=${this._handleKeypad}
-            title="Keypad"
-          >
-            <ha-icon icon="mdi:dialpad"></ha-icon>
-          </button>
+        <button
+          class="control-button ${this._showKeypad ? "active" : ""}"
+          @click=${this._handleKeypad}
+          title="Keypad"
+          style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+        >
+          <ha-icon icon="mdi:dialpad"></ha-icon>
+        </button>
 
-          <button
-            class="control-button ${isSpeaker ? "active" : ""}"
-            @click=${this._handleSpeaker}
-            title="Speaker"
-          >
-            <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:volume-low"}"></ha-icon>
-          </button>
+        <button
+          class="control-button ${isSpeaker ? "active" : ""}"
+          @click=${this._handleSpeaker}
+          title="Speaker"
+          style="visibility: ${isDialing ? 'hidden' : 'visible'}"
+        >
+          <ha-icon icon="${isSpeaker ? "mdi:volume-high" : "mdi:volume-low"}"></ha-icon>
+        </button>
 
-          <button
-            class="control-button hangup-button"
-            @click=${this._handleHangup}
-            title="Hang up"
-          >
-            <ha-icon icon="mdi:phone-hangup"></ha-icon>
-          </button>
-        </div>
-      ` : html`
-        <div class="call-controls">
-          <button
-            class="control-button hangup-button"
-            @click=${this._handleHangup}
-            title="Hang up"
-          >
-            <ha-icon icon="mdi:phone-hangup"></ha-icon>
-          </button>
-        </div>
-      `}
+        <button
+          class="control-button hangup-button"
+          @click=${this._handleHangup}
+          title="Hang up"
+        >
+          <ha-icon icon="mdi:phone-hangup"></ha-icon>
+        </button>
+      </div>
     `;
   }
 

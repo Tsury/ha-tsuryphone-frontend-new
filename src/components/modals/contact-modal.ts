@@ -189,15 +189,25 @@ export class ContactModal extends LitElement {
       gap: 8px;
     }
 
-    .priority-toggle ha-icon {
-      --mdc-icon-size: 20px;
-      color: var(--warning-color);
+    .phone-code-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .phone-code-row .form-field:first-child {
+      flex: 3;
+    }
+
+    .phone-code-row .form-field:last-child {
+      flex: 1;
     }
 
     .actions {
       display: flex;
       gap: 12px;
-      margin-top: 24px;
+      margin-top: auto;
+      padding-top: 24px;
     }
 
     .actions button {
@@ -240,13 +250,17 @@ export class ContactModal extends LitElement {
     }
 
     .button-delete {
-      background: var(--error-color);
-      color: var(--text-primary-color, white);
+      background: transparent;
+      color: var(--error-color);
+      border: 1px solid var(--error-color);
       margin-bottom: 12px;
+      padding: 12px 24px;
+      width: 100%;
     }
 
     .button-delete:hover:not(:disabled) {
-      opacity: 0.9;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
     }
 
     .delete-confirm {
@@ -587,7 +601,7 @@ export class ContactModal extends LitElement {
   protected render(): TemplateResult {
     if (!this.open) return html``;
 
-    const title = this.mode === "add" ? "Add Contact" : "Edit Contact";
+    const title = this.mode === "add" ? "Create Contact" : "Edit Contact";
 
     return html`
       <div class="modal">
@@ -653,44 +667,46 @@ export class ContactModal extends LitElement {
               }
             </div>
 
-            <div class="form-field">
-              <label>
-                Phone Number <span class="required">*</span>
-              </label>
-              <input
-                type="tel"
-                name="number"
-                .value=${this.formData.number}
-                @input=${this._handleInputChange}
-                class=${this.errors.number ? "error" : ""}
-                ?disabled=${this.saving}
-                placeholder="+1234567890"
-              />
-              ${
-                this.errors.number
-                  ? html`<div class="error-message">${this.errors.number}</div>`
-                  : ""
-              }
-            </div>
+            <div class="phone-code-row">
+              <div class="form-field">
+                <label>
+                  Phone Number <span class="required">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="number"
+                  .value=${this.formData.number}
+                  @input=${this._handleInputChange}
+                  class=${this.errors.number ? "error" : ""}
+                  ?disabled=${this.saving}
+                  placeholder="+1234567890"
+                />
+                ${
+                  this.errors.number
+                    ? html`<div class="error-message">${this.errors.number}</div>`
+                    : ""
+                }
+              </div>
 
-            <div class="form-field">
-              <label>
-                Quick Dial Code <span class="optional">(optional)</span>
-              </label>
-              <input
-                type="text"
-                name="code"
-                .value=${this.formData.code}
-                @input=${this._handleInputChange}
-                class=${this.errors.code ? "error" : ""}
-                ?disabled=${this.saving}
-                placeholder="e.g., 1, 2, mom, work"
-              />
-              ${
-                this.errors.code
-                  ? html`<div class="error-message">${this.errors.code}</div>`
-                  : ""
-              }
+              <div class="form-field">
+                <label>
+                  Code <span class="optional">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  name="code"
+                  .value=${this.formData.code}
+                  @input=${this._handleInputChange}
+                  class=${this.errors.code ? "error" : ""}
+                  ?disabled=${this.saving}
+                  placeholder="1"
+                />
+                ${
+                  this.errors.code
+                    ? html`<div class="error-message">${this.errors.code}</div>`
+                    : ""
+                }
+              </div>
             </div>
 
             <div class="priority-toggle">
@@ -703,7 +719,6 @@ export class ContactModal extends LitElement {
                 ?disabled=${this.saving}
               />
               <label for="priority-checkbox">
-                <ha-icon icon="mdi:star"></ha-icon>
                 Priority Contact
               </label>
             </div>
@@ -716,7 +731,7 @@ export class ContactModal extends LitElement {
                     class="button-delete"
                     @click=${this._handleDeleteClick}
                     ?disabled=${this.saving}
-                    style="width: 100%; margin-top: 24px;"
+                    style="margin-top: 24px;"
                   >
                     <ha-icon icon="mdi:delete"></ha-icon>
                     Delete Contact
@@ -742,8 +757,8 @@ export class ContactModal extends LitElement {
                 this.saving
                   ? html`<div class="spinner"></div>`
                   : this.mode === "add"
-                    ? "Add Contact"
-                    : "Save Changes"
+                    ? "Create"
+                    : "Save"
               }
             </button>
           </div>

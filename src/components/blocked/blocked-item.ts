@@ -23,17 +23,16 @@ export class TsuryPhoneBlockedItem extends LitElement {
   }
 
   render(): TemplateResult {
-    const { name, display_number } = this.entry;
-    const displayName = name || 'Unknown';
+  const { name, display_number, number } = this.entry;
+  const displayNumber = display_number || number || 'Unknown';
 
     return html`
       <div class="blocked-item">
-        <div class="blocked-icon">
-          <ha-icon icon="mdi:block-helper"></ha-icon>
-        </div>
         <div class="blocked-info">
-          <div class="blocked-name">${displayName}</div>
-          <div class="blocked-number">${display_number}</div>
+          <div class="blocked-number">${displayNumber}</div>
+          ${name
+            ? html`<div class="blocked-name">${name}</div>`
+            : html`<div class="blocked-name muted">Unknown contact name</div>`}
         </div>
         <button
           class="remove-button"
@@ -58,84 +57,65 @@ export class TsuryPhoneBlockedItem extends LitElement {
         .blocked-item {
           display: flex;
           align-items: center;
-          gap: var(--tsury-spacing-md);
-          padding: var(--tsury-spacing-md) var(--tsury-spacing-lg);
-          background: var(--tsury-card-background-color);
+          justify-content: space-between;
+          gap: 16px;
+          padding: 12px 16px;
           border-bottom: 1px solid var(--tsury-divider-color);
-          transition: background-color var(--tsury-transition-duration) var(--tsury-transition-timing);
+          background: transparent;
+          transition: background 0.2s ease;
         }
 
         .blocked-item:hover {
           background: var(--tsury-hover-background-color);
         }
 
-        .blocked-icon {
-          flex-shrink: 0;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--tsury-error-color, #f44336);
-          border-radius: 50%;
-          color: white;
-        }
-
-        .blocked-icon ha-icon {
-          --mdc-icon-size: 20px;
-        }
-
         .blocked-info {
           flex: 1;
-          min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 2px;
-        }
-
-        .blocked-name {
-          font-size: 16px;
-          font-weight: 500;
-          color: var(--tsury-primary-text-color);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          gap: 4px;
         }
 
         .blocked-number {
+          font-size: 16px;
+          color: var(--tsury-primary-text-color);
+          font-weight: 500;
+        }
+
+        .blocked-name {
           font-size: 14px;
           color: var(--tsury-secondary-text-color);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          direction: ltr;
+        }
+
+        .blocked-name.muted {
+          opacity: 0.6;
         }
 
         .remove-button {
-          flex-shrink: 0;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
+          width: 36px;
+          height: 36px;
+          border-radius: 18px;
           border: none;
           background: transparent;
-          color: var(--tsury-error-color, #f44336);
+          color: var(--tsury-secondary-text-color);
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all var(--tsury-transition-duration) var(--tsury-transition-timing);
+          transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
         }
 
         .remove-button:hover {
-          background: rgba(244, 67, 54, 0.1);
+          background: var(--tsury-hover-background-color);
+          color: var(--tsury-primary-text-color);
         }
 
         .remove-button:active {
-          transform: scale(0.95);
+          transform: scale(0.94);
         }
 
         .remove-button ha-icon {
-          --mdc-icon-size: 20px;
+          --mdc-icon-size: 18px;
         }
       `,
     ];
