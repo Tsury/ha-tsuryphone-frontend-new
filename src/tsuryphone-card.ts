@@ -144,7 +144,7 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _subscribe(): void {
     if (!this.hass || !this.hass.connection) {
-      console.warn("TsuryPhone: Cannot subscribe - no HA connection");
+
       return;
     }
 
@@ -180,7 +180,7 @@ export class TsuryPhoneCard extends LitElement {
           });
       }
     } catch (err) {
-      console.error("TsuryPhone: Error in subscribe:", err);
+
     }
   }
 
@@ -192,7 +192,7 @@ export class TsuryPhoneCard extends LitElement {
       try {
         unsub();
       } catch (err) {
-        console.error("TsuryPhone: Error unsubscribing:", err);
+
       }
     });
     this._unsubscribers = [];
@@ -263,24 +263,10 @@ export class TsuryPhoneCard extends LitElement {
       }
 
       // Update default dial code
-      console.log('[TsuryPhone] Checking dialing_context:', {
-        hasDialingContext: !!attrs.dialing_context,
-        dialingContext: attrs.dialing_context,
-        hasDefaultCode: !!(attrs.dialing_context && attrs.dialing_context.default_code),
-        defaultCode: attrs.dialing_context?.default_code
-      });
-      
       if (attrs.dialing_context && attrs.dialing_context.default_code) {
         this._defaultDialCode = attrs.dialing_context.default_code;
-        console.log('[TsuryPhone] ✓ Default dial code SET to:', this._defaultDialCode);
-      } else {
-        console.warn('[TsuryPhone] ✗ Default dial code NOT set - dialing_context missing or empty');
       }
-    } else {
-      console.warn('[TsuryPhone] ✗ Phone state entity has NO attributes');
     }
-
-    console.log('[TsuryPhone] Current _defaultDialCode value:', this._defaultDialCode);
 
     // Update call history from call_history_size sensor
     // Build entity ID based on extracted device prefix
@@ -293,33 +279,9 @@ export class TsuryPhoneCard extends LitElement {
     if (callHistoryEntity?.attributes) {
       const historyAttrs = callHistoryEntity.attributes as any;
 
-      console.log(
-        `[TsuryPhone] Call history sensor state:`,
-        {
-          state: callHistoryEntity.state,
-          capacity: historyAttrs.capacity,
-          entriesCount: historyAttrs.entries?.length || 0,
-          hasEntries: !!historyAttrs.entries,
-          isArray: Array.isArray(historyAttrs.entries)
-        }
-      );
-
       if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
-        console.log(
-          `[TsuryPhone] Loading call history from sensor (updated()):`,
-          `${historyAttrs.entries.length} calls`
-        );
         this._callHistoryCache = historyAttrs.entries;
-      } else {
-        console.log(
-          `[TsuryPhone] No entries in call_history_size sensor attributes`
-        );
       }
-    } else {
-      console.log(
-        `[TsuryPhone] Call history sensor not found or no attributes:`,
-        callHistoryEntityId
-      );
     }
 
     // Update call modal state
@@ -391,10 +353,6 @@ export class TsuryPhoneCard extends LitElement {
     if (callHistoryEntity?.attributes) {
       const historyAttrs = callHistoryEntity.attributes as any;
       if (historyAttrs.entries && Array.isArray(historyAttrs.entries)) {
-        console.log(
-          `[TsuryPhone] Loading call history from sensor (setConfig()):`,
-          `${historyAttrs.entries.length} calls`
-        );
         this._callHistoryCache = historyAttrs.entries;
       }
     }
@@ -539,7 +497,7 @@ export class TsuryPhoneCard extends LitElement {
         this._callHistoryCache = response.call_history;
       }
     } catch (err) {
-      console.error("TsuryPhone: Failed to refresh call history:", err);
+
     }
   }
 
@@ -571,7 +529,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle contact saved
    */
   private _handleContactSaved(e: CustomEvent): void {
-    console.log("Contact saved:", e.detail);
+
     this._handleContactModalClose();
     // Data will update automatically via state subscription
   }
@@ -580,7 +538,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle contact deleted
    */
   private _handleContactDeleted(e: CustomEvent): void {
-    console.log("Contact deleted:", e.detail);
+
     this._handleContactModalClose();
     // Data will update automatically via state subscription
   }
@@ -589,7 +547,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle contact modal error
    */
   private _handleContactModalError(e: CustomEvent): void {
-    console.error("Contact modal error:", e.detail);
+
     this._errorMessage = e.detail.message;
     // Show error for 3 seconds
     setTimeout(() => {
@@ -616,7 +574,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle call answered
    */
   private _handleCallAnswered(e: CustomEvent): void {
-    console.log("Call answered");
+
     // Modal will update to active mode via state subscription
   }
 
@@ -624,7 +582,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle call declined
    */
   private _handleCallDeclined(e: CustomEvent): void {
-    console.log("Call declined");
+
     this._callModalOpen = false;
   }
 
@@ -632,7 +590,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle call ended
    */
   private _handleCallEnded(e: CustomEvent): void {
-    console.log("Call ended");
+
     this._callModalOpen = false;
     this._showCallToast = false;
   }
@@ -641,7 +599,7 @@ export class TsuryPhoneCard extends LitElement {
    * Handle call modal error
    */
   private _handleCallModalError(e: CustomEvent): void {
-    console.error("Call modal error:", e.detail);
+
     this._errorMessage = e.detail.message;
     // Show error for 3 seconds
     setTimeout(() => {
@@ -791,23 +749,9 @@ export class TsuryPhoneCard extends LitElement {
           isBlocked: call.call_type === "blocked",
         };
 
-        // Log first few calls to debug
-        if (index < 3) {
-          console.log(`[TsuryPhone] Call ${index}:`, {
-            raw_call_type: call.call_type,
-            duration_s: call.duration_s,
-            mapped_type: entry.type,
-            isBlocked: entry.isBlocked,
-            name: entry.contactName
-          });
-        }
-
         return entry;
       }
     );
-
-    console.log(`[TsuryPhone] Total calls in history: ${callHistory.length}`);
-    console.log(`[TsuryPhone] _callHistoryCache size: ${this._callHistoryCache.length}`);
 
     return html`
       <div class="view home-view fade-in">
@@ -827,7 +771,7 @@ export class TsuryPhoneCard extends LitElement {
    */
   private _handleDialContact(e: CustomEvent): void {
     const { contact } = e.detail;
-    console.log("Dial contact:", contact);
+
     // TODO: Open call modal or initiate call in Phase 6
   }
 
@@ -851,7 +795,7 @@ export class TsuryPhoneCard extends LitElement {
           }
         );
       } catch (error) {
-        console.error("Failed to dial number from call history:", error);
+
       }
     }
   }

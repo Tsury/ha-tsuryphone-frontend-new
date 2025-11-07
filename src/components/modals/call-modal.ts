@@ -556,7 +556,6 @@ export class TsuryPhoneCallModal extends LitElement {
    */
   private _getNormalizedNumber(number: string): string {
     if (!this.entityId) {
-      console.log("[CallModal] _getNormalizedNumber: No entityId, returning raw number:", number);
       return number;
     }
     
@@ -564,17 +563,7 @@ export class TsuryPhoneCallModal extends LitElement {
     const dialingContext = phoneStateEntity?.attributes?.dialing_context;
     const defaultDialCode = dialingContext?.default_code || "";
     
-    console.log("[CallModal] _getNormalizedNumber DEBUG:", {
-      entityId: this.entityId,
-      phoneStateEntity: !!phoneStateEntity,
-      attributes: phoneStateEntity?.attributes,
-      dialingContext: dialingContext,
-      defaultDialCode: defaultDialCode,
-      inputNumber: number
-    });
-    
     const normalized = normalizePhoneNumberForDisplay(number, defaultDialCode);
-    console.log("[CallModal] Normalized result:", normalized);
     
     return normalized;
   }
