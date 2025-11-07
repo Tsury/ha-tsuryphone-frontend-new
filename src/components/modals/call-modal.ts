@@ -349,8 +349,10 @@ export class TsuryPhoneCallModal extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    if (this.mode === "active" && this.callInfo?.duration !== undefined) {
-      this._currentDuration = this.callInfo.duration;
+    // Don't initialize duration from callInfo - let it start at 0 and count up
+    // The backend resets its timer when call becomes active, so we should too
+    if (this.mode === "active") {
+      this._currentDuration = 0;
       this._startDurationTimer();
     }
   }
