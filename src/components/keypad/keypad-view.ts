@@ -55,7 +55,8 @@ export class TsuryPhoneKeypadView extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        flex: 1;
+        min-height: 0;
         background: var(--card-background-color);
         padding: 16px;
         box-sizing: border-box;
@@ -65,10 +66,12 @@ export class TsuryPhoneKeypadView extends LitElement {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 100%;
+        flex: 1;
         max-width: 400px;
         margin: 0 auto;
         width: 100%;
+        padding: 60px 0;
+        box-sizing: border-box;
       }
 
       .display-section {

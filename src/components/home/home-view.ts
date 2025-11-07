@@ -23,14 +23,15 @@ export class TsuryPhoneHomeView extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      height: 100%;
+      flex: 1;
+      min-height: 0;
       background: var(--card-background-color);
     }
 
     .home-view {
       display: flex;
       flex-direction: column;
-      height: 100%;
+      flex: 1;
       overflow: hidden;
     }
 
@@ -38,6 +39,7 @@ export class TsuryPhoneHomeView extends LitElement {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      min-height: 0;
     }
 
     .divider {

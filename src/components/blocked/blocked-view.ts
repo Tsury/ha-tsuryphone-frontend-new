@@ -21,6 +21,7 @@ export class TsuryPhoneBlockedView extends LitElement {
   @property({ attribute: false }) blockedNumbers: BlockedNumberEntry[] = [];
 
   @state() private _newNumber = "";
+  @state() private _newName = "";
   @state() private _isAdding = false;
   @state() private _errorMessage = "";
 
@@ -41,6 +42,14 @@ export class TsuryPhoneBlockedView extends LitElement {
     }
   }
 
+  private _handleNameInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this._newName = input.value;
+    if (this._errorMessage) {
+      this._errorMessage = "";
+    }
+  }
+
   private _getPhoneStateEntityId(): string {
     const deviceIdPrefix = this.config?.device_id || "";
     return deviceIdPrefix
@@ -50,8 +59,15 @@ export class TsuryPhoneBlockedView extends LitElement {
 
   private async _handleAddNumber(): Promise<void> {
     const rawNumber = this._newNumber.trim();
+    const rawName = this._newName.trim();
+
     if (!rawNumber) {
       this._errorMessage = "Enter a phone number to block.";
+      return;
+    }
+
+    if (!rawName) {
+      this._errorMessage = "Enter a contact name to label the blocked number.";
       return;
     }
 
@@ -64,12 +80,13 @@ export class TsuryPhoneBlockedView extends LitElement {
         "blocked_add",
         {
           number: rawNumber,
-          name: rawNumber,
+          name: rawName,
         },
         { entity_id: phoneStateEntityId }
       );
 
       this._newNumber = "";
+      this._newName = "";
       this._errorMessage = "";
     } catch (error: any) {
       const message = error?.message || "Failed to block number.";
@@ -136,6 +153,15 @@ export class TsuryPhoneBlockedView extends LitElement {
               @keydown=${this._handleAddKeydown}
               ?disabled=${this._isAdding}
             />
+            <input
+              class="name-input"
+              type="text"
+              placeholder="Enter contact name"
+              .value=${this._newName}
+              @input=${this._handleNameInput}
+              @keydown=${this._handleAddKeydown}
+              ?disabled=${this._isAdding}
+            />
             <button
               class="add-button"
               @click=${this._handleAddNumber}
@@ -193,13 +219,15 @@ export class TsuryPhoneBlockedView extends LitElement {
       haThemeVariables,
       css`
         :host {
-          display: block;
-          height: 100%;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-height: 0;
           background: var(--tsury-card-background-color);
         }
 
         .blocked-view {
-          height: 100%;
+          flex: 1;
           display: flex;
           flex-direction: column;
           padding: 24px 20px 16px;
@@ -287,7 +315,23 @@ export class TsuryPhoneBlockedView extends LitElement {
           transition: border-color 0.2s ease;
         }
 
+        .name-input {
+          flex: 1;
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: 1px solid var(--tsury-divider-color);
+          font-size: 16px;
+          color: var(--tsury-primary-text-color);
+          background: var(--tsury-card-background-color);
+          transition: border-color 0.2s ease;
+        }
+
         .number-input:focus {
+          outline: none;
+          border-color: var(--primary-color);
+        }
+
+        .name-input:focus {
           outline: none;
           border-color: var(--primary-color);
         }
@@ -337,6 +381,9 @@ export class TsuryPhoneBlockedView extends LitElement {
         tsuryphone-empty-state {
           flex: 1;
           display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
         }
 
         .spinner {
@@ -375,6 +422,11 @@ export class TsuryPhoneBlockedView extends LitElement {
           .add-row {
             flex-direction: column;
             align-items: stretch;
+          }
+
+          .number-input,
+          .name-input {
+            width: 100%;
           }
 
           .add-button {

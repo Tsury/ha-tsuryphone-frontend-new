@@ -23,7 +23,8 @@ export class TsuryPhoneContactsView extends LitElement {
       :host {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        flex: 1;
+        min-height: 0;
         background: var(--card-background-color);
       }
 
@@ -74,10 +75,6 @@ export class TsuryPhoneContactsView extends LitElement {
 
       .hamburger-button:active {
         transform: scale(0.95);
-      }
-
-      .search-icon {
-        color: var(--secondary-text-color);
       }
 
       .clear-button {
@@ -144,6 +141,7 @@ export class TsuryPhoneContactsView extends LitElement {
       .contacts-list {
         flex: 1;
         overflow-y: auto;
+        min-height: 0;
       }
 
       .section-header {
@@ -254,7 +252,6 @@ export class TsuryPhoneContactsView extends LitElement {
             >
               <ha-icon icon="mdi:menu"></ha-icon>
             </button>
-            <ha-icon class="search-icon" icon="mdi:magnify"></ha-icon>
             <input
               class="search-input"
               type="text"

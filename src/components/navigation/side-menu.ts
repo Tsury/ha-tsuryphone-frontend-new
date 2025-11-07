@@ -9,10 +9,11 @@ export class TsuryPhoneSideMenu extends LitElement {
 
   static styles: CSSResultGroup = css`
     :host {
-      position: fixed;
+      position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 120;
+      display: block;
     }
 
     :host([open]) {
