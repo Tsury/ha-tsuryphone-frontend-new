@@ -42,6 +42,7 @@ export class TsuryPhoneCallModal extends LitElement {
   @state() private _isDeclining = false;
   @state() private _isMuted = false;
   @state() private _showKeypad = false;
+  @state() private _dialedDigits = "";
   @state() private _swipeStartX = 0;
   @state() private _swipeDistance = 0;
   @state() private _isSwipingLeft = false;
@@ -97,9 +98,13 @@ export class TsuryPhoneCallModal extends LitElement {
       position: relative;
       background: var(--secondary-background-color);
       border-radius: 24px 24px 0 0;
-      padding: 24px;
+      padding: 24px 0;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
       z-index: 2;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     /* Keypad container slides from behind panel */
@@ -108,11 +113,12 @@ export class TsuryPhoneCallModal extends LitElement {
       bottom: 0;
       left: 0;
       right: 0;
+      width: 100%;
       background: var(--secondary-background-color);
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 24px 24px 0 0;
-      padding: 56px 16px 16px 16px;
+      padding: 0;
       z-index: 1;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
     }
@@ -122,10 +128,16 @@ export class TsuryPhoneCallModal extends LitElement {
       z-index: 3;
     }
 
+    .keypad-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--divider-color);
+      position: relative;
+    }
+
     .keypad-close {
-      position: absolute;
-      top: 12px;
-      left: 12px;
       background: none;
       border: none;
       color: var(--primary-text-color);
@@ -133,7 +145,6 @@ export class TsuryPhoneCallModal extends LitElement {
       padding: 8px;
       border-radius: 50%;
       transition: background 0.2s;
-      z-index: 4;
     }
 
     .keypad-close:hover {
@@ -142,6 +153,17 @@ export class TsuryPhoneCallModal extends LitElement {
 
     .keypad-close ha-icon {
       --mdc-icon-size: 24px;
+    }
+
+    .keypad-dialed-number {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--primary-text-color);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
     }
 
     .modal-header {
@@ -313,7 +335,7 @@ export class TsuryPhoneCallModal extends LitElement {
       height: 64px;
       border-radius: 32px;
       border: none;
-      background: var(--secondary-background-color);
+      background: rgba(0, 0, 0, 0.15);
       color: var(--primary-text-color);
       cursor: pointer;
       display: flex;
@@ -330,7 +352,7 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .control-button:hover {
-      background: var(--divider-color);
+      background: rgba(0, 0, 0, 0.25);
     }
 
     .control-button:active {
@@ -343,13 +365,17 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .hangup-button {
-      grid-column: 1 / -1;
       width: 120px;
       height: 56px;
       background: var(--error-color);
       color: var(--text-primary-color, white);
-      justify-self: center;
       border-radius: 28px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
       margin-top: 12px;
     }
 
@@ -642,17 +668,27 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private _toggleKeypad(): void {
     this._showKeypad = !this._showKeypad;
+    if (!this._showKeypad) {
+      // Clear dialed digits when closing keypad
+      this._dialedDigits = "";
+    }
     triggerHaptic("selection");
   }
 
   private async _handleDTMFDigit(e: CustomEvent<{ digit: string }>): Promise<void> {
     const digit = e.detail.digit;
+    
+    console.log("DTMF digit pressed:", digit);
 
     // Validate DTMF characters (0-9, *, #)
     if (!/^[0-9*#]$/.test(digit)) {
       console.error("Invalid DTMF digit:", digit);
       return;
     }
+
+    // Add digit to display
+    this._dialedDigits += digit;
+    console.log("Dialed digits now:", this._dialedDigits);
 
     triggerHaptic("light");
 
@@ -661,12 +697,14 @@ export class TsuryPhoneCallModal extends LitElement {
         throw new Error("Entity ID is required");
       }
 
+      console.log("Calling send_dtmf service with digit:", digit);
       await this.hass.callService(
         "tsuryphone",
         "send_dtmf",
         { digit },
         { entity_id: this.entityId }
       );
+      console.log("DTMF service call succeeded");
     } catch (error) {
       console.error("Failed to send DTMF:", error);
       triggerHaptic("failure");
@@ -892,11 +930,16 @@ export class TsuryPhoneCallModal extends LitElement {
 
       <!-- Sliding keypad (behind panel, slides up) -->
       <div class="call-keypad-container ${this._showKeypad ? "visible" : ""}">
-        <button class="keypad-close" @click=${this._toggleKeypad} title="Close keypad">
-          <ha-icon icon="mdi:close"></ha-icon>
-        </button>
+        <div class="keypad-header">
+          <button class="keypad-close" @click=${this._toggleKeypad} title="Close keypad">
+            <ha-icon icon="mdi:close"></ha-icon>
+          </button>
+          <div class="keypad-dialed-number">
+            ${this._dialedDigits || "\u00A0"}
+          </div>
+        </div>
         <tsuryphone-keypad-grid
-          @digit-pressed=${this._handleDTMFDigit}
+          @digit-press=${this._handleDTMFDigit}
         ></tsuryphone-keypad-grid>
       </div>
     `;
