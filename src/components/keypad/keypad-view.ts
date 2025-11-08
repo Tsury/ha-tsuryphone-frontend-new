@@ -149,7 +149,7 @@ export class TsuryPhoneKeypadView extends LitElement {
     try {
       // Handle + for international dialing, otherwise convert to number
       const digitValue = digit === "+" ? "+" : parseInt(digit, 10);
-      
+
       // Send digit to backend - no optimistic update
       await this.hass.callService(
         "tsuryphone",
@@ -192,7 +192,7 @@ export class TsuryPhoneKeypadView extends LitElement {
   private async _handleClear(): Promise<void> {
     // Clear all digits by calling hangup service (which clears dialing buffer)
     triggerHaptic("medium");
-    
+
     try {
       await this.hass.callService(
         "tsuryphone",

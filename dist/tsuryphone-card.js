@@ -2490,7 +2490,7 @@ function triggerHaptic(type = "light") {
 let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends i {
     constructor() {
         super(...arguments);
-        this.dialedNumber = '';
+        this.dialedNumber = "";
         this._isLongPressing = false;
     }
     static get styles() {
@@ -2580,12 +2580,12 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
             // Don't fire regular backspace if long press just completed
             return;
         }
-        this.dispatchEvent(new CustomEvent('backspace', { bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent("backspace", { bubbles: true, composed: true }));
     }
     _handleLongPress() {
         // Long press on backspace clears all
         this._isLongPressing = true;
-        this.dispatchEvent(new CustomEvent('clear', { bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent("clear", { bubbles: true, composed: true }));
     }
     _handleTouchStart(e) {
         e.preventDefault(); // Prevent context menu on mobile
@@ -2594,12 +2594,18 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
             this._handleLongPress();
         }, 500); // 500ms for long press
     }
-    _handleTouchEnd() {
+    _handleTouchEnd(e) {
+        e.preventDefault(); // Prevent click event from firing
+        const wasLongPress = this._isLongPressing;
         if (this._longPressTimer) {
             clearTimeout(this._longPressTimer);
             this._longPressTimer = undefined;
         }
-        // Small delay to prevent backspace from firing after long press
+        // If it wasn't a long press, fire a regular backspace
+        if (!wasLongPress) {
+            this._handleBackspace();
+        }
+        // Small delay to reset long press state
         if (this._isLongPressing) {
             setTimeout(() => {
                 this._isLongPressing = false;
@@ -2613,15 +2619,45 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
         }
         this._isLongPressing = false;
     }
+    _handleMouseDown() {
+        this._isLongPressing = false;
+        this._longPressTimer = window.setTimeout(() => {
+            this._handleLongPress();
+        }, 500); // 500ms for long press
+    }
+    _handleMouseUp() {
+        const wasLongPress = this._isLongPressing;
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = undefined;
+        }
+        // If it wasn't a long press, fire a regular backspace
+        if (!wasLongPress) {
+            this._handleBackspace();
+        }
+        // Small delay to reset long press state
+        if (this._isLongPressing) {
+            setTimeout(() => {
+                this._isLongPressing = false;
+            }, 100);
+        }
+    }
+    _handleMouseLeave() {
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = undefined;
+        }
+        this._isLongPressing = false;
+    }
     _formatDialedNumber(number) {
         if (!number)
-            return '';
+            return "";
         // Format the number with spaces for readability
         // Simple formatting: add space every 3 digits (can be enhanced)
-        let formatted = '';
+        let formatted = "";
         for (let i = 0; i < number.length; i++) {
             if (i > 0 && i % 3 === 0) {
-                formatted += ' ';
+                formatted += " ";
             }
             formatted += number[i];
         }
@@ -2632,15 +2668,17 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
         const formattedNumber = this._formatDialedNumber(this.dialedNumber);
         return x `
       <div class="display-container">
-        <div class="number-display ${!hasNumber ? 'empty' : ''}">
-          ${hasNumber ? formattedNumber : ''}
+        <div class="number-display ${!hasNumber ? "empty" : ""}">
+          ${hasNumber ? formattedNumber : ""}
         </div>
         <button
           class="backspace-button"
-          @click=${this._handleBackspace}
           @touchstart=${this._handleTouchStart}
           @touchend=${this._handleTouchEnd}
           @touchcancel=${this._handleTouchCancel}
+          @mousedown=${this._handleMouseDown}
+          @mouseup=${this._handleMouseUp}
+          @mouseleave=${this._handleMouseLeave}
           @contextmenu=${(e) => {
             e.preventDefault();
             this._handleLongPress();
@@ -2650,7 +2688,9 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
           title="Click to delete, long-press to clear all"
         >
           <svg class="backspace-icon" viewBox="0 0 24 24">
-            <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"/>
+            <path
+              d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"
+            />
           </svg>
         </button>
       </div>
@@ -2667,7 +2707,7 @@ __decorate([
     r()
 ], TsuryPhoneDialedNumberDisplay.prototype, "_isLongPressing", void 0);
 TsuryPhoneDialedNumberDisplay = __decorate([
-    t('tsuryphone-dialed-number-display')
+    t("tsuryphone-dialed-number-display")
 ], TsuryPhoneDialedNumberDisplay);
 
 /**
