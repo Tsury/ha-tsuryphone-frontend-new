@@ -5439,6 +5439,11 @@ TsuryPhoneCallModal.styles = i$3 `
       box-shadow: none;
     }
 
+    .call-controls-panel.keypad-open {
+      border-radius: 0;
+      box-shadow: none;
+    }
+
     /* Keypad container slides up from bottom */
     .call-keypad-container {
       position: absolute;
@@ -5452,13 +5457,15 @@ TsuryPhoneCallModal.styles = i$3 `
       border-radius: 0;
       padding: 0;
       z-index: 1;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
       padding-bottom: 200px;
     }
 
     .call-keypad-container.visible {
       transform: translateY(0);
       z-index: 1;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .keypad-header {
@@ -5466,7 +5473,7 @@ TsuryPhoneCallModal.styles = i$3 `
       align-items: center;
       justify-content: space-between;
       padding: 8px 16px;
-      border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.08);
+      border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.05);
       position: relative;
       background: var(--secondary-background-color);
       border-radius: 24px 24px 0 0;
@@ -6528,9 +6535,21 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     /**
      * Handle dial contact event from home view
      */
-    _handleDialContact(e) {
+    async _handleDialContact(e) {
         const { contact } = e.detail;
-        // TODO: Open call modal or initiate call in Phase 6
+        // Initiate a call to the contact's phone number
+        if (contact && contact.phoneNumber) {
+            try {
+                await this.hass.callService("tsuryphone", "dial", {
+                    number: contact.phoneNumber,
+                }, {
+                    entity_id: this._getPhoneStateEntityId(),
+                });
+            }
+            catch (error) {
+                console.error("Failed to dial contact:", error);
+            }
+        }
     }
     /**
      * Handle call details event from home view

@@ -884,10 +884,26 @@ export class TsuryPhoneCard extends LitElement {
   /**
    * Handle dial contact event from home view
    */
-  private _handleDialContact(e: CustomEvent): void {
+  private async _handleDialContact(e: CustomEvent): Promise<void> {
     const { contact } = e.detail;
 
-    // TODO: Open call modal or initiate call in Phase 6
+    // Initiate a call to the contact's phone number
+    if (contact && contact.phoneNumber) {
+      try {
+        await this.hass.callService(
+          "tsuryphone",
+          "dial",
+          {
+            number: contact.phoneNumber,
+          },
+          {
+            entity_id: this._getPhoneStateEntityId(),
+          }
+        );
+      } catch (error) {
+        console.error("Failed to dial contact:", error);
+      }
+    }
   }
 
   /**

@@ -116,6 +116,11 @@ export class TsuryPhoneCallModal extends LitElement {
       box-shadow: none;
     }
 
+    .call-controls-panel.keypad-open {
+      border-radius: 0;
+      box-shadow: none;
+    }
+
     /* Keypad container slides up from bottom */
     .call-keypad-container {
       position: absolute;
@@ -129,13 +134,15 @@ export class TsuryPhoneCallModal extends LitElement {
       border-radius: 0;
       padding: 0;
       z-index: 1;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
       padding-bottom: 200px;
     }
 
     .call-keypad-container.visible {
       transform: translateY(0);
       z-index: 1;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .keypad-header {
@@ -143,7 +150,7 @@ export class TsuryPhoneCallModal extends LitElement {
       align-items: center;
       justify-content: space-between;
       padding: 8px 16px;
-      border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.08);
+      border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.05);
       position: relative;
       background: var(--secondary-background-color);
       border-radius: 24px 24px 0 0;
