@@ -2,6 +2,7 @@ import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import "./dnd-settings";
+import "./maintenance-settings";
 
 export interface SettingsSection {
   id: string;
@@ -351,6 +352,16 @@ export class TsuryPhoneSettingsView extends LitElement {
           .entityId=${this.entityId}
           @navigate-back=${this._handleBackFromSettings}
         ></tsuryphone-dnd-settings>
+      `;
+    }
+
+    if (this._activeSetting === "maintenance") {
+      return html`
+        <tsuryphone-maintenance-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-maintenance-settings>
       `;
     }
 
