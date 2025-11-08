@@ -457,6 +457,9 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       });
 
       console.log("Automation config:", config); // Debug log
+      console.log("config.trigger:", config?.trigger);
+      console.log("config.triggers:", config?.triggers);
+      console.log("config.config:", config?.config);
 
       // Extract webhook triggers - handle both 'trigger' and 'triggers' keys
       let triggers: any[] = [];
@@ -464,11 +467,16 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
         triggers = config.trigger;
       } else if (Array.isArray(config?.triggers)) {
         triggers = config.triggers;
+      } else if (config?.config?.triggers) {
+        // Try nested config.config.triggers path
+        triggers = Array.isArray(config.config.triggers) ? config.config.triggers : [config.config.triggers];
       } else if (config?.trigger) {
         triggers = [config.trigger];
       } else if (config?.triggers) {
         triggers = [config.triggers];
       }
+
+      console.log("Extracted triggers array:", triggers);
 
       // Filter for webhook triggers - check both 'platform' and 'trigger' fields
       this._detectedWebhookIds = triggers
