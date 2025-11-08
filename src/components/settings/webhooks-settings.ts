@@ -592,8 +592,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
           <ha-icon icon="mdi:information"></ha-icon>
           <div>
             Configure webhook actions that trigger Home Assistant automations.
-            Select an automation to automatically detect webhook IDs, or enter
-            them manually.
+            Select an automation to automatically detect and extract webhook IDs.
           </div>
         </div>
 
@@ -604,14 +603,14 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
           <div class="add-webhook-form">
             <!-- Automation Picker -->
             <div class="form-row">
-              <label class="form-label">Pick Automation (Optional)</label>
+              <label class="form-label">Select Automation</label>
               <ha-entity-picker
                 .hass=${this.hass}
                 .includeDomains=${["automation"]}
-                .value=${this._selectedAutomation}
+                .value=${this._selectedAutomation || ""}
                 @value-changed=${this._handleAutomationSelected}
-                allow-custom-entity
                 .disabled=${this._loading}
+                label="Choose automation with webhook trigger"
               ></ha-entity-picker>
             </div>
 
@@ -675,6 +674,8 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
               class="add-button"
               @click=${this._handleAddWebhook}
               ?disabled=${this._loading ||
+              !this._selectedAutomation ||
+              this._detectedWebhookIds.length === 0 ||
               !this._newCode ||
               !this._newActionName}
             >
