@@ -537,14 +537,16 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
         url: this._selectedWebhookId,
         events: [this._newCode],
         name: this._newActionName,
+        entity_id: this.entityId,
       });
 
       // Call tsuryphone.webhook_add service directly
       await this.hass.callService("tsuryphone", "webhook_add", {
-        device_id: this.entityId.replace("sensor.", ""),
         url: this._selectedWebhookId,
         events: [this._newCode],
         name: this._newActionName,
+      }, {
+        entity_id: this.entityId,
       });
 
       console.log("Webhook added successfully");
@@ -580,8 +582,9 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
       // Call tsuryphone.webhook_remove service directly
       await this.hass.callService("tsuryphone", "webhook_remove", {
-        device_id: this.entityId.replace("sensor.", ""),
         url: webhook.webhook_id,
+      }, {
+        entity_id: this.entityId,
       });
 
       console.log("Webhook removed successfully");
