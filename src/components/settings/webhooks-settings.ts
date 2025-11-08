@@ -607,10 +607,11 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
               <ha-entity-picker
                 .hass=${this.hass}
                 .includeDomains=${["automation"]}
-                .value=${this._selectedAutomation || ""}
+                .value=${this._selectedAutomation}
                 @value-changed=${this._handleAutomationSelected}
-                .disabled=${this._loading}
+                ?disabled=${this._loading}
                 label="Choose automation with webhook trigger"
+                allow-custom-entity
               ></ha-entity-picker>
             </div>
 
