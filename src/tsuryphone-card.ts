@@ -18,6 +18,7 @@ import {
   haCardStyles,
   isDarkMode,
 } from "./styles/theme";
+import { normalizePhoneNumberForDisplay } from "./utils/formatters";
 import { commonStyles } from "./styles/common";
 import "./components/navigation/tsuryphone-navigation";
 import "./components/navigation/side-menu";
@@ -871,9 +872,11 @@ export class TsuryPhoneCard extends LitElement {
         console.log(`[CALL_LOG]   Raw number: "${call.number}"`);
         console.log(`[CALL_LOG]   call.name.trim(): "${call.name ? call.name.trim() : 'N/A'}"`);
         
-        const contactName = call.name && call.name.trim() ? call.name : call.number;
+        const normalizedNumber = normalizePhoneNumberForDisplay(call.number, this._defaultDialCode);
+        const contactName = call.name && call.name.trim() ? call.name : normalizedNumber;
         const hasContactName = !!(call.name && call.name.trim());
         
+        console.log(`[CALL_LOG]   Normalized number: "${normalizedNumber}"`);
         console.log(`[CALL_LOG]   Computed contactName: "${contactName}"`);
         console.log(`[CALL_LOG]   Computed hasContactName: ${hasContactName}`);
 
