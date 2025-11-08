@@ -5242,7 +5242,7 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
         const isDialing = phoneState === "Dialing";
         return x `
       <!-- Bottom control panel -->
-      <div class="call-controls-panel ${isDialing ? "no-background" : ""}">
+      <div class="call-controls-panel ${isDialing ? "no-background" : ""} ${this._showKeypad ? "keypad-open" : ""}">
         <div class="call-controls">
           <button
             class="control-button ${this._isMuted ? "active" : ""}"
@@ -5429,6 +5429,7 @@ TsuryPhoneCallModal.styles = i$3 `
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .call-controls-panel.no-background {
@@ -5436,7 +5437,11 @@ TsuryPhoneCallModal.styles = i$3 `
       box-shadow: none;
     }
 
-    /* Keypad container slides from behind panel */
+    .call-controls-panel.keypad-open {
+      transform: translateY(-100%);
+    }
+
+    /* Keypad container slides up from bottom */
     .call-keypad-container {
       position: absolute;
       bottom: 0;
@@ -5446,15 +5451,16 @@ TsuryPhoneCallModal.styles = i$3 `
       background: var(--secondary-background-color);
       transform: translateY(100%);
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: 24px 24px 0 0;
+      border-radius: 0;
       padding: 0;
       z-index: 1;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      padding-bottom: 200px;
     }
 
     .call-keypad-container.visible {
       transform: translateY(0);
-      z-index: 3;
+      z-index: 1;
     }
 
     .keypad-header {
@@ -5464,6 +5470,8 @@ TsuryPhoneCallModal.styles = i$3 `
       padding: 16px;
       border-bottom: 1px solid var(--divider-color);
       position: relative;
+      background: var(--secondary-background-color);
+      border-radius: 24px 24px 0 0;
     }
 
     .keypad-close {
