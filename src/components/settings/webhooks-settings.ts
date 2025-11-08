@@ -456,11 +456,30 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
         entity_id: entityId,
       });
 
-      // Extract webhook triggers
-      const triggers = Array.isArray(config?.trigger) ? config.trigger : [];
+      console.log("Automation config:", config); // Debug log
+
+      // Extract webhook triggers - handle both 'trigger' and 'triggers' keys
+      let triggers: any[] = [];
+      if (Array.isArray(config?.trigger)) {
+        triggers = config.trigger;
+      } else if (Array.isArray(config?.triggers)) {
+        triggers = config.triggers;
+      } else if (config?.trigger) {
+        triggers = [config.trigger];
+      } else if (config?.triggers) {
+        triggers = [config.triggers];
+      }
+
+      // Filter for webhook triggers - check both 'platform' and 'trigger' fields
       this._detectedWebhookIds = triggers
-        .filter((t: any) => t?.platform === "webhook" && t.webhook_id)
+        .filter((t: any) => {
+          const isWebhook = t?.platform === "webhook" || t?.trigger === "webhook";
+          const hasWebhookId = t?.webhook_id;
+          return isWebhook && hasWebhookId;
+        })
         .map((t: any) => t.webhook_id);
+
+      console.log("Detected webhook IDs:", this._detectedWebhookIds); // Debug log
 
       // Auto-fill action name from automation friendly_name
       if (config?.alias) {
