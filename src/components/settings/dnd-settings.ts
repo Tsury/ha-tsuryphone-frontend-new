@@ -212,9 +212,9 @@ export class TsuryPhoneDNDSettings extends LitElement {
     }
 
     .time-input {
-      width: 60px;
+      width: 50px;
       height: 40px;
-      padding: 8px 12px;
+      padding: 0;
       border: 1px solid var(--divider-color);
       border-radius: 8px;
       background: var(--card-background-color);
@@ -287,7 +287,7 @@ export class TsuryPhoneDNDSettings extends LitElement {
       }
 
       .time-input {
-        width: 55px;
+        width: 48px;
         height: 38px;
         font-size: 15px;
       }
@@ -303,42 +303,45 @@ export class TsuryPhoneDNDSettings extends LitElement {
     if (!this.hass || !this.entityId) return;
 
     try {
-      const phoneStateEntity = this.hass.states[this.entityId];
-      if (!phoneStateEntity) return;
+      // Find DND binary sensor (e.g., binary_sensor.tsuryphone_do_not_disturb)
+      const dndSensorId = Object.keys(this.hass.states).find(
+        (id) => id.includes("do_not_disturb") && id.startsWith("binary_sensor.")
+      );
+      
+      if (dndSensorId) {
+        this._dndActive = this.hass.states[dndSensorId].state === "on";
+      }
 
-      const attrs = phoneStateEntity.attributes;
-
-      // Load DND status
-      this._dndActive = phoneStateEntity.state === "on" || phoneStateEntity.state === "Active";
-
-      // Load settings from switches/text entities
+      // Find Force DND switch (e.g., switch.tsuryphone_force_do_not_disturb)
       const dndForceEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("force")
+        (id) => id.includes("force") && id.includes("do_not_disturb") && id.startsWith("switch.")
       );
-      const dndScheduleEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("schedule")
-      );
-
+      
       if (dndForceEntity) {
         this._dndForce = this.hass.states[dndForceEntity].state === "on";
       }
 
+      // Find DND Schedule Enabled switch (e.g., switch.tsuryphone_dnd_schedule_enabled)
+      const dndScheduleEntity = Object.keys(this.hass.states).find(
+        (id) => id.includes("dnd") && id.includes("schedule") && id.startsWith("switch.")
+      );
+      
       if (dndScheduleEntity) {
         this._scheduleEnabled = this.hass.states[dndScheduleEntity].state === "on";
       }
 
-      // Load time settings from text entities
+      // Load time settings from number entities
       const startHourEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("start_hour")
+        (id) => id.includes("dnd") && id.includes("start") && id.includes("hour") && id.startsWith("number.")
       );
       const startMinuteEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("start_minute")
+        (id) => id.includes("dnd") && id.includes("start") && id.includes("minute") && id.startsWith("number.")
       );
       const endHourEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("end_hour")
+        (id) => id.includes("dnd") && id.includes("end") && id.includes("hour") && id.startsWith("number.")
       );
       const endMinuteEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("end_minute")
+        (id) => id.includes("dnd") && id.includes("end") && id.includes("minute") && id.startsWith("number.")
       );
 
       if (startHourEntity) {
@@ -367,7 +370,7 @@ export class TsuryPhoneDNDSettings extends LitElement {
     );
   }
 
-  private async _handleDndForceToggle(e: Event): void {
+  private async _handleDndForceToggle(e: Event): Promise<void> {
     const target = e.target as HTMLInputElement;
     const enabled = target.checked;
 
@@ -375,6 +378,8 @@ export class TsuryPhoneDNDSettings extends LitElement {
     try {
       await this.hass.callService("tsuryphone", "set_dnd", {
         force: enabled,
+      }, {
+        entity_id: this.entityId,
       });
 
       this._dndForce = enabled;
@@ -387,7 +392,7 @@ export class TsuryPhoneDNDSettings extends LitElement {
     }
   }
 
-  private async _handleScheduleToggle(e: Event): void {
+  private async _handleScheduleToggle(e: Event): Promise<void> {
     const target = e.target as HTMLInputElement;
     const enabled = target.checked;
 
@@ -395,6 +400,8 @@ export class TsuryPhoneDNDSettings extends LitElement {
     try {
       await this.hass.callService("tsuryphone", "set_dnd", {
         scheduled: enabled,
+      }, {
+        entity_id: this.entityId,
       });
 
       this._scheduleEnabled = enabled;
@@ -419,7 +426,9 @@ export class TsuryPhoneDNDSettings extends LitElement {
       const updateData: any = {};
       updateData[field] = numValue;
 
-      await this.hass.callService("tsuryphone", "set_dnd", updateData);
+      await this.hass.callService("tsuryphone", "set_dnd", updateData, {
+        entity_id: this.entityId,
+      });
 
       // Update local state
       switch (field) {
