@@ -294,7 +294,10 @@ export class TsuryPhoneSettingsView extends LitElement {
     this._activeSetting = sectionId;
   }
 
-  private _handleBackFromSettings(): void {
+  private _handleBackFromSettings(e: Event): void {
+    // Stop propagation so the event doesn't bubble up to the main card
+    // This allows individual settings pages to navigate back to settings overview
+    e.stopPropagation();
     this._activeSetting = null;
   }
 

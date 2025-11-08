@@ -180,7 +180,7 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .status-banner.inactive {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(158, 158, 158, 0.12) 0%, rgba(158, 158, 158, 0.04) 100%);
     }
 
     .status-icon {
@@ -199,8 +199,8 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .status-banner.inactive .status-icon {
-      background: rgba(76, 175, 80, 0.2);
-      color: rgb(76, 175, 80);
+      background: rgba(158, 158, 158, 0.15);
+      color: rgb(117, 117, 117);
     }
 
     .status-icon ha-icon {
