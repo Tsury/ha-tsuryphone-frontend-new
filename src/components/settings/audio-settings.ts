@@ -857,6 +857,17 @@ export class TsuryPhoneAudioSettings extends LitElement {
           </div>
         </div>
 
+        <!-- Audio Help Text -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            <strong>Volume</strong> controls the overall loudness, while
+            <strong>Gain</strong> controls the signal amplification. Adjust
+            both settings to find your optimal audio quality. Changes take
+            effect immediately.
+          </div>
+        </div>
+
         <!-- Ring Pattern Settings -->
         <div class="settings-group">
           <div class="group-header">Ring Pattern</div>
@@ -924,17 +935,6 @@ export class TsuryPhoneAudioSettings extends LitElement {
               <ha-icon icon="mdi:bell-ring"></ha-icon>
               <span>Test Ring Pattern</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Help Text -->
-        <div class="help-text">
-          <ha-icon icon="mdi:information"></ha-icon>
-          <div>
-            <strong>Volume</strong> controls the overall loudness, while
-            <strong>Gain</strong> controls the signal amplification. Adjust
-            both settings to find your optimal audio quality. Changes take
-            effect immediately.
           </div>
         </div>
       </div>
