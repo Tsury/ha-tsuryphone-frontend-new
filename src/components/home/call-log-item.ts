@@ -175,9 +175,17 @@ export class TsuryPhoneCallLogItem extends LitElement {
   }
 
   render() {
+    console.log(`[CALL_LOG_ITEM] Rendering call item:`, this.call);
+    console.log(`[CALL_LOG_ITEM]   contactName: "${this.call.contactName}"`);
+    console.log(`[CALL_LOG_ITEM]   hasContactName: ${this.call.hasContactName}`);
+    console.log(`[CALL_LOG_ITEM]   phoneNumber: "${this.call.phoneNumber}"`);
+    
     const avatarColor = getAvatarColor(this.call.contactName);
     const initials = getInitials(this.call.contactName);
     const timeFormatted = formatCallTime(this.call.timestamp);
+    
+    console.log(`[CALL_LOG_ITEM]   avatarColor: ${avatarColor}`);
+    console.log(`[CALL_LOG_ITEM]   initials: "${initials}"`);
     
     // Show duration for answered calls, "Missed" for missed/blocked calls
     let durationDisplay = null;
@@ -194,6 +202,8 @@ export class TsuryPhoneCallLogItem extends LitElement {
 
     // For non-contacts, show generic profile icon instead of dynamic initials
     const isContact = this.call.hasContactName;
+    
+    console.log(`[CALL_LOG_ITEM]   isContact: ${isContact}, will use ${isContact ? 'colored avatar with initials' : 'generic gray icon'}`);
 
     return html`
       <div class="call-item" @click=${this._handleClick}>
