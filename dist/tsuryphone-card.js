@@ -5404,7 +5404,7 @@ TsuryPhoneCallModal.styles = i$3 `
     .call-header {
       position: sticky;
       top: 0;
-      z-index: 3;
+      z-index: 0;
       background: var(--card-background-color);
       padding: 24px;
       text-align: center;
@@ -5439,10 +5439,6 @@ TsuryPhoneCallModal.styles = i$3 `
       box-shadow: none;
     }
 
-    .call-controls-panel.keypad-open {
-      transform: translateY(-100%);
-    }
-
     /* Keypad container slides up from bottom */
     .call-keypad-container {
       position: absolute;
@@ -5469,8 +5465,8 @@ TsuryPhoneCallModal.styles = i$3 `
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px;
-      border-bottom: 1px solid var(--divider-color);
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.08);
       position: relative;
       background: var(--secondary-background-color);
       border-radius: 24px 24px 0 0;
