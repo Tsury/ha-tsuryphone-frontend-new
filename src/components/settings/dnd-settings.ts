@@ -329,32 +329,24 @@ export class TsuryPhoneDNDSettings extends LitElement {
       console.error("[DND] _findEntity - hass is null");
       return null;
     }
-    const deviceId = this._getDeviceId();
-    if (!deviceId) {
-      console.error("[DND] _findEntity - deviceId is null");
-      return null;
-    }
 
     const allEntityIds = Object.keys(this.hass.states);
-    console.log(`[DND] _findEntity - searching for prefix="${prefix}", keywords=[${keywords.join(", ")}], deviceId="${deviceId}"`);
+    console.log(`[DND] _findEntity - searching for prefix="${prefix}", keywords=[${keywords.join(", ")}]`);
     console.log(`[DND] _findEntity - total entities: ${allEntityIds.length}`);
     
     // Debug: show entities matching prefix
     const prefixMatch = allEntityIds.filter(id => id.startsWith(prefix));
     console.log(`[DND] _findEntity - entities with prefix "${prefix}":`, prefixMatch.slice(0, 10));
     
-    // Debug: show entities matching deviceId
-    const deviceMatch = allEntityIds.filter(id => id.includes(deviceId));
-    console.log(`[DND] _findEntity - entities with deviceId "${deviceId}":`, deviceMatch.slice(0, 10));
-    
+    // Backend entities DON'T have device_id prefix - search by prefix + keywords only
     const found = allEntityIds.find(
-      (id) => id.startsWith(prefix) && id.includes(deviceId) && keywords.some(kw => id.includes(kw))
+      (id) => id.startsWith(prefix) && keywords.some(kw => id.includes(kw))
     ) || null;
     
     if (found) {
       console.log(`[DND] _findEntity - ✓ FOUND: "${found}"`);
     } else {
-      console.error(`[DND] _findEntity - ✗ NOT FOUND with prefix="${prefix}", keywords=[${keywords.join(", ")}], deviceId="${deviceId}"`);
+      console.error(`[DND] _findEntity - ✗ NOT FOUND with prefix="${prefix}", keywords=[${keywords.join(", ")}]`);
     }
     
     return found;
