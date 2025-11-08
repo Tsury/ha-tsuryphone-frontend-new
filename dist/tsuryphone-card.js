@@ -2491,6 +2491,7 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
     constructor() {
         super(...arguments);
         this.dialedNumber = '';
+        this._isLongPressing = false;
     }
     static get styles() {
         return i$3 `
@@ -2575,11 +2576,42 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
     `;
     }
     _handleBackspace() {
+        if (this._isLongPressing) {
+            // Don't fire regular backspace if long press just completed
+            return;
+        }
         this.dispatchEvent(new CustomEvent('backspace', { bubbles: true, composed: true }));
     }
     _handleLongPress() {
         // Long press on backspace clears all
+        this._isLongPressing = true;
         this.dispatchEvent(new CustomEvent('clear', { bubbles: true, composed: true }));
+    }
+    _handleTouchStart(e) {
+        e.preventDefault(); // Prevent context menu on mobile
+        this._isLongPressing = false;
+        this._longPressTimer = window.setTimeout(() => {
+            this._handleLongPress();
+        }, 500); // 500ms for long press
+    }
+    _handleTouchEnd() {
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = undefined;
+        }
+        // Small delay to prevent backspace from firing after long press
+        if (this._isLongPressing) {
+            setTimeout(() => {
+                this._isLongPressing = false;
+            }, 100);
+        }
+    }
+    _handleTouchCancel() {
+        if (this._longPressTimer) {
+            clearTimeout(this._longPressTimer);
+            this._longPressTimer = undefined;
+        }
+        this._isLongPressing = false;
     }
     _formatDialedNumber(number) {
         if (!number)
@@ -2606,13 +2638,16 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
         <button
           class="backspace-button"
           @click=${this._handleBackspace}
+          @touchstart=${this._handleTouchStart}
+          @touchend=${this._handleTouchEnd}
+          @touchcancel=${this._handleTouchCancel}
           @contextmenu=${(e) => {
             e.preventDefault();
             this._handleLongPress();
         }}
           ?disabled=${!hasNumber}
           aria-label="Backspace"
-          title="Click to delete, right-click to clear all"
+          title="Click to delete, long-press to clear all"
         >
           <svg class="backspace-icon" viewBox="0 0 24 24">
             <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"/>
@@ -2625,6 +2660,12 @@ let TsuryPhoneDialedNumberDisplay = class TsuryPhoneDialedNumberDisplay extends 
 __decorate([
     n({ type: String })
 ], TsuryPhoneDialedNumberDisplay.prototype, "dialedNumber", void 0);
+__decorate([
+    r()
+], TsuryPhoneDialedNumberDisplay.prototype, "_longPressTimer", void 0);
+__decorate([
+    r()
+], TsuryPhoneDialedNumberDisplay.prototype, "_isLongPressing", void 0);
 TsuryPhoneDialedNumberDisplay = __decorate([
     t('tsuryphone-dialed-number-display')
 ], TsuryPhoneDialedNumberDisplay);
@@ -2996,9 +3037,18 @@ let TsuryPhoneKeypadView = class TsuryPhoneKeypadView extends i {
             triggerHaptic("failure");
         }
     }
-    _handleClear() {
-        // Clear is just deleting all digits - let user delete one by one
-        triggerHaptic("selection");
+    async _handleClear() {
+        // Clear all digits by calling hangup service (which clears dialing buffer)
+        triggerHaptic("medium");
+        try {
+            await this.hass.callService("tsuryphone", "hangup", {}, {
+                entity_id: this._getPhoneStateEntityId(),
+            });
+        }
+        catch (err) {
+            console.error("Failed to clear digits:", err);
+            triggerHaptic("failure");
+        }
     }
     async _handleCall() {
         if (!this._canCall())
@@ -4901,6 +4951,11 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     }
     willUpdate(changedProps) {
         super.willUpdate(changedProps);
+        // Clear dialed digits when modal closes (call ends)
+        if (changedProps.has('open') && !this.open) {
+            this._dialedDigits = "";
+            this._showKeypad = false;
+        }
         if (!this.hass) {
             return;
         }
@@ -5058,10 +5113,6 @@ let TsuryPhoneCallModal = class TsuryPhoneCallModal extends i {
     }
     _toggleKeypad() {
         this._showKeypad = !this._showKeypad;
-        if (!this._showKeypad) {
-            // Clear dialed digits when closing keypad
-            this._dialedDigits = "";
-        }
         triggerHaptic("selection");
     }
     async _handleDTMFDigit(e) {

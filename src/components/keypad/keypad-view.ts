@@ -189,9 +189,23 @@ export class TsuryPhoneKeypadView extends LitElement {
     }
   }
 
-  private _handleClear(): void {
-    // Clear is just deleting all digits - let user delete one by one
-    triggerHaptic("selection");
+  private async _handleClear(): Promise<void> {
+    // Clear all digits by calling hangup service (which clears dialing buffer)
+    triggerHaptic("medium");
+    
+    try {
+      await this.hass.callService(
+        "tsuryphone",
+        "hangup",
+        {},
+        {
+          entity_id: this._getPhoneStateEntityId(),
+        }
+      );
+    } catch (err) {
+      console.error("Failed to clear digits:", err);
+      triggerHaptic("failure");
+    }
   }
 
   private async _handleCall(): Promise<void> {

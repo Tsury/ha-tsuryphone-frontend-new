@@ -4,11 +4,14 @@
  */
 
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('tsuryphone-dialed-number-display')
 export class TsuryPhoneDialedNumberDisplay extends LitElement {
   @property({ type: String }) dialedNumber = '';
+
+  @state() private _longPressTimer?: number;
+  @state() private _isLongPressing = false;
 
   static get styles(): CSSResultGroup {
     return css`
@@ -94,12 +97,47 @@ export class TsuryPhoneDialedNumberDisplay extends LitElement {
   }
 
   private _handleBackspace(): void {
+    if (this._isLongPressing) {
+      // Don't fire regular backspace if long press just completed
+      return;
+    }
     this.dispatchEvent(new CustomEvent('backspace', { bubbles: true, composed: true }));
   }
 
   private _handleLongPress(): void {
     // Long press on backspace clears all
+    this._isLongPressing = true;
     this.dispatchEvent(new CustomEvent('clear', { bubbles: true, composed: true }));
+  }
+
+  private _handleTouchStart(e: TouchEvent): void {
+    e.preventDefault(); // Prevent context menu on mobile
+    this._isLongPressing = false;
+    this._longPressTimer = window.setTimeout(() => {
+      this._handleLongPress();
+    }, 500); // 500ms for long press
+  }
+
+  private _handleTouchEnd(): void {
+    if (this._longPressTimer) {
+      clearTimeout(this._longPressTimer);
+      this._longPressTimer = undefined;
+    }
+    
+    // Small delay to prevent backspace from firing after long press
+    if (this._isLongPressing) {
+      setTimeout(() => {
+        this._isLongPressing = false;
+      }, 100);
+    }
+  }
+
+  private _handleTouchCancel(): void {
+    if (this._longPressTimer) {
+      clearTimeout(this._longPressTimer);
+      this._longPressTimer = undefined;
+    }
+    this._isLongPressing = false;
   }
 
   private _formatDialedNumber(number: string): string {
@@ -129,13 +167,16 @@ export class TsuryPhoneDialedNumberDisplay extends LitElement {
         <button
           class="backspace-button"
           @click=${this._handleBackspace}
+          @touchstart=${this._handleTouchStart}
+          @touchend=${this._handleTouchEnd}
+          @touchcancel=${this._handleTouchCancel}
           @contextmenu=${(e: Event) => {
             e.preventDefault();
             this._handleLongPress();
           }}
           ?disabled=${!hasNumber}
           aria-label="Backspace"
-          title="Click to delete, right-click to clear all"
+          title="Click to delete, long-press to clear all"
         >
           <svg class="backspace-icon" viewBox="0 0 24 24">
             <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"/>

@@ -473,6 +473,12 @@ export class TsuryPhoneCallModal extends LitElement {
   override willUpdate(changedProps: Map<string, any>): void {
     super.willUpdate(changedProps);
 
+    // Clear dialed digits when modal closes (call ends)
+    if (changedProps.has('open') && !this.open) {
+      this._dialedDigits = "";
+      this._showKeypad = false;
+    }
+
     if (!this.hass) {
       return;
     }
@@ -688,10 +694,6 @@ export class TsuryPhoneCallModal extends LitElement {
 
   private _toggleKeypad(): void {
     this._showKeypad = !this._showKeypad;
-    if (!this._showKeypad) {
-      // Clear dialed digits when closing keypad
-      this._dialedDigits = "";
-    }
     triggerHaptic("selection");
   }
 
