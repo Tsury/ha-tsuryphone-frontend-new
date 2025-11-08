@@ -297,10 +297,19 @@ export class TsuryPhoneCallModal extends LitElement {
       pointer-events: none;
     }
 
+    .swipe-label.decline {
+      color: var(--error-color);
+    }
+
+    .swipe-label.answer {
+      color: var(--success-color);
+    }
+
     .swipe-handle {
       position: absolute;
       top: 6px;
-      left: 6px;
+      left: 50%;
+      transform: translateX(-50%);
       width: 60px;
       height: 60px;
       background: var(--card-background-color);
@@ -311,7 +320,6 @@ export class TsuryPhoneCallModal extends LitElement {
       justify-content: center;
       cursor: grab;
       transition:
-        transform 0.2s ease-out,
         background-color 0.2s;
       z-index: 2;
     }
@@ -572,7 +580,7 @@ export class TsuryPhoneCallModal extends LitElement {
       }
       await this.hass.callService(
         "tsuryphone",
-        "answer_call",
+        "answer",
         {},
         { entity_id: this.entityId }
       );
@@ -847,14 +855,14 @@ export class TsuryPhoneCallModal extends LitElement {
         @touchend=${this._handleSwipeEnd}
       >
         <div class="swipe-track">
-          <span class="swipe-label">Decline</span>
-          <span class="swipe-label">Answer</span>
+          <span class="swipe-label decline">Decline</span>
+          <span class="swipe-label answer">Answer</span>
         </div>
         <div
           class="swipe-handle ${this._isSwipingLeft
             ? "swiping-left"
             : ""} ${this._isSwipingRight ? "swiping-right" : ""}"
-          style="transform: translateX(${this._swipeDistance}px)"
+          style="transform: translateX(calc(-50% + ${this._swipeDistance}px))"
         >
           ${this._isSwipingLeft
             ? html`<ha-icon icon="mdi:close"></ha-icon>`
