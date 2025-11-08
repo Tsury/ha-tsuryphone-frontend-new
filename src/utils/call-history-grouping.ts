@@ -105,11 +105,11 @@ export function groupCallHistory(
 export function getFrequentContacts(
   calls: CallHistoryEntry[],
   limit: number = 6
-): { contactName: string; phoneNumber: string; callCount: number }[] {
+): { contactName: string; phoneNumber: string; callCount: number; hasContactName?: boolean }[] {
   // Count calls per contact
   const contactCounts = new Map<
     string,
-    { name: string; phone: string; count: number }
+    { name: string; phone: string; count: number; hasContactName: boolean }
   >();
 
   calls.forEach((call) => {
@@ -121,6 +121,7 @@ export function getFrequentContacts(
         name: call.contactName,
         phone: call.phoneNumber,
         count: 1,
+        hasContactName: call.hasContactName || false,
       });
     }
   });
@@ -133,5 +134,6 @@ export function getFrequentContacts(
       contactName: contact.name,
       phoneNumber: contact.phone,
       callCount: contact.count,
+      hasContactName: contact.hasContactName,
     }));
 }

@@ -6,6 +6,7 @@ interface FrequentContact {
   contactName: string;
   phoneNumber: string;
   callCount: number;
+  hasContactName?: boolean;
 }
 
 @customElement('tsuryphone-frequent-contacts')
@@ -66,6 +67,14 @@ export class TsuryPhoneFrequentContacts extends LitElement {
       font-weight: 600;
       font-size: 20px;
       position: relative;
+    }
+
+    .avatar.generic {
+      background: var(--secondary-text-color);
+    }
+
+    .avatar ha-icon {
+      --mdc-icon-size: 32px;
     }
 
     .call-count-badge {
@@ -138,25 +147,39 @@ export class TsuryPhoneFrequentContacts extends LitElement {
         <div class="section-header">Frequents</div>
         <div class="contacts-grid">
           ${this.contacts.map(
-            contact => html`
-              <div
-                class="contact-item"
-                @click=${() => this._handleContactClick(contact)}
-                role="button"
-                tabindex="0"
-                aria-label="Call ${contact.contactName}"
-              >
-                <div class="avatar" style="background-color: ${getAvatarColor(contact.contactName)}">
-                  ${getInitials(contact.contactName)}
-                  ${contact.callCount > 1
-                    ? html`<div class="call-count-badge">${contact.callCount}</div>`
-                    : ''}
+            contact => {
+              const isContact = contact.hasContactName;
+              return html`
+                <div
+                  class="contact-item"
+                  @click=${() => this._handleContactClick(contact)}
+                  role="button"
+                  tabindex="0"
+                  aria-label="Call ${contact.contactName}"
+                >
+                  ${isContact
+                    ? html`
+                        <div class="avatar" style="background-color: ${getAvatarColor(contact.contactName)}">
+                          ${getInitials(contact.contactName)}
+                          ${contact.callCount > 1
+                            ? html`<div class="call-count-badge">${contact.callCount}</div>`
+                            : ''}
+                        </div>
+                      `
+                    : html`
+                        <div class="avatar generic">
+                          <ha-icon icon="mdi:account"></ha-icon>
+                          ${contact.callCount > 1
+                            ? html`<div class="call-count-badge">${contact.callCount}</div>`
+                            : ''}
+                        </div>
+                      `}
+                  <div class="contact-name" title="${contact.contactName}">
+                    ${contact.contactName}
+                  </div>
                 </div>
-                <div class="contact-name" title="${contact.contactName}">
-                  ${contact.contactName}
-                </div>
-              </div>
-            `
+              `;
+            }
           )}
         </div>
       </div>
