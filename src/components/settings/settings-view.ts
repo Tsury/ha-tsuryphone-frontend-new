@@ -1,6 +1,7 @@
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
+import "./dnd-settings";
 
 export interface SettingsSection {
   id: string;
@@ -85,6 +86,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
 export class TsuryPhoneSettingsView extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ type: String }) entityId?: string;
+  @state() private _activeSetting: string | null = null;
 
   static styles: CSSResultGroup = css`
     :host {
@@ -294,13 +296,11 @@ export class TsuryPhoneSettingsView extends LitElement {
   }
 
   private _handleItemClick(sectionId: string): void {
-    this.dispatchEvent(
-      new CustomEvent("settings-navigate", {
-        detail: { section: sectionId },
-        bubbles: true,
-        composed: true,
-      })
-    );
+    this._activeSetting = sectionId;
+  }
+
+  private _handleBackFromSettings(): void {
+    this._activeSetting = null;
   }
 
   private _renderCategorySection(
@@ -343,6 +343,18 @@ export class TsuryPhoneSettingsView extends LitElement {
   }
 
   protected render(): TemplateResult {
+    // Show individual setting page if active
+    if (this._activeSetting === "dnd") {
+      return html`
+        <tsuryphone-dnd-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-dnd-settings>
+      `;
+    }
+
+    // Show settings overview
     return html`
       <div class="settings-header">
         <button
