@@ -296,76 +296,160 @@ export class TsuryPhoneDNDSettings extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    console.log("[DND] ===== connectedCallback =====");
+    console.log("[DND] entityId:", this.entityId);
+    console.log("[DND] hass exists:", !!this.hass);
     this._loadCurrentSettings();
   }
 
   willUpdate(changedProps: Map<string, any>): void {
     super.willUpdate(changedProps);
     
-    // Reload settings when hass updates (real-time state changes)
+    const changedKeys = Array.from(changedProps.keys());
+    console.log("[DND] willUpdate - changed props:", changedKeys);
+    
     if (changedProps.has("hass") && this.hass && this.entityId) {
+      console.log("[DND] hass prop changed, reloading settings");
       this._loadCurrentSettings();
     }
   }
 
   private _getDeviceId(): string | null {
-    if (!this.entityId) return null;
-    return this.entityId.replace("sensor.", "").replace("_phone_state", "");
+    if (!this.entityId) {
+      console.error("[DND] _getDeviceId - entityId is null");
+      return null;
+    }
+    const deviceId = this.entityId.replace("sensor.", "").replace("_phone_state", "");
+    console.log(`[DND] _getDeviceId - extracted: "${deviceId}" from "${this.entityId}"`);
+    return deviceId;
   }
 
   private _findEntity(prefix: string, keywords: string[]): string | null {
-    if (!this.hass) return null;
+    if (!this.hass) {
+      console.error("[DND] _findEntity - hass is null");
+      return null;
+    }
     const deviceId = this._getDeviceId();
-    if (!deviceId) return null;
+    if (!deviceId) {
+      console.error("[DND] _findEntity - deviceId is null");
+      return null;
+    }
 
     const allEntityIds = Object.keys(this.hass.states);
-    return allEntityIds.find(
+    console.log(`[DND] _findEntity - searching for prefix="${prefix}", keywords=[${keywords.join(", ")}], deviceId="${deviceId}"`);
+    console.log(`[DND] _findEntity - total entities: ${allEntityIds.length}`);
+    
+    // Debug: show entities matching prefix
+    const prefixMatch = allEntityIds.filter(id => id.startsWith(prefix));
+    console.log(`[DND] _findEntity - entities with prefix "${prefix}":`, prefixMatch.slice(0, 10));
+    
+    // Debug: show entities matching deviceId
+    const deviceMatch = allEntityIds.filter(id => id.includes(deviceId));
+    console.log(`[DND] _findEntity - entities with deviceId "${deviceId}":`, deviceMatch.slice(0, 10));
+    
+    const found = allEntityIds.find(
       (id) => id.startsWith(prefix) && id.includes(deviceId) && keywords.some(kw => id.includes(kw))
     ) || null;
+    
+    if (found) {
+      console.log(`[DND] _findEntity - ✓ FOUND: "${found}"`);
+    } else {
+      console.error(`[DND] _findEntity - ✗ NOT FOUND with prefix="${prefix}", keywords=[${keywords.join(", ")}], deviceId="${deviceId}"`);
+    }
+    
+    return found;
   }
 
   private async _loadCurrentSettings(): Promise<void> {
-    if (!this.hass || !this.entityId) return;
+    console.log("[DND] ===== _loadCurrentSettings START =====");
+    console.log("[DND] hass:", !!this.hass);
+    console.log("[DND] entityId:", this.entityId);
+    
+    if (!this.hass || !this.entityId) {
+      console.error("[DND] Cannot load - missing hass or entityId");
+      return;
+    }
 
     try {
       // Find DND active binary sensor
+      console.log("[DND] --- Searching for DND binary sensor ---");
       const dndSensorId = this._findEntity("binary_sensor.", ["do_not_disturb", "_dnd"]);
       if (dndSensorId) {
-        this._dndActive = this.hass.states[dndSensorId].state === "on";
+        const state = this.hass.states[dndSensorId].state;
+        this._dndActive = state === "on";
+        console.log(`[DND] Set _dndActive = ${this._dndActive} (from state: "${state}")`);
+      } else {
+        console.error("[DND] DND binary sensor NOT FOUND!");
       }
 
       // Find Force DND switch
+      console.log("[DND] --- Searching for Force DND switch ---");
       const forceDndId = this._findEntity("switch.", ["force_dnd", "force_do_not_disturb"]);
       if (forceDndId) {
-        this._dndForce = this.hass.states[forceDndId].state === "on";
+        const state = this.hass.states[forceDndId].state;
+        this._dndForce = state === "on";
+        console.log(`[DND] Set _dndForce = ${this._dndForce} (from state: "${state}")`);
+      } else {
+        console.error("[DND] Force DND switch NOT FOUND!");
       }
 
       // Find DND Schedule Enabled switch
+      console.log("[DND] --- Searching for DND Schedule switch ---");
       const scheduleEnabledId = this._findEntity("switch.", ["dnd_schedule_enabled"]);
       if (scheduleEnabledId) {
-        this._scheduleEnabled = this.hass.states[scheduleEnabledId].state === "on";
+        const state = this.hass.states[scheduleEnabledId].state;
+        this._scheduleEnabled = state === "on";
+        console.log(`[DND] Set _scheduleEnabled = ${this._scheduleEnabled} (from state: "${state}")`);
+      } else {
+        console.error("[DND] DND Schedule switch NOT FOUND!");
       }
 
       // Load time settings from text entities
+      console.log("[DND] --- Searching for time text entities ---");
       const startHourId = this._findEntity("text.", ["dnd_start_hour"]);
       const startMinuteId = this._findEntity("text.", ["dnd_start_minute"]);
       const endHourId = this._findEntity("text.", ["dnd_end_hour"]);
       const endMinuteId = this._findEntity("text.", ["dnd_end_minute"]);
 
       if (startHourId) {
-        this._startHour = parseInt(this.hass.states[startHourId].state) || 22;
+        const state = this.hass.states[startHourId].state;
+        this._startHour = parseInt(state) || 22;
+        console.log(`[DND] Set _startHour = ${this._startHour} (from state: "${state}")`);
+      } else {
+        console.error("[DND] Start hour text entity NOT FOUND!");
       }
+      
       if (startMinuteId) {
-        this._startMinute = parseInt(this.hass.states[startMinuteId].state) || 0;
+        const state = this.hass.states[startMinuteId].state;
+        this._startMinute = parseInt(state) || 0;
+        console.log(`[DND] Set _startMinute = ${this._startMinute} (from state: "${state}")`);
+      } else {
+        console.error("[DND] Start minute text entity NOT FOUND!");
       }
+      
       if (endHourId) {
-        this._endHour = parseInt(this.hass.states[endHourId].state) || 8;
+        const state = this.hass.states[endHourId].state;
+        this._endHour = parseInt(state) || 8;
+        console.log(`[DND] Set _endHour = ${this._endHour} (from state: "${state}")`);
+      } else {
+        console.error("[DND] End hour text entity NOT FOUND!");
       }
+      
       if (endMinuteId) {
-        this._endMinute = parseInt(this.hass.states[endMinuteId].state) || 0;
+        const state = this.hass.states[endMinuteId].state;
+        this._endMinute = parseInt(state) || 0;
+        console.log(`[DND] Set _endMinute = ${this._endMinute} (from state: "${state}")`);
+      } else {
+        console.error("[DND] End minute text entity NOT FOUND!");
       }
+      
+      console.log("[DND] ===== _loadCurrentSettings FINAL STATE =====");
+      console.log(`[DND]   _dndActive: ${this._dndActive}`);
+      console.log(`[DND]   _dndForce: ${this._dndForce}`);
+      console.log(`[DND]   _scheduleEnabled: ${this._scheduleEnabled}`);
+      console.log(`[DND]   Time: ${this._startHour}:${this._startMinute.toString().padStart(2, "0")} - ${this._endHour}:${this._endMinute.toString().padStart(2, "0")}`);
     } catch (error) {
-      console.error("Failed to load DND settings:", error);
+      console.error("[DND] EXCEPTION in _loadCurrentSettings:", error);
     }
   }
 
@@ -381,24 +465,27 @@ export class TsuryPhoneDNDSettings extends LitElement {
   private async _handleDndForceToggle(e: Event): Promise<void> {
     const target = e.target as HTMLInputElement;
     const enabled = target.checked;
+    console.log(`[DND] ===== _handleDndForceToggle enabled=${enabled} =====`);
 
     const forceDndId = this._findEntity("switch.", ["force_dnd", "force_do_not_disturb"]);
     if (!forceDndId) {
-      console.error("Force DND switch entity not found");
+      console.error("[DND] Force DND toggle ABORTED - entity not found");
       target.checked = !enabled;
       return;
     }
 
     this._loading = true;
     try {
+      console.log(`[DND] Calling switch.${enabled ? "turn_on" : "turn_off"} on "${forceDndId}"`);
       await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
         entity_id: forceDndId,
       });
 
       this._dndForce = enabled;
+      console.log(`[DND] ✓ Successfully toggled force DND to ${enabled}`);
     } catch (error) {
-      console.error("Failed to toggle DND force:", error);
-      target.checked = !enabled; // Revert on error
+      console.error("[DND] ✗ FAILED to toggle force DND:", error);
+      target.checked = !enabled;
     } finally {
       this._loading = false;
     }
@@ -407,24 +494,27 @@ export class TsuryPhoneDNDSettings extends LitElement {
   private async _handleScheduleToggle(e: Event): Promise<void> {
     const target = e.target as HTMLInputElement;
     const enabled = target.checked;
+    console.log(`[DND] ===== _handleScheduleToggle enabled=${enabled} =====`);
 
     const scheduleEnabledId = this._findEntity("switch.", ["dnd_schedule_enabled"]);
     if (!scheduleEnabledId) {
-      console.error("DND schedule enabled switch entity not found");
+      console.error("[DND] Schedule toggle ABORTED - entity not found");
       target.checked = !enabled;
       return;
     }
 
     this._loading = true;
     try {
+      console.log(`[DND] Calling switch.${enabled ? "turn_on" : "turn_off"} on "${scheduleEnabledId}"`);
       await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
         entity_id: scheduleEnabledId,
       });
 
       this._scheduleEnabled = enabled;
+      console.log(`[DND] ✓ Successfully toggled schedule to ${enabled}`);
     } catch (error) {
-      console.error("Failed to toggle DND schedule:", error);
-      target.checked = !enabled; // Revert on error
+      console.error("[DND] ✗ FAILED to toggle schedule:", error);
+      target.checked = !enabled;
     } finally {
       this._loading = false;
     }
@@ -435,24 +525,28 @@ export class TsuryPhoneDNDSettings extends LitElement {
     const isHour = field.includes("hour");
     const max = isHour ? 23 : 59;
 
-    if (numValue < 0 || numValue > max) return;
+    console.log(`[DND] ===== _handleTimeChange field=${field}, value="${value}", num=${numValue} =====`);
 
-    // Find the corresponding text entity
+    if (numValue < 0 || numValue > max) {
+      console.error(`[DND] Time change ABORTED - invalid value ${numValue} (max: ${max})`);
+      return;
+    }
+
     const textEntityId = this._findEntity("text.", [`dnd_${field}`]);
     if (!textEntityId) {
-      console.error(`Text entity for ${field} not found`);
+      console.error(`[DND] Time change ABORTED - text entity for ${field} not found`);
       return;
     }
 
     this._loading = true;
     try {
+      console.log(`[DND] Calling text.set_value on "${textEntityId}" with value="${numValue}"`);
       await this.hass.callService("text", "set_value", {
         value: numValue.toString(),
       }, {
         entity_id: textEntityId,
       });
 
-      // Update local state
       switch (field) {
         case "start_hour":
           this._startHour = numValue;
@@ -467,8 +561,9 @@ export class TsuryPhoneDNDSettings extends LitElement {
           this._endMinute = numValue;
           break;
       }
+      console.log(`[DND] ✓ Successfully updated ${field} to ${numValue}`);
     } catch (error) {
-      console.error(`Failed to update ${field}:`, error);
+      console.error(`[DND] ✗ FAILED to update ${field}:`, error);
     } finally {
       this._loading = false;
     }
