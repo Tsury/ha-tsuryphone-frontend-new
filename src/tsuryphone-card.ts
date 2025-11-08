@@ -868,10 +868,10 @@ export class TsuryPhoneCard extends LitElement {
 
         console.log(`[CALL_LOG] Processing call entry seq=${call.seq}:`);
         console.log(`[CALL_LOG]   Raw name: "${call.name}" (type: ${typeof call.name})`);
-        console.log(`[CALL_LOG]   Raw normalized_number: "${call.normalized_number}"`);
+        console.log(`[CALL_LOG]   Raw number: "${call.number}"`);
         console.log(`[CALL_LOG]   call.name.trim(): "${call.name ? call.name.trim() : 'N/A'}"`);
         
-        const contactName = call.name && call.name.trim() ? call.name : call.normalized_number;
+        const contactName = call.name && call.name.trim() ? call.name : call.number;
         const hasContactName = !!(call.name && call.name.trim());
         
         console.log(`[CALL_LOG]   Computed contactName: "${contactName}"`);

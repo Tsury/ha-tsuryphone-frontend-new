@@ -53,7 +53,6 @@ export interface CallHistoryEntry {
   call_type: string; // "incoming" | "outgoing" | "blocked" | "missed"
   number: string;
   name: string;
-  normalized_number: string;
   is_incoming: boolean;
   duration_s: number | null;
   duration_ms: number | null;
