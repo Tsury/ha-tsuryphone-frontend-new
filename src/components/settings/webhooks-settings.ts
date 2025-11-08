@@ -18,6 +18,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
   @state() private _webhooks: WebhookEntry[] = [];
   @state() private _selectedAutomation: string | null = null;
   @state() private _detectedWebhookIds: string[] = [];
+  @state() private _selectedWebhookId: string = ""; // Store the selected webhook ID
   @state() private _newCode = "";
   @state() private _newActionName = "";
   @state() private _entityPickerLoaded = false;
@@ -169,11 +170,17 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       font-size: 12px;
       font-family: monospace;
       cursor: pointer;
-      transition: opacity 0.2s ease;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
     }
 
     .webhook-chip:hover {
       opacity: 0.8;
+    }
+
+    .webhook-chip.selected {
+      border-color: var(--accent-color, white);
+      box-shadow: 0 0 8px var(--primary-color);
     }
 
     /* Add Button */
@@ -504,14 +511,9 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
   }
 
   private _handleWebhookIdClick(webhookId: string): void {
-    // Auto-populate the webhook ID input when user clicks a detected webhook
-    const webhookIdEntity = this._findEntity("text.", ["webhook_id"]);
-    if (webhookIdEntity) {
-      this.hass.callService("text", "set_value", {
-        entity_id: webhookIdEntity,
-        value: webhookId,
-      });
-    }
+    // Store the selected webhook ID
+    this._selectedWebhookId = webhookId;
+    console.log("Selected webhook ID:", webhookId);
   }
 
   private async _handleAddWebhook(): Promise<void> {
@@ -520,36 +522,47 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       return;
     }
 
-    const codeEntity = this._findEntity("text.", ["webhook_code"]);
-    const nameEntity = this._findEntity("text.", ["webhook", "action_name"]);
-
-    if (!codeEntity || !nameEntity) {
-      console.error("Webhook text entities not found");
+    if (!this._selectedWebhookId || !this._newCode || !this._newActionName) {
+      console.error("Missing required fields:", {
+        webhookId: this._selectedWebhookId,
+        code: this._newCode,
+        name: this._newActionName,
+      });
       return;
     }
 
     this._loading = true;
     try {
-      // The button service will read from the text entities
-      await this.hass.callService(
-        "button",
-        "press",
-        {},
-        {
-          entity_id: this._findEntity("button.", ["webhook", "add"]),
-        }
-      );
+      console.log("Adding webhook with:", {
+        url: this._selectedWebhookId,
+        events: [this._newCode],
+        name: this._newActionName,
+      });
+
+      // Call tsuryphone.webhook_add service directly
+      await this.hass.callService("tsuryphone", "webhook_add", {
+        device_id: this.entityId.replace("sensor.", ""),
+        url: this._selectedWebhookId,
+        events: [this._newCode],
+        name: this._newActionName,
+      });
+
+      console.log("Webhook added successfully");
 
       // Clear form
       this._newCode = "";
       this._newActionName = "";
       this._selectedAutomation = null;
       this._detectedWebhookIds = [];
+      this._selectedWebhookId = "";
 
-      // Reload webhooks
-      await this._loadWebhooks();
+      // Reload webhooks after a short delay to allow backend to update
+      setTimeout(() => {
+        this._loadWebhooks();
+      }, 500);
     } catch (error) {
       console.error("Failed to add webhook:", error);
+      alert(`Failed to add webhook: ${error}`);
     } finally {
       this._loading = false;
     }
@@ -563,39 +576,23 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
     this._loading = true;
     try {
-      // Select the webhook to delete
-      const selectEntity = this._findEntity("select.", ["webhook"]);
-      if (selectEntity) {
-        const option = webhook.action_name
-          ? `${webhook.action_name} (${webhook.code})`
-          : webhook.code;
+      console.log("Removing webhook:", webhook.webhook_id);
 
-        await this.hass.callService("select", "select_option", {
-          entity_id: selectEntity,
-          option: option,
-        });
+      // Call tsuryphone.webhook_remove service directly
+      await this.hass.callService("tsuryphone", "webhook_remove", {
+        device_id: this.entityId.replace("sensor.", ""),
+        url: webhook.webhook_id,
+      });
 
-        // Trigger remove
-        const removeButtonEntity = this._findEntity("button.", [
-          "webhook",
-          "remove",
-        ]);
-        if (removeButtonEntity) {
-          await this.hass.callService(
-            "button",
-            "press",
-            {},
-            {
-              entity_id: removeButtonEntity,
-            }
-          );
-        }
-      }
+      console.log("Webhook removed successfully");
 
-      // Reload webhooks
-      await this._loadWebhooks();
+      // Reload webhooks after a short delay
+      setTimeout(() => {
+        this._loadWebhooks();
+      }, 500);
     } catch (error) {
       console.error("Failed to delete webhook:", error);
+      alert(`Failed to delete webhook: ${error}`);
     } finally {
       this._loading = false;
     }
@@ -677,14 +674,14 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
               ? html`
                   <div class="detected-webhooks">
                     <div class="detected-title">
-                      Detected webhook IDs (click to use):
+                      Detected webhook IDs (click to select):
                     </div>
                     ${this._detectedWebhookIds.map(
                       (id) => html`
                         <span
-                          class="webhook-chip"
+                          class="webhook-chip ${id === this._selectedWebhookId ? 'selected' : ''}"
                           @click=${() => this._handleWebhookIdClick(id)}
-                          title="Click to use this webhook ID"
+                          title="Click to select this webhook ID"
                         >
                           ${id}
                         </span>
@@ -733,8 +730,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
               class="add-button"
               @click=${this._handleAddWebhook}
               ?disabled=${this._loading ||
-              !this._selectedAutomation ||
-              this._detectedWebhookIds.length === 0 ||
+              !this._selectedWebhookId ||
               !this._newCode ||
               !this._newActionName}
             >
