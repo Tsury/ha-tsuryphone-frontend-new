@@ -147,12 +147,15 @@ export class TsuryPhoneKeypadView extends LitElement {
     triggerHaptic("selection");
 
     try {
+      // Handle + for international dialing, otherwise convert to number
+      const digitValue = digit === "+" ? "+" : parseInt(digit, 10);
+      
       // Send digit to backend - no optimistic update
       await this.hass.callService(
         "tsuryphone",
         "dial_digit",
         {
-          digit: parseInt(digit, 10),
+          digit: digitValue,
         },
         {
           entity_id: this._getPhoneStateEntityId(),
