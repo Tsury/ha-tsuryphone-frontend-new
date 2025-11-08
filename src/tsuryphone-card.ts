@@ -867,18 +867,9 @@ export class TsuryPhoneCard extends LitElement {
           callType = "missed";
         }
 
-        console.log(`[CALL_LOG] Processing call entry seq=${call.seq}:`);
-        console.log(`[CALL_LOG]   Raw name: "${call.name}" (type: ${typeof call.name})`);
-        console.log(`[CALL_LOG]   Raw number: "${call.number}"`);
-        console.log(`[CALL_LOG]   call.name.trim(): "${call.name ? call.name.trim() : 'N/A'}"`);
-        
         const normalizedNumber = normalizePhoneNumberForDisplay(call.number, this._defaultDialCode);
         const contactName = call.name && call.name.trim() ? call.name : normalizedNumber;
         const hasContactName = !!(call.name && call.name.trim());
-        
-        console.log(`[CALL_LOG]   Normalized number: "${normalizedNumber}"`);
-        console.log(`[CALL_LOG]   Computed contactName: "${contactName}"`);
-        console.log(`[CALL_LOG]   Computed hasContactName: ${hasContactName}`);
 
         const entry = {
           id: call.seq || `${call.received_ts}-${call.number}`,
@@ -890,8 +881,6 @@ export class TsuryPhoneCard extends LitElement {
           isBlocked: call.call_type === "blocked",
           hasContactName: hasContactName,
         };
-
-        console.log(`[CALL_LOG]   Final entry:`, entry);
 
         return entry;
       }

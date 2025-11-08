@@ -202,8 +202,6 @@ export class TsuryPhoneCallLogItem extends LitElement {
 
     // For non-contacts, show generic profile icon instead of dynamic initials
     const isContact = this.call.hasContactName;
-    
-    console.log(`[CALL_LOG_ITEM]   isContact: ${isContact}, will use ${isContact ? 'colored avatar with initials' : 'generic gray icon'}`);
 
     return html`
       <div class="call-item" @click=${this._handleClick}>
