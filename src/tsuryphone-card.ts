@@ -25,6 +25,7 @@ import "./components/home/home-view";
 import "./components/keypad/keypad-view";
 import "./components/contacts/contacts-view";
 import "./components/blocked/blocked-view";
+import "./components/settings/settings-view";
 import "./components/modals/contact-modal";
 import "./components/modals/call-modal";
 import type {
@@ -61,7 +62,7 @@ export class TsuryPhoneCard extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @property({ attribute: false }) config!: TsuryPhoneCardConfig;
 
-  @state() private _activeView: NavigationTab = "home";
+  @state() private _activeView: NavigationTab | "blocked" | "settings" = "home";
   @state() private _showCallModal = false;
   @state() private _showContactModal = false;
   @state() private _isSideMenuOpen = false;
@@ -741,6 +742,17 @@ export class TsuryPhoneCard extends LitElement {
     this._activeView = "contacts";
   }
 
+  private _handleNavigateBackFromSettings(): void {
+    this._activeView = "contacts";
+  }
+
+  private _handleSettingsNavigate(e: CustomEvent<{ section: string }>): void {
+    const section = e.detail.section;
+    // TODO: Navigate to specific settings section
+    // For now, this is a placeholder for Phase 6-14
+    console.log("Navigate to settings section:", section);
+  }
+
   private _handleSideMenuNavigate(
     e: CustomEvent<{ target: "blocked" | "settings" }>
   ): void {
@@ -749,8 +761,7 @@ export class TsuryPhoneCard extends LitElement {
     if (target === "blocked") {
       this._activeView = "blocked";
     } else if (target === "settings") {
-      // Settings view will be implemented in Phase 5
-      this._activeView = "contacts";
+      this._activeView = "settings";
     }
 
     this._isSideMenuOpen = false;
@@ -799,7 +810,7 @@ export class TsuryPhoneCard extends LitElement {
   }
 
   /**
-   * Render main views (home, keypad, contacts, blocked)
+   * Render main views (home, keypad, contacts, blocked, settings)
    */
   private _renderMainViews(): TemplateResult {
     return html`
@@ -809,10 +820,11 @@ export class TsuryPhoneCard extends LitElement {
           ${this._activeView === "keypad" ? this._renderKeypadView() : ""}
           ${this._activeView === "contacts" ? this._renderContactsView() : ""}
           ${this._activeView === "blocked" ? this._renderBlockedView() : ""}
+          ${this._activeView === "settings" ? this._renderSettingsView() : ""}
         </div>
 
         <tsuryphone-navigation
-          .activeTab=${this._activeView}
+          .activeTab=${this._activeView === "blocked" || this._activeView === "settings" ? "contacts" : this._activeView}
           .disabled=${this._showCallModal}
           @tab-change=${this._handleTabChange}
         ></tsuryphone-navigation>
@@ -1066,6 +1078,22 @@ export class TsuryPhoneCard extends LitElement {
           .blockedNumbers=${this._blockedCache}
           @navigate-back=${this._handleNavigateBackFromBlocked}
         ></tsuryphone-blocked-view>
+      </div>
+    `;
+  }
+
+  /**
+   * Render settings view
+   */
+  private _renderSettingsView(): TemplateResult {
+    return html`
+      <div class="view settings-view fade-in">
+        <tsuryphone-settings-view
+          .hass=${this.hass}
+          .entityId=${this.config.entity}
+          @navigate-back=${this._handleNavigateBackFromSettings}
+          @settings-navigate=${this._handleSettingsNavigate}
+        ></tsuryphone-settings-view>
       </div>
     `;
   }
