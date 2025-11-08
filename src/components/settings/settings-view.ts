@@ -2,6 +2,7 @@ import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import "./dnd-settings";
+import "./audio-settings";
 import "./device-settings";
 
 export interface SettingsSection {
@@ -345,6 +346,16 @@ export class TsuryPhoneSettingsView extends LitElement {
           .entityId=${this.entityId}
           @navigate-back=${this._handleBackFromSettings}
         ></tsuryphone-dnd-settings>
+      `;
+    }
+
+    if (this._activeSetting === "audio") {
+      return html`
+        <tsuryphone-audio-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-audio-settings>
       `;
     }
 
