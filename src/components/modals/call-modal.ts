@@ -44,9 +44,11 @@ export class TsuryPhoneCallModal extends LitElement {
   @state() private _showKeypad = false;
   @state() private _dialedDigits = "";
   @state() private _swipeStartX = 0;
+  @state() private _swipeStartY = 0;
   @state() private _swipeDistance = 0;
   @state() private _isSwipingLeft = false;
   @state() private _isSwipingRight = false;
+  @state() private _isSwiping = false; // Track if actively swiping
 
   static override styles: CSSResultGroup = css`
     :host {
@@ -530,17 +532,33 @@ export class TsuryPhoneCallModal extends LitElement {
   private _handleSwipeStart(e: TouchEvent | MouseEvent): void {
     if (e instanceof TouchEvent) {
       this._swipeStartX = e.touches[0].clientX;
+      this._swipeStartY = e.touches[0].clientY;
     } else {
       this._swipeStartX = e.clientX;
+      this._swipeStartY = e.clientY;
     }
     this._swipeDistance = 0;
+    this._isSwiping = true;
   }
 
   private _handleSwipeMove(e: TouchEvent | MouseEvent): void {
+    // Only process if we started a swipe
+    if (!this._isSwiping) return;
     if (this._isAnswering || this._isDeclining) return;
 
     const currentX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX;
-    this._swipeDistance = currentX - this._swipeStartX;
+    const currentY = e instanceof TouchEvent ? e.touches[0].clientY : e.clientY;
+    
+    const deltaX = currentX - this._swipeStartX;
+    const deltaY = currentY - this._swipeStartY;
+    
+    // Allow significant vertical tolerance - only reject if movement is primarily vertical
+    // Ratio of 2:1 means vertical movement must be twice as large to reject
+    if (Math.abs(deltaY) > Math.abs(deltaX) * 2) {
+      return; // Too much vertical movement
+    }
+
+    this._swipeDistance = deltaX;
 
     // Limit swipe distance
     const maxDistance = 200;
@@ -557,6 +575,9 @@ export class TsuryPhoneCallModal extends LitElement {
   }
 
   private _handleSwipeEnd(): void {
+    // Only process if we were actively swiping
+    if (!this._isSwiping) return;
+    
     // Lower threshold to make it easier to reach edges
     const threshold = 80;
 
@@ -569,6 +590,7 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     // Always reset swipe state
+    this._isSwiping = false;
     this._swipeDistance = 0;
     this._isSwipingLeft = false;
     this._isSwipingRight = false;
