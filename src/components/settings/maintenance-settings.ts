@@ -9,6 +9,7 @@ export class TsuryPhoneMaintenanceSettings extends LitElement {
 
   @state() private _maintenanceActive = false;
   @state() private _loading = false;
+  @state() private _deviceIp: string | null = null;
 
   static styles: CSSResultGroup = css`
     :host {
@@ -204,6 +205,52 @@ export class TsuryPhoneMaintenanceSettings extends LitElement {
       color: rgb(255, 152, 0);
     }
 
+    /* Web Portal Link */
+    .portal-link {
+      margin: 0 20px 16px;
+      padding: 16px;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      border-radius: 12px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 500;
+      transition: opacity 0.2s ease;
+    }
+
+    .portal-link:hover {
+      opacity: 0.9;
+    }
+
+    .portal-link:active {
+      opacity: 0.8;
+    }
+
+    .portal-link-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .portal-link-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .portal-link-url {
+      font-size: 13px;
+      opacity: 0.9;
+      font-family: monospace;
+    }
+
+    .portal-link ha-icon {
+      --mdc-icon-size: 24px;
+      flex-shrink: 0;
+    }
+
     /* Loading State */
     .loading-overlay {
       position: absolute;
@@ -272,6 +319,17 @@ export class TsuryPhoneMaintenanceSettings extends LitElement {
         const state = this.hass.states[maintenanceSensorId].state;
         this._maintenanceActive = state === "on";
       }
+
+      // Try to get device IP from sensor entity (if available)
+      const sensorEntity = this.hass.states[this.entityId];
+      if (sensorEntity?.attributes) {
+        // Look for IP in various possible attribute names
+        this._deviceIp = 
+          sensorEntity.attributes.ip_address ||
+          sensorEntity.attributes.device_ip ||
+          sensorEntity.attributes.ip ||
+          null;
+      }
     } catch (error) {
       console.error("Failed to load maintenance settings:", error);
     }
@@ -329,28 +387,44 @@ export class TsuryPhoneMaintenanceSettings extends LitElement {
         <!-- Status Banner -->
         <div class="status-banner ${this._maintenanceActive ? "active" : "inactive"}">
           <div class="status-icon">
-            <ha-icon icon="${this._maintenanceActive ? "mdi:alert-circle" : "mdi:check-circle"}"></ha-icon>
+            <ha-icon icon="${this._maintenanceActive ? "mdi:cog" : "mdi:check-circle"}"></ha-icon>
           </div>
           <div class="status-content">
             <div class="status-title">
-              ${this._maintenanceActive ? "Maintenance Active" : "Normal Operation"}
+              ${this._maintenanceActive ? "Web Portal Active" : "Portal Inactive"}
             </div>
             <div class="status-description">
               ${this._maintenanceActive 
-                ? "Device is in maintenance mode" 
-                : "Device is operating normally"}
+                ? "Configuration portal is accessible" 
+                : "Enable to access WiFi and OTA settings"}
             </div>
           </div>
         </div>
 
+        <!-- Web Portal Link (only shown when active) -->
+        ${this._maintenanceActive && this._deviceIp ? html`
+          <a
+            class="portal-link"
+            href="http://${this._deviceIp}/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div class="portal-link-content">
+              <div class="portal-link-title">Open Web Portal</div>
+              <div class="portal-link-url">http://${this._deviceIp}/</div>
+            </div>
+            <ha-icon icon="mdi:open-in-new"></ha-icon>
+          </a>
+        ` : ""}
+
         <!-- Maintenance Mode Toggle -->
         <div class="settings-group">
-          <div class="group-header">Configuration</div>
+          <div class="group-header">Configuration Portal</div>
           <div class="setting-item">
             <div class="setting-info">
-              <div class="setting-title">Enable Maintenance Mode</div>
+              <div class="setting-title">Enable Web Portal</div>
               <div class="setting-description">
-                Prevent automatic reboots during device configuration
+                Start configuration portal for WiFi and OTA updates
               </div>
             </div>
             <ha-switch
@@ -364,18 +438,20 @@ export class TsuryPhoneMaintenanceSettings extends LitElement {
         <!-- Help Text -->
         ${this._maintenanceActive ? html`
           <div class="help-text warning">
-            <ha-icon icon="mdi:alert"></ha-icon>
+            <ha-icon icon="mdi:clock-alert"></ha-icon>
             <div>
-              <strong>Important:</strong> Maintenance mode prevents the device from automatically rebooting. 
-              Normal phone operations may be affected. Disable maintenance mode when configuration is complete.
+              <strong>Portal Timeout:</strong> The configuration portal will automatically close after 5 minutes of inactivity. 
+              Use the portal to change WiFi credentials or perform OTA firmware updates. 
+              Normal phone functionality is disabled while the portal is active.
             </div>
           </div>
         ` : html`
           <div class="help-text">
             <ha-icon icon="mdi:information"></ha-icon>
             <div>
-              Enable maintenance mode when making configuration changes to prevent the device from rebooting. 
-              The device will automatically return to normal mode after a manual reboot.
+              Enable the web portal to access device configuration at <strong>http://DEVICE_IP/</strong>. 
+              You can change WiFi settings and upload firmware updates. 
+              The portal automatically times out after 5 minutes for security.
             </div>
           </div>
         `}
