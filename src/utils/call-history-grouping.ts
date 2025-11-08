@@ -16,6 +16,7 @@ export interface CallHistoryEntry {
   type: CallType;
   isBlocked?: boolean;
   count?: number; // For stacked calls
+  hasContactName?: boolean; // Whether this is from contacts or just a number
 }
 
 export interface GroupedCallHistory {

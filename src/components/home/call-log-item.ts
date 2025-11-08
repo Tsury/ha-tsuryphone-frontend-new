@@ -45,6 +45,14 @@ export class TsuryPhoneCallLogItem extends LitElement {
       flex-shrink: 0;
     }
 
+    .avatar.generic {
+      background: var(--secondary-text-color);
+    }
+
+    .avatar ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
     .call-info {
       flex: 1;
       min-width: 0;
@@ -184,11 +192,22 @@ export class TsuryPhoneCallLogItem extends LitElement {
       this.defaultDialCode
     );
 
+    // For non-contacts, show generic profile icon instead of dynamic initials
+    const isContact = this.call.hasContactName;
+
     return html`
       <div class="call-item" @click=${this._handleClick}>
-        <div class="avatar" style="background-color: ${avatarColor}">
-          ${initials}
-        </div>
+        ${isContact
+          ? html`
+              <div class="avatar" style="background-color: ${avatarColor}">
+                ${initials}
+              </div>
+            `
+          : html`
+              <div class="avatar generic">
+                <ha-icon icon="mdi:account"></ha-icon>
+              </div>
+            `}
         <div class="call-info">
           <div class="call-header">
             <span class="contact-name">${this.call.contactName}</span>
