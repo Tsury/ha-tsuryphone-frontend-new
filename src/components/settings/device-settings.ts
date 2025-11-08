@@ -10,6 +10,8 @@ export class TsuryPhoneDeviceSettings extends LitElement {
   @state() private _loading = false;
   @state() private _showRebootConfirm = false;
   @state() private _showFactoryResetConfirm = false;
+  @state() private _maintenanceActive = false;
+  @state() private _deviceIp: string | null = null;
 
   static styles: CSSResultGroup = css`
     :host {
@@ -160,6 +162,143 @@ export class TsuryPhoneDeviceSettings extends LitElement {
 
     .action-button.danger .action-description {
       color: rgb(244, 67, 54);
+    }
+
+    /* Status Banner */
+    .status-banner {
+      margin: 0 20px 16px;
+      padding: 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.3s ease;
+    }
+
+    .status-banner.active {
+      background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 152, 0, 0.05) 100%);
+    }
+
+    .status-banner.inactive {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .status-banner.active .status-icon {
+      background: rgba(255, 152, 0, 0.2);
+      color: rgb(255, 152, 0);
+    }
+
+    .status-banner.inactive .status-icon {
+      background: rgba(76, 175, 80, 0.2);
+      color: rgb(76, 175, 80);
+    }
+
+    .status-icon ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .status-content {
+      flex: 1;
+    }
+
+    .status-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin-bottom: 2px;
+    }
+
+    .status-description {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+    }
+
+    /* Web Portal Link */
+    .portal-link {
+      margin: 0 20px 16px;
+      padding: 16px;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      border-radius: 12px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 500;
+      transition: opacity 0.2s ease;
+    }
+
+    .portal-link:hover {
+      opacity: 0.9;
+    }
+
+    .portal-link:active {
+      opacity: 0.8;
+    }
+
+    .portal-link-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .portal-link-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .portal-link-url {
+      font-size: 13px;
+      opacity: 0.9;
+      font-family: monospace;
+    }
+
+    .portal-link ha-icon {
+      --mdc-icon-size: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Maintenance Toggle Item */
+    .setting-item {
+      margin: 0 20px 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--card-background-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .setting-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .setting-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    .setting-description {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
     }
 
     /* Help Text */
@@ -349,6 +488,54 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
   `;
 
+  connectedCallback(): void {
+    super.connectedCallback();
+    this._loadMaintenanceStatus();
+  }
+
+  willUpdate(changedProps: Map<string, any>): void {
+    super.willUpdate(changedProps);
+    
+    if (changedProps.has("hass") && this.hass && this.entityId) {
+      this._loadMaintenanceStatus();
+    }
+  }
+
+  private _findEntity(prefix: string, keywords: string[]): string | null {
+    if (!this.hass) return null;
+
+    const allEntityIds = Object.keys(this.hass.states);
+    
+    const found = allEntityIds.find(
+      (id) => id.startsWith(prefix) && keywords.some(kw => id.includes(kw))
+    ) || null;
+    
+    return found;
+  }
+
+  private async _loadMaintenanceStatus(): Promise<void> {
+    if (!this.hass || !this.entityId) return;
+
+    try {
+      const maintenanceSensorId = this._findEntity("binary_sensor.", ["maintenance_mode", "maintenance"]);
+      if (maintenanceSensorId) {
+        const state = this.hass.states[maintenanceSensorId].state;
+        this._maintenanceActive = state === "on";
+      }
+
+      const sensorEntity = this.hass.states[this.entityId];
+      if (sensorEntity?.attributes) {
+        this._deviceIp = 
+          sensorEntity.attributes.ip_address ||
+          sensorEntity.attributes.device_ip ||
+          sensorEntity.attributes.ip ||
+          null;
+      }
+    } catch (error) {
+      console.error("Failed to load maintenance status:", error);
+    }
+  }
+
   private _handleBack(): void {
     this.dispatchEvent(
       new CustomEvent("navigate-back", {
@@ -369,6 +556,32 @@ export class TsuryPhoneDeviceSettings extends LitElement {
   private _closeDialogs(): void {
     this._showRebootConfirm = false;
     this._showFactoryResetConfirm = false;
+  }
+
+  private async _handleMaintenanceToggle(e: Event): Promise<void> {
+    const target = e.target as HTMLInputElement;
+    const enabled = target.checked;
+
+    const maintenanceSwitchId = this._findEntity("switch.", ["maintenance_mode", "maintenance"]);
+    if (!maintenanceSwitchId) {
+      console.error("Maintenance mode switch entity not found");
+      target.checked = !enabled;
+      return;
+    }
+
+    this._loading = true;
+    try {
+      await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+        entity_id: maintenanceSwitchId,
+      });
+
+      this._maintenanceActive = enabled;
+    } catch (error) {
+      console.error("Failed to toggle maintenance mode:", error);
+      target.checked = !enabled;
+    } finally {
+      this._loading = false;
+    }
   }
 
   private async _handleReboot(): Promise<void> {
@@ -433,6 +646,80 @@ export class TsuryPhoneDeviceSettings extends LitElement {
       </div>
 
       <div class="settings-content">
+        <!-- Maintenance Mode Section -->
+        <div class="settings-group">
+          <div class="group-header">Configuration Portal</div>
+          
+          <!-- Status Banner -->
+          <div class="status-banner ${this._maintenanceActive ? "active" : "inactive"}">
+            <div class="status-icon">
+              <ha-icon icon="${this._maintenanceActive ? "mdi:cog" : "mdi:check-circle"}"></ha-icon>
+            </div>
+            <div class="status-content">
+              <div class="status-title">
+                ${this._maintenanceActive ? "Web Portal Active" : "Portal Inactive"}
+              </div>
+              <div class="status-description">
+                ${this._maintenanceActive 
+                  ? "Configuration portal is accessible" 
+                  : "Enable to access WiFi and OTA settings"}
+              </div>
+            </div>
+          </div>
+
+          <!-- Web Portal Link (only shown when active) -->
+          ${this._maintenanceActive && this._deviceIp ? html`
+            <a
+              class="portal-link"
+              href="http://${this._deviceIp}/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="portal-link-content">
+                <div class="portal-link-title">Open Web Portal</div>
+                <div class="portal-link-url">http://${this._deviceIp}/</div>
+              </div>
+              <ha-icon icon="mdi:open-in-new"></ha-icon>
+            </a>
+          ` : ""}
+
+          <!-- Maintenance Mode Toggle -->
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title">Enable Web Portal</div>
+              <div class="setting-description">
+                Start configuration portal for WiFi and OTA updates
+              </div>
+            </div>
+            <ha-switch
+              .checked=${this._maintenanceActive}
+              @change=${this._handleMaintenanceToggle}
+              .disabled=${this._loading}
+            ></ha-switch>
+          </div>
+        </div>
+
+        <!-- Help Text for Maintenance Mode -->
+        ${this._maintenanceActive ? html`
+          <div class="help-text">
+            <ha-icon icon="mdi:clock-alert"></ha-icon>
+            <div>
+              <strong>Portal Timeout:</strong> The configuration portal will automatically close after 5 minutes of inactivity. 
+              Use the portal to change WiFi credentials or perform OTA firmware updates. 
+              Normal phone functionality is disabled while the portal is active.
+            </div>
+          </div>
+        ` : html`
+          <div class="help-text">
+            <ha-icon icon="mdi:information"></ha-icon>
+            <div>
+              Enable the web portal to access device configuration at <strong>http://DEVICE_IP/</strong>. 
+              You can change WiFi settings and upload firmware updates. 
+              The portal automatically times out after 5 minutes for security.
+            </div>
+          </div>
+        `}
+
         <!-- Device Actions -->
         <div class="settings-group">
           <div class="group-header">Device Actions</div>
