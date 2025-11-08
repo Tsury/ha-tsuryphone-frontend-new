@@ -527,15 +527,19 @@ export class TsuryPhoneCallModal extends LitElement {
     );
   }
 
-  private _handleSwipeStart(e: TouchEvent): void {
-    this._swipeStartX = e.touches[0].clientX;
+  private _handleSwipeStart(e: TouchEvent | MouseEvent): void {
+    if (e instanceof TouchEvent) {
+      this._swipeStartX = e.touches[0].clientX;
+    } else {
+      this._swipeStartX = e.clientX;
+    }
     this._swipeDistance = 0;
   }
 
-  private _handleSwipeMove(e: TouchEvent): void {
+  private _handleSwipeMove(e: TouchEvent | MouseEvent): void {
     if (this._isAnswering || this._isDeclining) return;
 
-    const currentX = e.touches[0].clientX;
+    const currentX = e instanceof TouchEvent ? e.touches[0].clientX : e.clientX;
     this._swipeDistance = currentX - this._swipeStartX;
 
     // Limit swipe distance
@@ -545,15 +549,16 @@ export class TsuryPhoneCallModal extends LitElement {
       Math.min(maxDistance, this._swipeDistance)
     );
 
-    // Update visual state
-    this._isSwipingLeft = this._swipeDistance < -50;
-    this._isSwipingRight = this._swipeDistance > 50;
+    // Update visual state with lower threshold for easier triggering
+    this._isSwipingLeft = this._swipeDistance < -30;
+    this._isSwipingRight = this._swipeDistance > 30;
 
     this.requestUpdate();
   }
 
   private _handleSwipeEnd(): void {
-    const threshold = 120;
+    // Lower threshold to make it easier to reach edges
+    const threshold = 80;
 
     if (this._swipeDistance < -threshold) {
       // Swipe left to decline
@@ -563,7 +568,7 @@ export class TsuryPhoneCallModal extends LitElement {
       this._handleAnswer();
     }
 
-    // Reset swipe state
+    // Always reset swipe state
     this._swipeDistance = 0;
     this._isSwipingLeft = false;
     this._isSwipingRight = false;
@@ -846,13 +851,16 @@ export class TsuryPhoneCallModal extends LitElement {
           : ""}
       </div>
 
-      <div class="call-status">Incoming call...</div>
-
       <div
         class="swipe-slider"
         @touchstart=${this._handleSwipeStart}
         @touchmove=${this._handleSwipeMove}
         @touchend=${this._handleSwipeEnd}
+        @touchcancel=${this._handleSwipeEnd}
+        @mousedown=${this._handleSwipeStart}
+        @mousemove=${this._handleSwipeMove}
+        @mouseup=${this._handleSwipeEnd}
+        @mouseleave=${this._handleSwipeEnd}
       >
         <div class="swipe-track">
           <span class="swipe-label decline">Decline</span>
