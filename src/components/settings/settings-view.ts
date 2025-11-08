@@ -35,7 +35,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
     id: "device",
     title: "Device Management",
     icon: "mdi:cellphone-cog",
-    description: "Reset and reboot options",
+    description: "Reset, reboot, and integration options",
     category: "device",
   },
   {
@@ -47,13 +47,6 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   },
   
   // Advanced Settings
-  {
-    id: "send-mode",
-    title: "Send Mode",
-    icon: "mdi:send",
-    description: "Dial behavior and card communication",
-    category: "advanced",
-  },
   {
     id: "webhooks",
     title: "Webhooks",

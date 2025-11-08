@@ -12,6 +12,7 @@ export class TsuryPhoneDeviceSettings extends LitElement {
   @state() private _showFactoryResetConfirm = false;
   @state() private _maintenanceActive = false;
   @state() private _deviceIp: string | null = null;
+  @state() private _sendModeEnabled = false;
 
   static styles: CSSResultGroup = css`
     :host {
@@ -523,6 +524,12 @@ export class TsuryPhoneDeviceSettings extends LitElement {
         this._maintenanceActive = state === "on";
       }
 
+      const sendModeSwitchId = this._findEntity("switch.", ["send_mode"]);
+      if (sendModeSwitchId) {
+        const state = this.hass.states[sendModeSwitchId].state;
+        this._sendModeEnabled = state === "on";
+      }
+
       const sensorEntity = this.hass.states[this.entityId];
       if (sensorEntity?.attributes) {
         this._deviceIp = 
@@ -578,6 +585,32 @@ export class TsuryPhoneDeviceSettings extends LitElement {
       this._maintenanceActive = enabled;
     } catch (error) {
       console.error("Failed to toggle maintenance mode:", error);
+      target.checked = !enabled;
+    } finally {
+      this._loading = false;
+    }
+  }
+
+  private async _handleSendModeToggle(e: Event): Promise<void> {
+    const target = e.target as HTMLInputElement;
+    const enabled = target.checked;
+
+    const sendModeSwitchId = this._findEntity("switch.", ["send_mode"]);
+    if (!sendModeSwitchId) {
+      console.error("Send mode switch entity not found");
+      target.checked = !enabled;
+      return;
+    }
+
+    this._loading = true;
+    try {
+      await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+        entity_id: sendModeSwitchId,
+      });
+
+      this._sendModeEnabled = enabled;
+    } catch (error) {
+      console.error("Failed to toggle send mode:", error);
       target.checked = !enabled;
     } finally {
       this._loading = false;
@@ -719,6 +752,37 @@ export class TsuryPhoneDeviceSettings extends LitElement {
             </div>
           </div>
         `}
+
+        <!-- Send Mode Section -->
+        <div class="settings-group">
+          <div class="group-header">Integration Behavior</div>
+          
+          <!-- Send Mode Toggle -->
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title">Send Mode</div>
+              <div class="setting-description">
+                Require explicit send action for integration dialing
+              </div>
+            </div>
+            <ha-switch
+              .checked=${this._sendModeEnabled}
+              @change=${this._handleSendModeToggle}
+              .disabled=${this._loading}
+            ></ha-switch>
+          </div>
+        </div>
+
+        <!-- Help Text for Send Mode -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            When <strong>Send Mode</strong> is enabled, digits entered through the integration (card keypad) 
+            are queued and require pressing the send button to dial. 
+            This does not affect the physical rotary dial, which always dials immediately. 
+            Useful for modern phone behavior when using the card interface.
+          </div>
+        </div>
 
         <!-- Device Actions -->
         <div class="settings-group">
