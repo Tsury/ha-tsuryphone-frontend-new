@@ -308,51 +308,61 @@ export class TsuryPhoneDNDSettings extends LitElement {
     }
   }
 
+  private _getDeviceId(): string | null {
+    if (!this.entityId) return null;
+    return this.entityId.replace("sensor.", "").replace("_phone_state", "");
+  }
+
+  private _findEntity(prefix: string, keywords: string[]): string | null {
+    if (!this.hass) return null;
+    const deviceId = this._getDeviceId();
+    if (!deviceId) return null;
+
+    const allEntityIds = Object.keys(this.hass.states);
+    return allEntityIds.find(
+      (id) => id.startsWith(prefix) && id.includes(deviceId) && keywords.some(kw => id.includes(kw))
+    ) || null;
+  }
+
   private async _loadCurrentSettings(): Promise<void> {
     if (!this.hass || !this.entityId) return;
 
     try {
-      const phoneStateEntity = this.hass.states[this.entityId];
-      
-      if (!phoneStateEntity) {
-        console.warn(`Phone state entity ${this.entityId} not found`);
-        return;
+      // Find DND active binary sensor
+      const dndSensorId = this._findEntity("binary_sensor.", ["do_not_disturb", "_dnd"]);
+      if (dndSensorId) {
+        this._dndActive = this.hass.states[dndSensorId].state === "on";
       }
 
-      const attrs = phoneStateEntity.attributes as any;
-
-      // Read DND active status from phone state attributes
-      if (typeof attrs.dnd_active === "boolean") {
-        this._dndActive = attrs.dnd_active;
+      // Find Force DND switch
+      const forceDndId = this._findEntity("switch.", ["force_dnd", "force_do_not_disturb"]);
+      if (forceDndId) {
+        this._dndForce = this.hass.states[forceDndId].state === "on";
       }
 
-      // Read DND config from phone state attributes
-      if (attrs.dnd_config) {
-        const config = attrs.dnd_config;
-        
-        if (typeof config.force === "boolean") {
-          this._dndForce = config.force;
-        }
-        
-        if (typeof config.scheduled === "boolean") {
-          this._scheduleEnabled = config.scheduled;
-        }
-        
-        if (typeof config.start_hour === "number") {
-          this._startHour = config.start_hour;
-        }
-        
-        if (typeof config.start_minute === "number") {
-          this._startMinute = config.start_minute;
-        }
-        
-        if (typeof config.end_hour === "number") {
-          this._endHour = config.end_hour;
-        }
-        
-        if (typeof config.end_minute === "number") {
-          this._endMinute = config.end_minute;
-        }
+      // Find DND Schedule Enabled switch
+      const scheduleEnabledId = this._findEntity("switch.", ["dnd_schedule_enabled"]);
+      if (scheduleEnabledId) {
+        this._scheduleEnabled = this.hass.states[scheduleEnabledId].state === "on";
+      }
+
+      // Load time settings from text entities
+      const startHourId = this._findEntity("text.", ["dnd_start_hour"]);
+      const startMinuteId = this._findEntity("text.", ["dnd_start_minute"]);
+      const endHourId = this._findEntity("text.", ["dnd_end_hour"]);
+      const endMinuteId = this._findEntity("text.", ["dnd_end_minute"]);
+
+      if (startHourId) {
+        this._startHour = parseInt(this.hass.states[startHourId].state) || 22;
+      }
+      if (startMinuteId) {
+        this._startMinute = parseInt(this.hass.states[startMinuteId].state) || 0;
+      }
+      if (endHourId) {
+        this._endHour = parseInt(this.hass.states[endHourId].state) || 8;
+      }
+      if (endMinuteId) {
+        this._endMinute = parseInt(this.hass.states[endMinuteId].state) || 0;
       }
     } catch (error) {
       console.error("Failed to load DND settings:", error);
@@ -372,16 +382,20 @@ export class TsuryPhoneDNDSettings extends LitElement {
     const target = e.target as HTMLInputElement;
     const enabled = target.checked;
 
+    const forceDndId = this._findEntity("switch.", ["force_dnd", "force_do_not_disturb"]);
+    if (!forceDndId) {
+      console.error("Force DND switch entity not found");
+      target.checked = !enabled;
+      return;
+    }
+
     this._loading = true;
     try {
-      await this.hass.callService("tsuryphone", "set_dnd", {
-        force: enabled,
-      }, {
-        entity_id: this.entityId,
+      await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+        entity_id: forceDndId,
       });
 
       this._dndForce = enabled;
-      await this._loadCurrentSettings();
     } catch (error) {
       console.error("Failed to toggle DND force:", error);
       target.checked = !enabled; // Revert on error
@@ -394,16 +408,20 @@ export class TsuryPhoneDNDSettings extends LitElement {
     const target = e.target as HTMLInputElement;
     const enabled = target.checked;
 
+    const scheduleEnabledId = this._findEntity("switch.", ["dnd_schedule_enabled"]);
+    if (!scheduleEnabledId) {
+      console.error("DND schedule enabled switch entity not found");
+      target.checked = !enabled;
+      return;
+    }
+
     this._loading = true;
     try {
-      await this.hass.callService("tsuryphone", "set_dnd", {
-        scheduled: enabled,
-      }, {
-        entity_id: this.entityId,
+      await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+        entity_id: scheduleEnabledId,
       });
 
       this._scheduleEnabled = enabled;
-      await this._loadCurrentSettings();
     } catch (error) {
       console.error("Failed to toggle DND schedule:", error);
       target.checked = !enabled; // Revert on error
@@ -419,13 +437,19 @@ export class TsuryPhoneDNDSettings extends LitElement {
 
     if (numValue < 0 || numValue > max) return;
 
+    // Find the corresponding text entity
+    const textEntityId = this._findEntity("text.", [`dnd_${field}`]);
+    if (!textEntityId) {
+      console.error(`Text entity for ${field} not found`);
+      return;
+    }
+
     this._loading = true;
     try {
-      const updateData: any = {};
-      updateData[field] = numValue;
-
-      await this.hass.callService("tsuryphone", "set_dnd", updateData, {
-        entity_id: this.entityId,
+      await this.hass.callService("text", "set_value", {
+        value: numValue.toString(),
+      }, {
+        entity_id: textEntityId,
       });
 
       // Update local state
@@ -443,8 +467,6 @@ export class TsuryPhoneDNDSettings extends LitElement {
           this._endMinute = numValue;
           break;
       }
-
-      await this._loadCurrentSettings();
     } catch (error) {
       console.error(`Failed to update ${field}:`, error);
     } finally {
