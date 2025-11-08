@@ -473,8 +473,10 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       // Filter for webhook triggers - check both 'platform' and 'trigger' fields
       this._detectedWebhookIds = triggers
         .filter((t: any) => {
+          console.log("Checking trigger:", t); // Debug individual trigger
           const isWebhook = t?.platform === "webhook" || t?.trigger === "webhook";
           const hasWebhookId = t?.webhook_id;
+          console.log(`  isWebhook: ${isWebhook}, hasWebhookId: ${hasWebhookId}`);
           return isWebhook && hasWebhookId;
         })
         .map((t: any) => t.webhook_id);
