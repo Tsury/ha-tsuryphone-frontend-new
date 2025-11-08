@@ -95,7 +95,10 @@ export class TsuryPhoneCallModal extends LitElement {
 
     /* Bottom control panel with rounded top (half-pill) */
     .call-controls-panel {
-      position: relative;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
       background: var(--secondary-background-color);
       border-radius: 24px 24px 0 0;
       padding: 24px 0;
@@ -105,6 +108,11 @@ export class TsuryPhoneCallModal extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
+    }
+
+    .call-controls-panel.no-background {
+      background: transparent;
+      box-shadow: none;
     }
 
     /* Keypad container slides from behind panel */
@@ -124,7 +132,7 @@ export class TsuryPhoneCallModal extends LitElement {
     }
 
     .call-keypad-container.visible {
-      transform: translateY(-100%);
+      transform: translateY(0);
       z-index: 3;
     }
 
@@ -203,9 +211,10 @@ export class TsuryPhoneCallModal extends LitElement {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 0;
       overflow-y: auto;
       box-sizing: border-box;
+      position: relative;
     }
 
     /* Incoming Call UI */
@@ -882,9 +891,25 @@ export class TsuryPhoneCallModal extends LitElement {
           ? this._renderWaitingCall()
           : ""}
       </div>
+    `;
+  }
 
+  private _renderCallControls(): TemplateResult {
+    const { callInfo } = this;
+    if (!callInfo) return html``;
+
+    const audioOutput = (callInfo.audioOutput || "").toLowerCase();
+    const isSpeaker = audioOutput === "speaker";
+
+    // Check phone state to determine if we're dialing
+    const phoneState = this.entityId
+      ? this.hass.states[this.entityId]?.state
+      : null;
+    const isDialing = phoneState === "Dialing";
+
+    return html`
       <!-- Bottom control panel -->
-      <div class="call-controls-panel">
+      <div class="call-controls-panel ${isDialing ? "no-background" : ""}">
         <div class="call-controls">
           <button
             class="control-button ${this._isMuted ? "active" : ""}"
@@ -928,7 +953,7 @@ export class TsuryPhoneCallModal extends LitElement {
         </button>
       </div>
 
-      <!-- Sliding keypad (behind panel, slides up) -->
+      <!-- Sliding keypad (slides up to replace controls) -->
       <div class="call-keypad-container ${this._showKeypad ? "visible" : ""}">
         <div class="keypad-header">
           <button class="keypad-close" @click=${this._toggleKeypad} title="Close keypad">
@@ -1010,6 +1035,8 @@ export class TsuryPhoneCallModal extends LitElement {
           ? this._renderIncomingCall()
           : this._renderActiveCall()}
       </div>
+      
+      ${this.mode === "active" ? this._renderCallControls() : ""}
     `;
   }
 }
