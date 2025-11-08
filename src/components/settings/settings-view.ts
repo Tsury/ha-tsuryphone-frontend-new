@@ -26,14 +26,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
     id: "audio",
     title: "Audio",
     icon: "mdi:volume-high",
-    description: "Earpiece and speaker volume settings",
-    category: "general",
-  },
-  {
-    id: "ring-pattern",
-    title: "Ring Pattern",
-    icon: "mdi:bell-ring",
-    description: "Customize ring tone pattern",
+    description: "Volume, gain, and ring pattern settings",
     category: "general",
   },
   
