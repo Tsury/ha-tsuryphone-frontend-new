@@ -4,6 +4,7 @@ import { HomeAssistant } from "../../types/homeassistant";
 import "./dnd-settings";
 import "./audio-settings";
 import "./device-settings";
+import "./webhooks-settings";
 
 export interface SettingsSection {
   id: string;
@@ -355,6 +356,16 @@ export class TsuryPhoneSettingsView extends LitElement {
           .entityId=${this.entityId}
           @navigate-back=${this._handleBackFromSettings}
         ></tsuryphone-device-settings>
+      `;
+    }
+
+    if (this._activeSetting === "webhooks") {
+      return html`
+        <tsuryphone-webhooks-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-webhooks-settings>
       `;
     }
 
