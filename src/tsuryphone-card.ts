@@ -868,13 +868,13 @@ export class TsuryPhoneCard extends LitElement {
 
         const entry = {
           id: call.seq || `${call.received_ts}-${call.number}`,
-          contactName: call.name || call.normalized_number,
+          contactName: call.name && call.name.trim() ? call.name : call.normalized_number,
           phoneNumber: call.number,
           timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
           duration: call.duration_s || 0,
           type: callType,
           isBlocked: call.call_type === "blocked",
-          hasContactName: !!call.name, // Track if this came from contacts
+          hasContactName: !!(call.name && call.name.trim()), // Track if this came from contacts
         };
 
         return entry;

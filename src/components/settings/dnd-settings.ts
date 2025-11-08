@@ -299,62 +299,60 @@ export class TsuryPhoneDNDSettings extends LitElement {
     this._loadCurrentSettings();
   }
 
+  willUpdate(changedProps: Map<string, any>): void {
+    super.willUpdate(changedProps);
+    
+    // Reload settings when hass updates (real-time state changes)
+    if (changedProps.has("hass") && this.hass && this.entityId) {
+      this._loadCurrentSettings();
+    }
+  }
+
   private async _loadCurrentSettings(): Promise<void> {
     if (!this.hass || !this.entityId) return;
 
     try {
-      // Find DND binary sensor (e.g., binary_sensor.tsuryphone_do_not_disturb)
-      const dndSensorId = Object.keys(this.hass.states).find(
-        (id) => id.includes("do_not_disturb") && id.startsWith("binary_sensor.")
-      );
+      const phoneStateEntity = this.hass.states[this.entityId];
       
-      if (dndSensorId) {
-        this._dndActive = this.hass.states[dndSensorId].state === "on";
+      if (!phoneStateEntity) {
+        console.warn(`Phone state entity ${this.entityId} not found`);
+        return;
       }
 
-      // Find Force DND switch (e.g., switch.tsuryphone_force_do_not_disturb)
-      const dndForceEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("force") && id.includes("do_not_disturb") && id.startsWith("switch.")
-      );
-      
-      if (dndForceEntity) {
-        this._dndForce = this.hass.states[dndForceEntity].state === "on";
+      const attrs = phoneStateEntity.attributes as any;
+
+      // Read DND active status from phone state attributes
+      if (typeof attrs.dnd_active === "boolean") {
+        this._dndActive = attrs.dnd_active;
       }
 
-      // Find DND Schedule Enabled switch (e.g., switch.tsuryphone_dnd_schedule_enabled)
-      const dndScheduleEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("schedule") && id.startsWith("switch.")
-      );
-      
-      if (dndScheduleEntity) {
-        this._scheduleEnabled = this.hass.states[dndScheduleEntity].state === "on";
-      }
-
-      // Load time settings from number entities
-      const startHourEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("start") && id.includes("hour") && id.startsWith("number.")
-      );
-      const startMinuteEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("start") && id.includes("minute") && id.startsWith("number.")
-      );
-      const endHourEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("end") && id.includes("hour") && id.startsWith("number.")
-      );
-      const endMinuteEntity = Object.keys(this.hass.states).find(
-        (id) => id.includes("dnd") && id.includes("end") && id.includes("minute") && id.startsWith("number.")
-      );
-
-      if (startHourEntity) {
-        this._startHour = parseInt(this.hass.states[startHourEntity].state) || 22;
-      }
-      if (startMinuteEntity) {
-        this._startMinute = parseInt(this.hass.states[startMinuteEntity].state) || 0;
-      }
-      if (endHourEntity) {
-        this._endHour = parseInt(this.hass.states[endHourEntity].state) || 8;
-      }
-      if (endMinuteEntity) {
-        this._endMinute = parseInt(this.hass.states[endMinuteEntity].state) || 0;
+      // Read DND config from phone state attributes
+      if (attrs.dnd_config) {
+        const config = attrs.dnd_config;
+        
+        if (typeof config.force === "boolean") {
+          this._dndForce = config.force;
+        }
+        
+        if (typeof config.scheduled === "boolean") {
+          this._scheduleEnabled = config.scheduled;
+        }
+        
+        if (typeof config.start_hour === "number") {
+          this._startHour = config.start_hour;
+        }
+        
+        if (typeof config.start_minute === "number") {
+          this._startMinute = config.start_minute;
+        }
+        
+        if (typeof config.end_hour === "number") {
+          this._endHour = config.end_hour;
+        }
+        
+        if (typeof config.end_minute === "number") {
+          this._endMinute = config.end_minute;
+        }
       }
     } catch (error) {
       console.error("Failed to load DND settings:", error);
