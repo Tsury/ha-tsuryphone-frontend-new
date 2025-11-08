@@ -20,6 +20,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
   @state() private _detectedWebhookIds: string[] = [];
   @state() private _newCode = "";
   @state() private _newActionName = "";
+  @state() private _entityPickerLoaded = false;
 
   static styles: CSSResultGroup = css`
     :host {
@@ -134,6 +135,13 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
     .form-input::placeholder {
       color: var(--secondary-text-color);
       opacity: 0.6;
+    }
+
+    .loading-message {
+      padding: 16px;
+      text-align: center;
+      color: var(--secondary-text-color);
+      font-size: 14px;
     }
 
     /* Webhook detected list */
@@ -370,6 +378,23 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
   connectedCallback(): void {
     super.connectedCallback();
     this._loadWebhooks();
+    this._loadEntityPicker();
+  }
+
+  // Load ha-entity-picker component by triggering glance card editor
+  // See: https://community.home-assistant.io/t/re-using-existing-frontend-components-in-lovelace-card-editor/103415
+  private async _loadEntityPicker(): Promise<void> {
+    if (!customElements.get("ha-entity-picker")) {
+      const glanceCard = customElements.get("hui-glance-card");
+      if (glanceCard && typeof (glanceCard as any).getConfigElement === "function") {
+        try {
+          await (glanceCard as any).getConfigElement();
+        } catch (e) {
+          console.warn("Failed to load ha-entity-picker:", e);
+        }
+      }
+    }
+    this._entityPickerLoaded = true;
   }
 
   willUpdate(changedProps: Map<string, any>): void {
@@ -601,19 +626,23 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
           <div class="group-header">Add Webhook</div>
 
           <div class="add-webhook-form">
-            <!-- Automation Picker -->
-            <div class="form-row">
-              <label class="form-label">Select Automation</label>
-              <ha-entity-picker
-                .hass=${this.hass}
-                .includeDomains=${["automation"]}
-                .value=${this._selectedAutomation}
-                @value-changed=${this._handleAutomationSelected}
-                ?disabled=${this._loading}
-                label="Choose automation with webhook trigger"
-                allow-custom-entity
-              ></ha-entity-picker>
-            </div>
+            ${!this._entityPickerLoaded
+              ? html`<div class="loading-message">Loading picker...</div>`
+              : html`
+                  <!-- Automation Picker -->
+                  <div class="form-row">
+                    <label class="form-label">Select Automation</label>
+                    <ha-entity-picker
+                      .hass=${this.hass}
+                      .includeDomains=${["automation"]}
+                      .value=${this._selectedAutomation}
+                      @value-changed=${this._handleAutomationSelected}
+                      ?disabled=${this._loading}
+                      label="Choose automation with webhook trigger"
+                      allow-custom-entity
+                    ></ha-entity-picker>
+                  </div>
+                `}
 
             ${this._detectedWebhookIds.length > 0
               ? html`
