@@ -498,6 +498,12 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
       console.log("Detected webhook IDs:", this._detectedWebhookIds); // Debug log
 
+      // Auto-select if there's only one webhook ID
+      if (this._detectedWebhookIds.length === 1) {
+        this._selectedWebhookId = this._detectedWebhookIds[0];
+        console.log("Auto-selected single webhook ID:", this._selectedWebhookId);
+      }
+
       // Auto-fill action name from automation friendly_name
       if (config?.alias) {
         this._newActionName = config.alias;
@@ -528,6 +534,12 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
         code: this._newCode,
         name: this._newActionName,
       });
+      return;
+    }
+
+    // Validate code is numeric only
+    if (!/^\d+$/.test(this._newCode)) {
+      alert("Code must contain only numbers (0-9). This is what you dial on your rotary phone.");
       return;
     }
 
@@ -602,7 +614,18 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
   }
 
   private _handleCodeInput(e: Event): void {
-    this._newCode = (e.target as HTMLInputElement).value;
+    const input = e.target as HTMLInputElement;
+    let value = input.value;
+    
+    // Only allow numeric characters (0-9)
+    value = value.replace(/[^0-9]/g, "");
+    
+    // Update the input field if we stripped characters
+    if (input.value !== value) {
+      input.value = value;
+    }
+    
+    this._newCode = value;
 
     // Update backend entity
     const codeEntity = this._findEntity("text.", ["webhook_code"]);
@@ -704,9 +727,11 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
             <!-- Code Input -->
             <div class="form-row">
-              <label class="form-label">Code</label>
+              <label class="form-label">Code (numbers only)</label>
               <input
                 type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
                 class="form-input"
                 .value=${this._newCode}
                 @input=${this._handleCodeInput}
