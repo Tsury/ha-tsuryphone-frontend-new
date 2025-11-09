@@ -710,7 +710,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
                 class="form-input"
                 .value=${this._newCode}
                 @input=${this._handleCodeInput}
-                placeholder="W1"
+                placeholder="1234"
                 ?disabled=${this._loading}
               />
             </div>
