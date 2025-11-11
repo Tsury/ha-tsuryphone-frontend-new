@@ -502,6 +502,8 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       if (this._detectedWebhookIds.length === 1) {
         this._selectedWebhookId = this._detectedWebhookIds[0];
         console.log("Auto-selected single webhook ID:", this._selectedWebhookId);
+        // Force re-render to update the selected chip styling
+        this.requestUpdate();
       }
 
       // Auto-fill action name from automation friendly_name
