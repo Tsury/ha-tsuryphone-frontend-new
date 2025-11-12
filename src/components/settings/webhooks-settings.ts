@@ -463,11 +463,6 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
         entity_id: entityId,
       });
 
-      console.log("Automation config:", config); // Debug log
-      console.log("config.trigger:", config?.trigger);
-      console.log("config.triggers:", config?.triggers);
-      console.log("config.config:", config?.config);
-
       // Extract webhook triggers - handle both 'trigger' and 'triggers' keys
       let triggers: any[] = [];
       if (Array.isArray(config?.trigger)) {
@@ -483,25 +478,18 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
         triggers = [config.triggers];
       }
 
-      console.log("Extracted triggers array:", triggers);
-
       // Filter for webhook triggers - check both 'platform' and 'trigger' fields
       this._detectedWebhookIds = triggers
         .filter((t: any) => {
-          console.log("Checking trigger:", t); // Debug individual trigger
           const isWebhook = t?.platform === "webhook" || t?.trigger === "webhook";
           const hasWebhookId = t?.webhook_id;
-          console.log(`  isWebhook: ${isWebhook}, hasWebhookId: ${hasWebhookId}`);
           return isWebhook && hasWebhookId;
         })
         .map((t: any) => t.webhook_id);
 
-      console.log("Detected webhook IDs:", this._detectedWebhookIds); // Debug log
-
       // Auto-select if there's only one webhook ID
       if (this._detectedWebhookIds.length === 1) {
         this._selectedWebhookId = this._detectedWebhookIds[0];
-        console.log("Auto-selected single webhook ID:", this._selectedWebhookId);
         // Force re-render to update the selected chip styling
         this.requestUpdate();
       }
@@ -519,9 +507,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
   }
 
   private _handleWebhookIdClick(webhookId: string): void {
-    // Store the selected webhook ID
     this._selectedWebhookId = webhookId;
-    console.log("Selected webhook ID:", webhookId);
   }
 
   private async _handleAddWebhook(): Promise<void> {
@@ -547,13 +533,6 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
     this._loading = true;
     try {
-      console.log("Adding webhook with:", {
-        webhook_id: this._selectedWebhookId,
-        code: this._newCode,
-        name: this._newActionName,
-        entity_id: this.entityId,
-      });
-
       // Call tsuryphone.webhook_add service
       await this.hass.callService("tsuryphone", "webhook_add", {
         webhook_id: this._selectedWebhookId,
@@ -562,8 +541,6 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       }, {
         entity_id: this.entityId,
       });
-
-      console.log("Webhook added successfully");
 
       // Clear form
       this._newCode = "";
@@ -592,16 +569,12 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
     this._loading = true;
     try {
-      console.log("Removing webhook with code:", webhook.code);
-
       // Call tsuryphone.webhook_remove service
       await this.hass.callService("tsuryphone", "webhook_remove", {
         code: webhook.code,
       }, {
         entity_id: this.entityId,
       });
-
-      console.log("Webhook removed successfully");
 
       // Reload webhooks after a short delay
       setTimeout(() => {
@@ -729,7 +702,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
 
             <!-- Code Input -->
             <div class="form-row">
-              <label class="form-label">Code (numbers only)</label>
+              <label class="form-label">Code</label>
               <input
                 type="text"
                 inputmode="numeric"

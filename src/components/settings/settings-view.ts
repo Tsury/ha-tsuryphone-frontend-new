@@ -52,7 +52,7 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
     id: "webhooks",
     title: "Webhooks",
     icon: "mdi:webhook",
-    description: "Configure event notifications",
+    description: "Dial codes to trigger automations",
     category: "advanced",
   },
   {
