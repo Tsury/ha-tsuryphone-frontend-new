@@ -7687,8 +7687,7 @@ let TsuryPhoneStatisticsSettings = class TsuryPhoneStatisticsSettings extends i 
         return `${minutes}m ${secs}s`;
     }
     _handleBack() {
-        this.dispatchEvent(new CustomEvent("navigate", {
-            detail: { view: "settings" },
+        this.dispatchEvent(new CustomEvent("navigate-back", {
             bubbles: true,
             composed: true,
         }));

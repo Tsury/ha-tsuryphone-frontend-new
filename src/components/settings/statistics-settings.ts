@@ -347,8 +347,7 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
 
   private _handleBack(): void {
     this.dispatchEvent(
-      new CustomEvent("navigate", {
-        detail: { view: "settings" },
+      new CustomEvent("navigate-back", {
         bubbles: true,
         composed: true,
       })
