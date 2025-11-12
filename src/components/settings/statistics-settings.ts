@@ -121,11 +121,11 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
 
     /* Icon color variations */
     .stat-card[data-type="blocked"] .stat-icon {
-      background: rgba(255, 82, 82, 0.15);
+      background: rgba(var(--rgb-error-color, 255, 82, 82), 0.15);
     }
 
     .stat-card[data-type="blocked"] .stat-icon ha-icon {
-      color: #ff5252;
+      color: var(--error-color);
     }
 
     .stat-card[data-type="history"] .stat-icon {
@@ -137,27 +137,27 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
     }
 
     .stat-card[data-type="incoming"] .stat-icon {
-      background: rgba(33, 150, 243, 0.15);
+      background: rgba(var(--rgb-info-color, 33, 150, 243), 0.15);
     }
 
     .stat-card[data-type="incoming"] .stat-icon ha-icon {
-      color: #2196f3;
+      color: var(--info-color);
     }
 
     .stat-card[data-type="outgoing"] .stat-icon {
-      background: rgba(76, 175, 80, 0.15);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.15);
     }
 
     .stat-card[data-type="outgoing"] .stat-icon ha-icon {
-      color: #4caf50;
+      color: var(--success-color);
     }
 
     .stat-card[data-type="total"] .stat-icon {
-      background: rgba(255, 152, 0, 0.15);
+      background: rgba(var(--rgb-warning-color, 255, 152, 0), 0.15);
     }
 
     .stat-card[data-type="total"] .stat-icon ha-icon {
-      color: #ff9800;
+      color: var(--warning-color);
     }
 
     .stat-card[data-type="time"] .stat-icon {

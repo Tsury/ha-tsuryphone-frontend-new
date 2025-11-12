@@ -1273,7 +1273,7 @@ export class TsuryPhoneCard extends LitElement {
           right: 12px;
           z-index: 50;
           background: var(--primary-color);
-          color: white;
+          color: var(--text-primary-color, white);
           padding: 8px 12px;
           border-radius: 20px;
           display: flex;

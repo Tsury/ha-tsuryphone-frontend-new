@@ -23,7 +23,7 @@ export class TsuryPhoneSideMenu extends LitElement {
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.32);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.32));
       opacity: 0;
       transition: opacity 200ms ease;
       display: flex;
@@ -39,7 +39,7 @@ export class TsuryPhoneSideMenu extends LitElement {
       width: min(320px, 80vw);
       height: 100%;
       background: var(--card-background-color);
-      box-shadow: var(--ha-card-box-shadow, 0 12px 32px rgba(15, 23, 42, 0.35));
+      box-shadow: var(--ha-card-box-shadow, 0 12px 32px rgba(0, 0, 0, 0.3));
       transform: translateX(-100%);
       transition: transform 240ms ease;
       display: flex;

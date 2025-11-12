@@ -63,7 +63,7 @@ export class TsuryPhoneFrequentContacts extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--text-primary-color, white);
       font-weight: 600;
       font-size: 20px;
       position: relative;

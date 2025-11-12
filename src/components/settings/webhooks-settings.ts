@@ -289,7 +289,7 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       border-radius: 8px;
       border: 1px solid var(--divider-color);
       background: transparent;
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -298,8 +298,8 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
     }
 
     .delete-button:hover {
-      background: rgba(244, 67, 54, 0.1);
-      border-color: rgb(244, 67, 54);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.1);
+      border-color: var(--error-color);
     }
 
     .delete-button ha-icon {
@@ -353,11 +353,11 @@ export class TsuryPhoneWebhooksSettings extends LitElement {
       color: var(--primary-color);
     }
 
-    /* Loading Overlay */
+    /* Loading State */
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;

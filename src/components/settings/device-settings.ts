@@ -110,11 +110,11 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .action-button.danger:hover {
-      background: rgba(244, 67, 54, 0.1);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.1);
     }
 
     .action-button.danger:active {
-      background: rgba(244, 67, 54, 0.15);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.15);
     }
 
     .action-icon {
@@ -133,8 +133,8 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .action-button.danger .action-icon {
-      background: rgba(244, 67, 54, 0.15);
-      color: rgb(244, 67, 54);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.15);
+      color: var(--error-color);
     }
 
     .action-icon ha-icon {
@@ -162,7 +162,7 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .action-button.danger .action-description {
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
     }
 
     /* Status Banner */
@@ -177,11 +177,11 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .status-banner.active {
-      background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 152, 0, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-warning-color, 255, 152, 0), 0.15) 0%, rgba(var(--rgb-warning-color, 255, 152, 0), 0.05) 100%);
     }
 
     .status-banner.inactive {
-      background: linear-gradient(135deg, rgba(158, 158, 158, 0.12) 0%, rgba(158, 158, 158, 0.04) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.12) 0%, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.04) 100%);
     }
 
     .status-icon {
@@ -195,13 +195,13 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .status-banner.active .status-icon {
-      background: rgba(255, 152, 0, 0.2);
-      color: rgb(255, 152, 0);
+      background: rgba(var(--rgb-warning-color, 255, 152, 0), 0.2);
+      color: var(--warning-color);
     }
 
     .status-banner.inactive .status-icon {
-      background: rgba(158, 158, 158, 0.15);
-      color: rgb(117, 117, 117);
+      background: rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.15);
+      color: var(--secondary-text-color);
     }
 
     .status-icon ha-icon {
@@ -364,11 +364,11 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .modal-title.danger {
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
     }
 
     .modal-title.danger ha-icon {
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
     }
 
     .modal-content {
@@ -384,8 +384,8 @@ export class TsuryPhoneDeviceSettings extends LitElement {
 
     .modal-warning {
       padding: 12px 16px;
-      background: rgba(244, 67, 54, 0.1);
-      border-left: 4px solid rgb(244, 67, 54);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.1);
+      border-left: 4px solid var(--error-color);
       border-radius: 4px;
       margin: 0 0 16px;
     }
@@ -393,7 +393,7 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     .modal-warning-title {
       font-size: 13px;
       font-weight: 600;
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
       margin: 0 0 4px;
     }
 
@@ -443,12 +443,12 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     }
 
     .modal-button.danger {
-      background: rgb(244, 67, 54);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
     }
 
     .modal-button.danger:hover {
-      background: rgb(229, 57, 53);
+      opacity: 0.9;
     }
 
     .modal-button:disabled {
@@ -460,7 +460,7 @@ export class TsuryPhoneDeviceSettings extends LitElement {
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.5));
       display: flex;
       align-items: center;
       justify-content: center;

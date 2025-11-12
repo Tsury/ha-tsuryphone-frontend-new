@@ -835,7 +835,7 @@ TsuryPhoneSideMenu.styles = i$3 `
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.32);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.32));
       opacity: 0;
       transition: opacity 200ms ease;
       display: flex;
@@ -851,7 +851,7 @@ TsuryPhoneSideMenu.styles = i$3 `
       width: min(320px, 80vw);
       height: 100%;
       background: var(--card-background-color);
-      box-shadow: var(--ha-card-box-shadow, 0 12px 32px rgba(15, 23, 42, 0.35));
+      box-shadow: var(--ha-card-box-shadow, 0 12px 32px rgba(0, 0, 0, 0.3));
       transform: translateX(-100%);
       transition: transform 240ms ease;
       display: flex;
@@ -1504,7 +1504,7 @@ TsuryPhoneFrequentContacts.styles = i$3 `
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--text-primary-color, white);
       font-weight: 600;
       font-size: 20px;
       position: relative;
@@ -1684,7 +1684,7 @@ TsuryPhoneCallLogItem.styles = i$3 `
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--text-primary-color, white);
       font-weight: 600;
       font-size: 16px;
       flex-shrink: 0;
@@ -4708,11 +4708,11 @@ TsuryPhoneDNDSettings.styles = i$3 `
     }
 
     .status-banner.active {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-success-color, 76, 175, 80), 0.15) 0%, rgba(var(--rgb-success-color, 76, 175, 80), 0.05) 100%);
     }
 
     .status-banner.inactive {
-      background: linear-gradient(135deg, rgba(158, 158, 158, 0.15) 0%, rgba(158, 158, 158, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.15) 0%, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.05) 100%);
     }
 
     .status-icon {
@@ -4726,13 +4726,13 @@ TsuryPhoneDNDSettings.styles = i$3 `
     }
 
     .status-banner.active .status-icon {
-      background: rgba(76, 175, 80, 0.2);
-      color: rgb(76, 175, 80);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.2);
+      color: var(--success-color);
     }
 
     .status-banner.inactive .status-icon {
-      background: rgba(158, 158, 158, 0.2);
-      color: rgb(158, 158, 158);
+      background: rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.2);
+      color: var(--secondary-text-color);
     }
 
     .status-icon ha-icon {
@@ -4884,7 +4884,7 @@ TsuryPhoneDNDSettings.styles = i$3 `
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -5754,12 +5754,12 @@ TsuryPhoneAudioSettings.styles = i$3 `
     }
 
     .pattern-input.error {
-      border-color: rgb(244, 67, 54);
+      border-color: var(--error-color);
     }
 
     .pattern-error {
       font-size: 12px;
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
       margin-top: 4px;
     }
 
@@ -5811,7 +5811,7 @@ TsuryPhoneAudioSettings.styles = i$3 `
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -6389,11 +6389,11 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .action-button.danger:hover {
-      background: rgba(244, 67, 54, 0.1);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.1);
     }
 
     .action-button.danger:active {
-      background: rgba(244, 67, 54, 0.15);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.15);
     }
 
     .action-icon {
@@ -6412,8 +6412,8 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .action-button.danger .action-icon {
-      background: rgba(244, 67, 54, 0.15);
-      color: rgb(244, 67, 54);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.15);
+      color: var(--error-color);
     }
 
     .action-icon ha-icon {
@@ -6441,7 +6441,7 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .action-button.danger .action-description {
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
     }
 
     /* Status Banner */
@@ -6456,11 +6456,11 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .status-banner.active {
-      background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 152, 0, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-warning-color, 255, 152, 0), 0.15) 0%, rgba(var(--rgb-warning-color, 255, 152, 0), 0.05) 100%);
     }
 
     .status-banner.inactive {
-      background: linear-gradient(135deg, rgba(158, 158, 158, 0.12) 0%, rgba(158, 158, 158, 0.04) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.12) 0%, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.04) 100%);
     }
 
     .status-icon {
@@ -6474,13 +6474,13 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .status-banner.active .status-icon {
-      background: rgba(255, 152, 0, 0.2);
-      color: rgb(255, 152, 0);
+      background: rgba(var(--rgb-warning-color, 255, 152, 0), 0.2);
+      color: var(--warning-color);
     }
 
     .status-banner.inactive .status-icon {
-      background: rgba(158, 158, 158, 0.15);
-      color: rgb(117, 117, 117);
+      background: rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.15);
+      color: var(--secondary-text-color);
     }
 
     .status-icon ha-icon {
@@ -6643,11 +6643,11 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .modal-title.danger {
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
     }
 
     .modal-title.danger ha-icon {
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
     }
 
     .modal-content {
@@ -6663,8 +6663,8 @@ TsuryPhoneDeviceSettings.styles = i$3 `
 
     .modal-warning {
       padding: 12px 16px;
-      background: rgba(244, 67, 54, 0.1);
-      border-left: 4px solid rgb(244, 67, 54);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.1);
+      border-left: 4px solid var(--error-color);
       border-radius: 4px;
       margin: 0 0 16px;
     }
@@ -6672,7 +6672,7 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     .modal-warning-title {
       font-size: 13px;
       font-weight: 600;
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
       margin: 0 0 4px;
     }
 
@@ -6722,12 +6722,12 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     }
 
     .modal-button.danger {
-      background: rgb(244, 67, 54);
-      color: white;
+      background: var(--error-color);
+      color: var(--text-primary-color, white);
     }
 
     .modal-button.danger:hover {
-      background: rgb(229, 57, 53);
+      opacity: 0.9;
     }
 
     .modal-button:disabled {
@@ -6739,7 +6739,7 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.5));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -7466,7 +7466,7 @@ TsuryPhoneWebhooksSettings.styles = i$3 `
       border-radius: 8px;
       border: 1px solid var(--divider-color);
       background: transparent;
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -7475,8 +7475,8 @@ TsuryPhoneWebhooksSettings.styles = i$3 `
     }
 
     .delete-button:hover {
-      background: rgba(244, 67, 54, 0.1);
-      border-color: rgb(244, 67, 54);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.1);
+      border-color: var(--error-color);
     }
 
     .delete-button ha-icon {
@@ -7530,11 +7530,11 @@ TsuryPhoneWebhooksSettings.styles = i$3 `
       color: var(--primary-color);
     }
 
-    /* Loading Overlay */
+    /* Loading State */
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -7884,11 +7884,11 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
 
     /* Icon color variations */
     .stat-card[data-type="blocked"] .stat-icon {
-      background: rgba(255, 82, 82, 0.15);
+      background: rgba(var(--rgb-error-color, 255, 82, 82), 0.15);
     }
 
     .stat-card[data-type="blocked"] .stat-icon ha-icon {
-      color: #ff5252;
+      color: var(--error-color);
     }
 
     .stat-card[data-type="history"] .stat-icon {
@@ -7900,27 +7900,27 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
     }
 
     .stat-card[data-type="incoming"] .stat-icon {
-      background: rgba(33, 150, 243, 0.15);
+      background: rgba(var(--rgb-info-color, 33, 150, 243), 0.15);
     }
 
     .stat-card[data-type="incoming"] .stat-icon ha-icon {
-      color: #2196f3;
+      color: var(--info-color);
     }
 
     .stat-card[data-type="outgoing"] .stat-icon {
-      background: rgba(76, 175, 80, 0.15);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.15);
     }
 
     .stat-card[data-type="outgoing"] .stat-icon ha-icon {
-      color: #4caf50;
+      color: var(--success-color);
     }
 
     .stat-card[data-type="total"] .stat-icon {
-      background: rgba(255, 152, 0, 0.15);
+      background: rgba(var(--rgb-warning-color, 255, 152, 0), 0.15);
     }
 
     .stat-card[data-type="total"] .stat-icon ha-icon {
-      color: #ff9800;
+      color: var(--warning-color);
     }
 
     .stat-card[data-type="time"] .stat-icon {
@@ -8441,11 +8441,11 @@ TsuryPhoneDiagnosticsSettings.styles = i$3 `
 
     /* Icon color variations */
     .info-card[data-type="memory"] .info-icon {
-      background: rgba(33, 150, 243, 0.15);
+      background: rgba(var(--rgb-info-color, 33, 150, 243), 0.15);
     }
 
     .info-card[data-type="memory"] .info-icon ha-icon {
-      color: #2196f3;
+      color: var(--info-color);
     }
 
     .info-card[data-type="uptime"] .info-icon {
@@ -8457,20 +8457,20 @@ TsuryPhoneDiagnosticsSettings.styles = i$3 `
     }
 
     .info-card[data-type="wifi"] .info-icon {
-      background: rgba(76, 175, 80, 0.15);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.15);
     }
 
     .info-card[data-type="wifi"] .info-icon ha-icon {
-      color: #4caf50;
+      color: var(--success-color);
     }
 
     /* WiFi signal color coding */
     .info-card[data-signal="excellent"] .info-icon {
-      background: rgba(76, 175, 80, 0.15);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.15);
     }
 
     .info-card[data-signal="excellent"] .info-icon ha-icon {
-      color: #4caf50;
+      color: var(--success-color);
     }
 
     .info-card[data-signal="good"] .info-icon {
@@ -8482,19 +8482,19 @@ TsuryPhoneDiagnosticsSettings.styles = i$3 `
     }
 
     .info-card[data-signal="fair"] .info-icon {
-      background: rgba(255, 152, 0, 0.15);
+      background: rgba(var(--rgb-warning-color, 255, 152, 0), 0.15);
     }
 
     .info-card[data-signal="fair"] .info-icon ha-icon {
-      color: #ff9800;
+      color: var(--warning-color);
     }
 
     .info-card[data-signal="poor"] .info-icon {
-      background: rgba(244, 67, 54, 0.15);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.15);
     }
 
     .info-card[data-signal="poor"] .info-icon ha-icon {
-      color: #f44336;
+      color: var(--error-color);
     }
 
     .info-value {
@@ -11737,7 +11737,7 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
           right: 12px;
           z-index: 50;
           background: var(--primary-color);
-          color: white;
+          color: var(--text-primary-color, white);
           padding: 8px 12px;
           border-radius: 20px;
           display: flex;

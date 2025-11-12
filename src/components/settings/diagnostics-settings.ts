@@ -167,11 +167,11 @@ export class TsuryPhoneDiagnosticsSettings extends LitElement {
 
     /* Icon color variations */
     .info-card[data-type="memory"] .info-icon {
-      background: rgba(33, 150, 243, 0.15);
+      background: rgba(var(--rgb-info-color, 33, 150, 243), 0.15);
     }
 
     .info-card[data-type="memory"] .info-icon ha-icon {
-      color: #2196f3;
+      color: var(--info-color);
     }
 
     .info-card[data-type="uptime"] .info-icon {
@@ -183,20 +183,20 @@ export class TsuryPhoneDiagnosticsSettings extends LitElement {
     }
 
     .info-card[data-type="wifi"] .info-icon {
-      background: rgba(76, 175, 80, 0.15);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.15);
     }
 
     .info-card[data-type="wifi"] .info-icon ha-icon {
-      color: #4caf50;
+      color: var(--success-color);
     }
 
     /* WiFi signal color coding */
     .info-card[data-signal="excellent"] .info-icon {
-      background: rgba(76, 175, 80, 0.15);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.15);
     }
 
     .info-card[data-signal="excellent"] .info-icon ha-icon {
-      color: #4caf50;
+      color: var(--success-color);
     }
 
     .info-card[data-signal="good"] .info-icon {
@@ -208,19 +208,19 @@ export class TsuryPhoneDiagnosticsSettings extends LitElement {
     }
 
     .info-card[data-signal="fair"] .info-icon {
-      background: rgba(255, 152, 0, 0.15);
+      background: rgba(var(--rgb-warning-color, 255, 152, 0), 0.15);
     }
 
     .info-card[data-signal="fair"] .info-icon ha-icon {
-      color: #ff9800;
+      color: var(--warning-color);
     }
 
     .info-card[data-signal="poor"] .info-icon {
-      background: rgba(244, 67, 54, 0.15);
+      background: rgba(var(--rgb-error-color, 244, 67, 54), 0.15);
     }
 
     .info-card[data-signal="poor"] .info-icon ha-icon {
-      color: #f44336;
+      color: var(--error-color);
     }
 
     .info-value {

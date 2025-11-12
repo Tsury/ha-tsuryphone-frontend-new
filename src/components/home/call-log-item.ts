@@ -39,7 +39,7 @@ export class TsuryPhoneCallLogItem extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--text-primary-color, white);
       font-weight: 600;
       font-size: 16px;
       flex-shrink: 0;

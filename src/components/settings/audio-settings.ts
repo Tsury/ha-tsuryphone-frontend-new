@@ -325,12 +325,12 @@ export class TsuryPhoneAudioSettings extends LitElement {
     }
 
     .pattern-input.error {
-      border-color: rgb(244, 67, 54);
+      border-color: var(--error-color);
     }
 
     .pattern-error {
       font-size: 12px;
-      color: rgb(244, 67, 54);
+      color: var(--error-color);
       margin-top: 4px;
     }
 
@@ -382,7 +382,7 @@ export class TsuryPhoneAudioSettings extends LitElement {
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;

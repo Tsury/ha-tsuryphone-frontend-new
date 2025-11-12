@@ -85,11 +85,11 @@ export class TsuryPhoneDNDSettings extends LitElement {
     }
 
     .status-banner.active {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-success-color, 76, 175, 80), 0.15) 0%, rgba(var(--rgb-success-color, 76, 175, 80), 0.05) 100%);
     }
 
     .status-banner.inactive {
-      background: linear-gradient(135deg, rgba(158, 158, 158, 0.15) 0%, rgba(158, 158, 158, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.15) 0%, rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.05) 100%);
     }
 
     .status-icon {
@@ -103,13 +103,13 @@ export class TsuryPhoneDNDSettings extends LitElement {
     }
 
     .status-banner.active .status-icon {
-      background: rgba(76, 175, 80, 0.2);
-      color: rgb(76, 175, 80);
+      background: rgba(var(--rgb-success-color, 76, 175, 80), 0.2);
+      color: var(--success-color);
     }
 
     .status-banner.inactive .status-icon {
-      background: rgba(158, 158, 158, 0.2);
-      color: rgb(158, 158, 158);
+      background: rgba(var(--rgb-secondary-text-color, 158, 158, 158), 0.2);
+      color: var(--secondary-text-color);
     }
 
     .status-icon ha-icon {
@@ -261,7 +261,7 @@ export class TsuryPhoneDNDSettings extends LitElement {
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;
