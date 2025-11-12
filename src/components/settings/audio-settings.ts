@@ -68,10 +68,6 @@ export class TsuryPhoneAudioSettings extends LitElement {
       background: var(--divider-color);
     }
 
-    .back-button:active {
-      background: var(--secondary-background-color);
-    }
-
     .back-button ha-icon {
       --mdc-icon-size: 24px;
     }

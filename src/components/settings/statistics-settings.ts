@@ -54,10 +54,6 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
       background: var(--divider-color);
     }
 
-    .back-button:active {
-      background: var(--secondary-background-color);
-    }
-
     .back-button ha-icon {
       --mdc-icon-size: 24px;
     }
@@ -73,7 +69,7 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
     .settings-content {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      padding: 16px 0;
     }
 
     /* Statistics Grid */
@@ -81,7 +77,7 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 16px;
-      margin-bottom: 24px;
+      margin: 0 20px 24px;
     }
 
     @media (max-width: 600px) {
@@ -187,6 +183,7 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
       text-align: center;
       line-height: 1.3;
       margin: 0;
+      white-space: nowrap;
     }
 
     /* Loading State */
@@ -217,6 +214,7 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
 
     /* Info Section */
     .info-section {
+      margin: 0 20px;
       background: var(--card-background-color);
       border: 1px solid var(--divider-color);
       border-radius: 12px;
@@ -243,6 +241,21 @@ export class TsuryPhoneStatisticsSettings extends LitElement {
       color: var(--secondary-text-color);
       line-height: 1.5;
       margin: 0;
+    }
+
+    @media (max-width: 480px) {
+      .settings-header {
+        padding: 12px 16px;
+      }
+
+      .statistics-grid,
+      .info-section {
+        margin: 0 16px 24px;
+      }
+
+      .statistics-grid {
+        gap: 12px;
+      }
     }
   `;
 
