@@ -5,6 +5,7 @@ import "./dnd-settings";
 import "./audio-settings";
 import "./device-settings";
 import "./webhooks-settings";
+import "./statistics-settings";
 
 export interface SettingsSection {
   id: string;
@@ -366,6 +367,16 @@ export class TsuryPhoneSettingsView extends LitElement {
           .entityId=${this.entityId}
           @navigate-back=${this._handleBackFromSettings}
         ></tsuryphone-webhooks-settings>
+      `;
+    }
+
+    if (this._activeSetting === "statistics") {
+      return html`
+        <tsuryphone-statistics-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-statistics-settings>
       `;
     }
 

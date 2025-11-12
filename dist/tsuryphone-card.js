@@ -319,6 +319,79 @@ i$3 `
 `;
 
 /**
+ * Formatting Utilities
+ * Reusable formatters for phone numbers, dates, durations
+ */
+/**
+ * Format phone number for display
+ */
+/**
+ * Generate consistent color from string (for avatars)
+ */
+function generateColor(input) {
+    if (!input)
+        return "hsl(200, 60%, 45%)"; // Default color
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+        hash = input.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash % 360);
+    // Check if dark mode - simple heuristic
+    const isDark = (() => {
+        if (typeof document !== 'undefined') {
+            const html = document.documentElement;
+            const themeStyle = getComputedStyle(html);
+            const cardBg = themeStyle.getPropertyValue('--card-background-color');
+            if (cardBg && cardBg.includes('rgb')) {
+                const values = cardBg.match(/\d+/g);
+                if (values && values.length >= 3) {
+                    const brightness = (parseInt(values[0]) + parseInt(values[1]) + parseInt(values[2])) / 3;
+                    return brightness < 128;
+                }
+            }
+        }
+        return true; // default to dark
+    })();
+    // Dark mode: darker, more saturated colors
+    // Light mode: lighter, less saturated colors
+    if (isDark) {
+        return `hsl(${hue}, 65%, 45%)`; // Darker for dark mode
+    }
+    else {
+        return `hsl(${hue}, 60%, 60%)`; // Lighter for light mode
+    }
+}
+/**
+ * Get first letter of name for avatar
+ */
+function getAvatarLetter(name) {
+    if (!name)
+        return "?";
+    return name.trim()[0].toUpperCase();
+}
+/**
+ * Normalize phone number for display based on default dial code
+ * If number starts with the default dial code (e.g., +972), replace it with 0
+ */
+function normalizePhoneNumberForDisplay(number, defaultDialCode) {
+    if (!number) {
+        return number;
+    }
+    if (!defaultDialCode) {
+        return number;
+    }
+    // Remove any + prefix and whitespace from both number and code
+    const cleanNumber = number.replace(/^\+/, "").replace(/\s/g, "");
+    const cleanDefaultCode = defaultDialCode.replace(/^\+/, "").replace(/\s/g, "");
+    // Check if number starts with the default code
+    if (cleanNumber.startsWith(cleanDefaultCode)) {
+        const normalized = "0" + cleanNumber.substring(cleanDefaultCode.length);
+        return normalized;
+    }
+    return number;
+}
+
+/**
  * Common utility styles used across components
  */
 const commonStyles = i$3 `
@@ -1085,6 +1158,7 @@ function getFrequentContacts(calls, limit = 6) {
                 name: call.contactName,
                 phone: call.phoneNumber,
                 count: 1,
+                hasContactName: call.hasContactName || false,
             });
         }
     });
@@ -1096,6 +1170,7 @@ function getFrequentContacts(calls, limit = 6) {
         contactName: contact.name,
         phoneNumber: contact.phone,
         callCount: contact.count,
+        hasContactName: contact.hasContactName,
     }));
 }
 
@@ -1341,25 +1416,39 @@ let TsuryPhoneFrequentContacts = class TsuryPhoneFrequentContacts extends i {
       <div class="frequent-contacts">
         <div class="section-header">Frequents</div>
         <div class="contacts-grid">
-          ${this.contacts.map(contact => x `
-              <div
-                class="contact-item"
-                @click=${() => this._handleContactClick(contact)}
-                role="button"
-                tabindex="0"
-                aria-label="Call ${contact.contactName}"
-              >
-                <div class="avatar" style="background-color: ${getAvatarColor(contact.contactName)}">
-                  ${getInitials(contact.contactName)}
-                  ${contact.callCount > 1
-            ? x `<div class="call-count-badge">${contact.callCount}</div>`
-            : ''}
+          ${this.contacts.map(contact => {
+            const isContact = contact.hasContactName;
+            return x `
+                <div
+                  class="contact-item"
+                  @click=${() => this._handleContactClick(contact)}
+                  role="button"
+                  tabindex="0"
+                  aria-label="Call ${contact.contactName}"
+                >
+                  ${isContact
+                ? x `
+                        <div class="avatar" style="background-color: ${getAvatarColor(contact.contactName)}">
+                          ${getInitials(contact.contactName)}
+                          ${contact.callCount > 1
+                    ? x `<div class="call-count-badge">${contact.callCount}</div>`
+                    : ''}
+                        </div>
+                      `
+                : x `
+                        <div class="avatar generic">
+                          <ha-icon icon="mdi:account"></ha-icon>
+                          ${contact.callCount > 1
+                    ? x `<div class="call-count-badge">${contact.callCount}</div>`
+                    : ''}
+                        </div>
+                      `}
+                  <div class="contact-name" title="${contact.contactName}">
+                    ${contact.contactName}
+                  </div>
                 </div>
-                <div class="contact-name" title="${contact.contactName}">
-                  ${contact.contactName}
-                </div>
-              </div>
-            `)}
+              `;
+        })}
         </div>
       </div>
     `;
@@ -1421,6 +1510,14 @@ TsuryPhoneFrequentContacts.styles = i$3 `
       position: relative;
     }
 
+    .avatar.generic {
+      background: var(--secondary-text-color);
+    }
+
+    .avatar ha-icon {
+      --mdc-icon-size: 32px;
+    }
+
     .call-count-badge {
       position: absolute;
       top: -4px;
@@ -1468,79 +1565,6 @@ __decorate([
 TsuryPhoneFrequentContacts = __decorate([
     t('tsuryphone-frequent-contacts')
 ], TsuryPhoneFrequentContacts);
-
-/**
- * Formatting Utilities
- * Reusable formatters for phone numbers, dates, durations
- */
-/**
- * Format phone number for display
- */
-/**
- * Generate consistent color from string (for avatars)
- */
-function generateColor(input) {
-    if (!input)
-        return "hsl(200, 60%, 45%)"; // Default color
-    let hash = 0;
-    for (let i = 0; i < input.length; i++) {
-        hash = input.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = Math.abs(hash % 360);
-    // Check if dark mode - simple heuristic
-    const isDark = (() => {
-        if (typeof document !== 'undefined') {
-            const html = document.documentElement;
-            const themeStyle = getComputedStyle(html);
-            const cardBg = themeStyle.getPropertyValue('--card-background-color');
-            if (cardBg && cardBg.includes('rgb')) {
-                const values = cardBg.match(/\d+/g);
-                if (values && values.length >= 3) {
-                    const brightness = (parseInt(values[0]) + parseInt(values[1]) + parseInt(values[2])) / 3;
-                    return brightness < 128;
-                }
-            }
-        }
-        return true; // default to dark
-    })();
-    // Dark mode: darker, more saturated colors
-    // Light mode: lighter, less saturated colors
-    if (isDark) {
-        return `hsl(${hue}, 65%, 45%)`; // Darker for dark mode
-    }
-    else {
-        return `hsl(${hue}, 60%, 60%)`; // Lighter for light mode
-    }
-}
-/**
- * Get first letter of name for avatar
- */
-function getAvatarLetter(name) {
-    if (!name)
-        return "?";
-    return name.trim()[0].toUpperCase();
-}
-/**
- * Normalize phone number for display based on default dial code
- * If number starts with the default dial code (e.g., +972), replace it with 0
- */
-function normalizePhoneNumberForDisplay(number, defaultDialCode) {
-    if (!number) {
-        return number;
-    }
-    if (!defaultDialCode) {
-        return number;
-    }
-    // Remove any + prefix and whitespace from both number and code
-    const cleanNumber = number.replace(/^\+/, "").replace(/\s/g, "");
-    const cleanDefaultCode = defaultDialCode.replace(/^\+/, "").replace(/\s/g, "");
-    // Check if number starts with the default code
-    if (cleanNumber.startsWith(cleanDefaultCode)) {
-        const normalized = "0" + cleanNumber.substring(cleanDefaultCode.length);
-        return normalized;
-    }
-    return number;
-}
 
 let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
     constructor() {
@@ -1595,11 +1619,21 @@ let TsuryPhoneCallLogItem = class TsuryPhoneCallLogItem extends i {
             durationDisplay = x `<span>• ${formatDuration(this.call.duration)}</span>`;
         }
         const displayNumber = normalizePhoneNumberForDisplay(this.call.phoneNumber, this.defaultDialCode);
+        // For non-contacts, show generic profile icon instead of dynamic initials
+        const isContact = this.call.hasContactName;
         return x `
       <div class="call-item" @click=${this._handleClick}>
-        <div class="avatar" style="background-color: ${avatarColor}">
-          ${initials}
-        </div>
+        ${isContact
+            ? x `
+              <div class="avatar" style="background-color: ${avatarColor}">
+                ${initials}
+              </div>
+            `
+            : x `
+              <div class="avatar generic">
+                <ha-icon icon="mdi:account"></ha-icon>
+              </div>
+            `}
         <div class="call-info">
           <div class="call-header">
             <span class="contact-name">${this.call.contactName}</span>
@@ -1654,6 +1688,14 @@ TsuryPhoneCallLogItem.styles = i$3 `
       font-weight: 600;
       font-size: 16px;
       flex-shrink: 0;
+    }
+
+    .avatar.generic {
+      background: var(--secondary-text-color);
+    }
+
+    .avatar ha-icon {
+      --mdc-icon-size: 24px;
     }
 
     .call-info {
@@ -4264,6 +4306,3751 @@ TsuryPhoneBlockedView = __decorate([
     t("tsuryphone-blocked-view")
 ], TsuryPhoneBlockedView);
 
+let TsuryPhoneDNDSettings = class TsuryPhoneDNDSettings extends i {
+    constructor() {
+        super(...arguments);
+        this._dndActive = false;
+        this._dndForce = false;
+        this._scheduleEnabled = false;
+        this._startHour = 22;
+        this._startMinute = 0;
+        this._endHour = 8;
+        this._endMinute = 0;
+        this._loading = false;
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this._loadCurrentSettings();
+    }
+    willUpdate(changedProps) {
+        super.willUpdate(changedProps);
+        if (changedProps.has("hass") && this.hass && this.entityId) {
+            this._loadCurrentSettings();
+        }
+    }
+    _getDeviceId() {
+        if (!this.entityId)
+            return null;
+        return this.entityId.replace("sensor.", "").replace("_phone_state", "");
+    }
+    _findEntity(prefix, keywords) {
+        if (!this.hass)
+            return null;
+        const allEntityIds = Object.keys(this.hass.states);
+        // Backend entities DON'T have device_id prefix - search by prefix + keywords only
+        const found = allEntityIds.find((id) => id.startsWith(prefix) && keywords.some(kw => id.includes(kw))) || null;
+        return found;
+    }
+    async _loadCurrentSettings() {
+        if (!this.hass || !this.entityId)
+            return;
+        try {
+            // Find DND active binary sensor
+            const dndSensorId = this._findEntity("binary_sensor.", ["do_not_disturb", "_dnd"]);
+            if (dndSensorId) {
+                const state = this.hass.states[dndSensorId].state;
+                this._dndActive = state === "on";
+            }
+            // Find Force DND switch
+            const forceDndId = this._findEntity("switch.", ["force_dnd", "force_do_not_disturb"]);
+            if (forceDndId) {
+                const state = this.hass.states[forceDndId].state;
+                this._dndForce = state === "on";
+            }
+            // Find DND Schedule Enabled switch
+            const scheduleEnabledId = this._findEntity("switch.", ["dnd_schedule_enabled"]);
+            if (scheduleEnabledId) {
+                const state = this.hass.states[scheduleEnabledId].state;
+                this._scheduleEnabled = state === "on";
+            }
+            // Load time settings from text entities
+            const startHourId = this._findEntity("text.", ["dnd_start_hour"]);
+            const startMinuteId = this._findEntity("text.", ["dnd_start_minute"]);
+            const endHourId = this._findEntity("text.", ["dnd_end_hour"]);
+            const endMinuteId = this._findEntity("text.", ["dnd_end_minute"]);
+            if (startHourId) {
+                const state = this.hass.states[startHourId].state;
+                this._startHour = parseInt(state) || 22;
+            }
+            if (startMinuteId) {
+                const state = this.hass.states[startMinuteId].state;
+                this._startMinute = parseInt(state) || 0;
+            }
+            if (endHourId) {
+                const state = this.hass.states[endHourId].state;
+                this._endHour = parseInt(state) || 8;
+            }
+            if (endMinuteId) {
+                const state = this.hass.states[endMinuteId].state;
+                this._endMinute = parseInt(state) || 0;
+            }
+        }
+        catch (error) {
+            console.error("Failed to load DND settings:", error);
+        }
+    }
+    _handleBack() {
+        this.dispatchEvent(new CustomEvent("navigate-back", {
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    async _handleDndForceToggle(e) {
+        const target = e.target;
+        const enabled = target.checked;
+        const forceDndId = this._findEntity("switch.", ["force_dnd", "force_do_not_disturb"]);
+        if (!forceDndId) {
+            console.error("Force DND switch entity not found");
+            target.checked = !enabled;
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+                entity_id: forceDndId,
+            });
+            this._dndForce = enabled;
+        }
+        catch (error) {
+            console.error("Failed to toggle force DND:", error);
+            target.checked = !enabled;
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleScheduleToggle(e) {
+        const target = e.target;
+        const enabled = target.checked;
+        const scheduleEnabledId = this._findEntity("switch.", ["dnd_schedule_enabled"]);
+        if (!scheduleEnabledId) {
+            console.error("DND schedule enabled switch entity not found");
+            target.checked = !enabled;
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+                entity_id: scheduleEnabledId,
+            });
+            this._scheduleEnabled = enabled;
+        }
+        catch (error) {
+            console.error("Failed to toggle DND schedule:", error);
+            target.checked = !enabled;
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleTimeChange(field, value) {
+        const numValue = parseInt(value) || 0;
+        const isHour = field.includes("hour");
+        const max = isHour ? 23 : 59;
+        if (numValue < 0 || numValue > max)
+            return;
+        const textEntityId = this._findEntity("text.", [`dnd_${field}`]);
+        if (!textEntityId) {
+            console.error(`Text entity for ${field} not found`);
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("text", "set_value", {
+                value: numValue.toString(),
+            }, {
+                entity_id: textEntityId,
+            });
+            switch (field) {
+                case "start_hour":
+                    this._startHour = numValue;
+                    break;
+                case "start_minute":
+                    this._startMinute = numValue;
+                    break;
+                case "end_hour":
+                    this._endHour = numValue;
+                    break;
+                case "end_minute":
+                    this._endMinute = numValue;
+                    break;
+            }
+        }
+        catch (error) {
+            console.error(`Failed to update ${field}:`, error);
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    _formatTime(hour, minute) {
+        return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    }
+    render() {
+        return x `
+      <div class="settings-header">
+        <button
+          class="back-button"
+          @click=${this._handleBack}
+          aria-label="Back"
+        >
+          <ha-icon icon="mdi:arrow-left"></ha-icon>
+        </button>
+        <h1 class="header-title">Do Not Disturb</h1>
+      </div>
+
+      <div class="settings-content">
+        <!-- Status Banner -->
+        <div class="status-banner ${this._dndActive ? "active" : "inactive"}">
+          <div class="status-icon">
+            <ha-icon
+              icon="${this._dndActive
+            ? "mdi:moon-waning-crescent"
+            : "mdi:bell-ring"}"
+            ></ha-icon>
+          </div>
+          <div class="status-content">
+            <div class="status-title">
+              ${this._dndActive ? "DND Active" : "DND Inactive"}
+            </div>
+            <div class="status-description">
+              ${this._dndActive
+            ? "Incoming calls are being silenced"
+            : "Phone will ring normally for all calls"}
+            </div>
+          </div>
+        </div>
+
+        <!-- Force DND -->
+        <div class="settings-group">
+          <div class="group-header">Quick Actions</div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title">Force DND</div>
+              <div class="setting-description">
+                Override schedule and silence all calls immediately
+              </div>
+            </div>
+            <ha-switch
+              .checked=${this._dndForce}
+              @change=${this._handleDndForceToggle}
+              .disabled=${this._loading}
+            ></ha-switch>
+          </div>
+        </div>
+
+        <!-- Schedule Settings -->
+        <div class="settings-group">
+          <div class="group-header">Schedule</div>
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title">Scheduled DND</div>
+              <div class="setting-description">
+                Automatically enable DND during specific hours
+              </div>
+            </div>
+            <ha-switch
+              .checked=${this._scheduleEnabled}
+              @change=${this._handleScheduleToggle}
+              .disabled=${this._loading}
+            ></ha-switch>
+          </div>
+
+          ${this._scheduleEnabled
+            ? x `
+                <div class="time-picker-section">
+                  <div class="time-picker-row">
+                    <div class="time-picker-label">Start Time</div>
+                    <div class="time-picker-inputs">
+                      <input
+                        type="number"
+                        class="time-input"
+                        min="0"
+                        max="23"
+                        .value=${this._startHour.toString()}
+                        @change=${(e) => this._handleTimeChange("start_hour", e.target.value)}
+                        ?disabled=${this._loading}
+                        aria-label="Start hour"
+                      />
+                      <span class="time-separator">:</span>
+                      <input
+                        type="number"
+                        class="time-input"
+                        min="0"
+                        max="59"
+                        .value=${this._startMinute.toString().padStart(2, "0")}
+                        @change=${(e) => this._handleTimeChange("start_minute", e.target.value)}
+                        ?disabled=${this._loading}
+                        aria-label="Start minute"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="time-picker-row">
+                    <div class="time-picker-label">End Time</div>
+                    <div class="time-picker-inputs">
+                      <input
+                        type="number"
+                        class="time-input"
+                        min="0"
+                        max="23"
+                        .value=${this._endHour.toString()}
+                        @change=${(e) => this._handleTimeChange("end_hour", e.target.value)}
+                        ?disabled=${this._loading}
+                        aria-label="End hour"
+                      />
+                      <span class="time-separator">:</span>
+                      <input
+                        type="number"
+                        class="time-input"
+                        min="0"
+                        max="59"
+                        .value=${this._endMinute.toString().padStart(2, "0")}
+                        @change=${(e) => this._handleTimeChange("end_minute", e.target.value)}
+                        ?disabled=${this._loading}
+                        aria-label="End minute"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="help-text">
+                  <ha-icon icon="mdi:information-outline"></ha-icon>
+                  <div>
+                    DND will automatically activate at
+                    ${this._formatTime(this._startHour, this._startMinute)} and
+                    deactivate at
+                    ${this._formatTime(this._endHour, this._endMinute)} every
+                    day.
+                  </div>
+                </div>
+              `
+            : ""}
+        </div>
+      </div>
+
+      ${this._loading
+            ? x `
+            <div class="loading-overlay">
+              <ha-circular-progress active></ha-circular-progress>
+            </div>
+          `
+            : ""}
+    `;
+    }
+};
+TsuryPhoneDNDSettings.styles = i$3 `
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--card-background-color);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      border-bottom: 1px solid var(--divider-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      gap: 12px;
+    }
+
+    .back-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--primary-text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .back-button:hover {
+      background: var(--divider-color);
+    }
+
+    .back-button ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    /* Status Banner */
+    .status-banner {
+      margin: 0 20px 24px;
+      padding: 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.3s ease;
+    }
+
+    .status-banner.active {
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+    }
+
+    .status-banner.inactive {
+      background: linear-gradient(135deg, rgba(158, 158, 158, 0.15) 0%, rgba(158, 158, 158, 0.05) 100%);
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .status-banner.active .status-icon {
+      background: rgba(76, 175, 80, 0.2);
+      color: rgb(76, 175, 80);
+    }
+
+    .status-banner.inactive .status-icon {
+      background: rgba(158, 158, 158, 0.2);
+      color: rgb(158, 158, 158);
+    }
+
+    .status-icon ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .status-content {
+      flex: 1;
+    }
+
+    .status-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin-bottom: 2px;
+    }
+
+    .status-description {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+    }
+
+    /* Settings Groups */
+    .settings-group {
+      margin-bottom: 24px;
+    }
+
+    .group-header {
+      padding: 8px 20px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--secondary-text-color);
+    }
+
+    /* Setting Item */
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      gap: 16px;
+      min-height: 60px;
+    }
+
+    .setting-item + .setting-item {
+      border-top: 1px solid var(--divider-color);
+    }
+
+    .setting-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .setting-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    .setting-description {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+
+    /* Time Picker Section */
+    .time-picker-section {
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      border-top: 1px solid var(--divider-color);
+    }
+
+    .time-picker-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+    }
+
+    .time-picker-row + .time-picker-row {
+      border-top: 1px solid var(--divider-color);
+    }
+
+    .time-picker-label {
+      font-size: 15px;
+      color: var(--primary-text-color);
+      font-weight: 500;
+    }
+
+    .time-picker-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-input {
+      width: 50px;
+      height: 40px;
+      padding: 0;
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      background: var(--card-background-color);
+      color: var(--primary-text-color);
+      font-size: 16px;
+      font-family: inherit;
+      text-align: center;
+      transition: border-color 0.2s ease;
+    }
+
+    .time-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .time-separator {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--secondary-text-color);
+    }
+
+    /* Help Text */
+    .help-text {
+      margin: 0 20px;
+      padding: 12px 16px;
+      background: var(--secondary-background-color);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .help-text ha-icon {
+      --mdc-icon-size: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      color: var(--primary-color);
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    @media (max-width: 480px) {
+      .settings-header {
+        padding: 12px 16px;
+      }
+
+      .status-banner {
+        margin: 0 16px 20px;
+        padding: 14px;
+      }
+
+      .setting-item {
+        padding: 14px 16px;
+      }
+
+      .time-picker-section {
+        padding: 14px 16px;
+      }
+
+      .time-input {
+        width: 48px;
+        height: 38px;
+        font-size: 15px;
+      }
+    }
+  `;
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneDNDSettings.prototype, "hass", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneDNDSettings.prototype, "entityId", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_dndActive", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_dndForce", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_scheduleEnabled", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_startHour", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_startMinute", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_endHour", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_endMinute", void 0);
+__decorate([
+    r()
+], TsuryPhoneDNDSettings.prototype, "_loading", void 0);
+TsuryPhoneDNDSettings = __decorate([
+    t("tsuryphone-dnd-settings")
+], TsuryPhoneDNDSettings);
+
+let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
+    constructor() {
+        super(...arguments);
+        this._earpieceVolume = 4;
+        this._earpieceGain = 4;
+        this._speakerVolume = 4;
+        this._speakerGain = 4;
+        this._ringPattern = "";
+        this._customPattern = "";
+        this._patternError = "";
+        this._loading = false;
+        // Ring pattern presets from backend
+        this._ringPatternPresets = {
+            Default: "",
+            "Pulse Short": "300,300x2",
+            Classic: "500,500,500",
+            "Long Gap": "800,400,800",
+            Triple: "300,300,300",
+            Stagger: "500,250,500",
+            Alarm: "200,200x5",
+            Slow: "1000",
+            Burst: "150,150x3",
+        };
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this._loadAudioSettings();
+    }
+    willUpdate() {
+        this._loadAudioSettings();
+    }
+    _loadAudioSettings() {
+        if (!this.hass)
+            return;
+        // Find audio entities without device_id prefix
+        const earpieceVolumeEntity = this._findEntity("number.earpiece_volume");
+        const earpieceGainEntity = this._findEntity("number.earpiece_gain");
+        const speakerVolumeEntity = this._findEntity("number.speaker_volume");
+        const speakerGainEntity = this._findEntity("number.speaker_gain");
+        const ringPatternCustomEntity = this._findEntity("text.ring_pattern_custom");
+        if (earpieceVolumeEntity) {
+            const value = parseFloat(this.hass.states[earpieceVolumeEntity].state);
+            if (!isNaN(value)) {
+                this._earpieceVolume = Math.round(value);
+            }
+        }
+        if (earpieceGainEntity) {
+            const value = parseFloat(this.hass.states[earpieceGainEntity].state);
+            if (!isNaN(value)) {
+                this._earpieceGain = Math.round(value);
+            }
+        }
+        if (speakerVolumeEntity) {
+            const value = parseFloat(this.hass.states[speakerVolumeEntity].state);
+            if (!isNaN(value)) {
+                this._speakerVolume = Math.round(value);
+            }
+        }
+        if (speakerGainEntity) {
+            const value = parseFloat(this.hass.states[speakerGainEntity].state);
+            if (!isNaN(value)) {
+                this._speakerGain = Math.round(value);
+            }
+        }
+        if (ringPatternCustomEntity) {
+            const pattern = this.hass.states[ringPatternCustomEntity].state || "";
+            this._ringPattern = pattern;
+            this._customPattern = pattern;
+        }
+    }
+    _findEntity(entitySuffix) {
+        // Try to find entity with or without device_id prefix
+        const allEntities = Object.keys(this.hass.states);
+        // Try exact match first
+        if (allEntities.includes(entitySuffix)) {
+            return entitySuffix;
+        }
+        // Try with device_id prefix
+        const withPrefix = allEntities.find((entity) => entity.endsWith(entitySuffix.replace("number.", "_")));
+        if (withPrefix) {
+            return withPrefix;
+        }
+        // Try partial match
+        const partialMatch = allEntities.find((entity) => entity.includes(entitySuffix.replace("number.", "")));
+        return partialMatch || null;
+    }
+    async _handleSliderChange(entitySuffix, value) {
+        const entityId = this._findEntity(entitySuffix);
+        if (!entityId) {
+            console.error(`Audio entity not found: ${entitySuffix}`);
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("number", "set_value", {
+                entity_id: entityId,
+                value: value,
+            });
+        }
+        catch (error) {
+            console.error(`Failed to set ${entitySuffix}:`, error);
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    _handleEarpieceVolumeChange(e) {
+        const value = parseInt(e.target.value);
+        this._earpieceVolume = value;
+        this._handleSliderChange("number.earpiece_volume", value);
+    }
+    _handleEarpieceGainChange(e) {
+        const value = parseInt(e.target.value);
+        this._earpieceGain = value;
+        this._handleSliderChange("number.earpiece_gain", value);
+    }
+    _handleSpeakerVolumeChange(e) {
+        const value = parseInt(e.target.value);
+        this._speakerVolume = value;
+        this._handleSliderChange("number.speaker_volume", value);
+    }
+    _handleSpeakerGainChange(e) {
+        const value = parseInt(e.target.value);
+        this._speakerGain = value;
+        this._handleSliderChange("number.speaker_gain", value);
+    }
+    _validateRingPattern(pattern) {
+        const normalized = pattern.trim();
+        // Empty pattern is valid (device default)
+        if (!normalized) {
+            return null;
+        }
+        // Max length check
+        if (normalized.length > 32) {
+            return "Pattern too long (max 32 characters)";
+        }
+        // Valid characters check
+        const validChars = /^[0-9,x]+$/;
+        if (!validChars.test(normalized)) {
+            return "Pattern can only contain digits, commas, and 'x'";
+        }
+        // Parse pattern and repeat
+        let base = normalized;
+        let repeatCount = 1;
+        if (normalized.includes("x")) {
+            const parts = normalized.split("x");
+            if (parts.length !== 2) {
+                return "Only one 'x' allowed for repeat count";
+            }
+            base = parts[0];
+            const repeatStr = parts[1];
+            if (!repeatStr || !/^\d+$/.test(repeatStr)) {
+                return "Repeat count must be a positive number";
+            }
+            repeatCount = parseInt(repeatStr);
+            if (repeatCount <= 0) {
+                return "Repeat count must be greater than 0";
+            }
+        }
+        // Validate segments
+        const segments = base.split(",");
+        if (segments.length === 0 || segments.some((s) => s === "")) {
+            return "Empty segments not allowed";
+        }
+        for (const segment of segments) {
+            if (!/^\d+$/.test(segment)) {
+                return "Each segment must be a positive number";
+            }
+            if (parseInt(segment) <= 0) {
+                return "Segment durations must be greater than 0";
+            }
+        }
+        // Segment count validation based on repeat
+        if (repeatCount > 1) {
+            if (segments.length % 2 !== 0) {
+                return "Repeated patterns must have even number of segments";
+            }
+        }
+        else {
+            if (segments.length % 2 !== 1) {
+                return "Single patterns must have odd number of segments";
+            }
+        }
+        return null;
+    }
+    _handlePatternPresetChange(e) {
+        const select = e.target;
+        const presetName = select.value;
+        const pattern = this._ringPatternPresets[presetName];
+        this._ringPattern = pattern;
+        this._customPattern = pattern;
+        this._patternError = "";
+        // Save pattern
+        this._saveRingPattern(pattern);
+    }
+    _handleCustomPatternChange(e) {
+        const input = e.target;
+        const pattern = input.value;
+        this._customPattern = pattern;
+        // Validate pattern
+        const error = this._validateRingPattern(pattern);
+        this._patternError = error || "";
+        // Only save if valid
+        if (!error) {
+            this._ringPattern = pattern;
+            this._saveRingPattern(pattern);
+        }
+    }
+    async _saveRingPattern(pattern) {
+        const entityId = this._findEntity("text.ring_pattern_custom");
+        if (!entityId) {
+            console.error("Ring pattern custom entity not found");
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("text", "set_value", {
+                entity_id: entityId,
+                value: pattern,
+            });
+        }
+        catch (error) {
+            console.error("Failed to set ring pattern:", error);
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleTestRing() {
+        if (!this.entityId) {
+            console.error("Entity ID required for test ring");
+            return;
+        }
+        const pattern = this._customPattern || this._ringPattern;
+        // Validate before testing
+        const error = this._validateRingPattern(pattern);
+        if (error) {
+            this._patternError = error;
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("tsuryphone", "ring_device", {
+                pattern: pattern,
+                force: false,
+            });
+        }
+        catch (error) {
+            console.error("Failed to test ring:", error);
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    _getCurrentPresetName() {
+        const currentPattern = this._ringPattern;
+        // Find matching preset
+        for (const [name, pattern] of Object.entries(this._ringPatternPresets)) {
+            if (pattern === currentPattern) {
+                return name;
+            }
+        }
+        return "Default";
+    }
+    _handleBack() {
+        this.dispatchEvent(new CustomEvent("navigate-back", {
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    render() {
+        return x `
+      <div class="settings-header">
+        <button
+          class="back-button"
+          @click=${this._handleBack}
+          aria-label="Back to settings"
+        >
+          <ha-icon icon="mdi:arrow-left"></ha-icon>
+        </button>
+        <h1 class="header-title">Audio</h1>
+      </div>
+
+      <div class="settings-content">
+        <!-- Earpiece Settings -->
+        <div class="settings-group">
+          <div class="group-header">Earpiece</div>
+
+          <!-- Earpiece Volume -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:volume-high"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Volume</div>
+                  <div class="slider-description">
+                    Adjust earpiece loudness level
+                  </div>
+                </div>
+              </div>
+              <div class="slider-value">${this._earpieceVolume}</div>
+            </div>
+            <div class="slider-control">
+              <div class="slider-min">1</div>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                step="1"
+                .value=${this._earpieceVolume.toString()}
+                @input=${this._handleEarpieceVolumeChange}
+                aria-label="Earpiece volume"
+              />
+              <div class="slider-max">7</div>
+            </div>
+          </div>
+
+          <!-- Earpiece Gain -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:amplifier"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Gain</div>
+                  <div class="slider-description">
+                    Adjust earpiece amplification
+                  </div>
+                </div>
+              </div>
+              <div class="slider-value">${this._earpieceGain}</div>
+            </div>
+            <div class="slider-control">
+              <div class="slider-min">1</div>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                step="1"
+                .value=${this._earpieceGain.toString()}
+                @input=${this._handleEarpieceGainChange}
+                aria-label="Earpiece gain"
+              />
+              <div class="slider-max">7</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speaker Settings -->
+        <div class="settings-group">
+          <div class="group-header">Speaker</div>
+
+          <!-- Speaker Volume -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:volume-high"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Volume</div>
+                  <div class="slider-description">
+                    Adjust speaker loudness level
+                  </div>
+                </div>
+              </div>
+              <div class="slider-value">${this._speakerVolume}</div>
+            </div>
+            <div class="slider-control">
+              <div class="slider-min">1</div>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                step="1"
+                .value=${this._speakerVolume.toString()}
+                @input=${this._handleSpeakerVolumeChange}
+                aria-label="Speaker volume"
+              />
+              <div class="slider-max">7</div>
+            </div>
+          </div>
+
+          <!-- Speaker Gain -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:amplifier"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Gain</div>
+                  <div class="slider-description">
+                    Adjust speaker amplification
+                  </div>
+                </div>
+              </div>
+              <div class="slider-value">${this._speakerGain}</div>
+            </div>
+            <div class="slider-control">
+              <div class="slider-min">1</div>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                step="1"
+                .value=${this._speakerGain.toString()}
+                @input=${this._handleSpeakerGainChange}
+                aria-label="Speaker gain"
+              />
+              <div class="slider-max">7</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Help Text -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            <strong>Volume</strong> controls the overall loudness, while
+            <strong>Gain</strong> controls the signal amplification. Adjust
+            both settings to find your optimal audio quality. Changes take
+            effect immediately.
+          </div>
+        </div>
+
+        <!-- Ring Pattern Settings -->
+        <div class="settings-group">
+          <div class="group-header">Ring Pattern</div>
+
+          <!-- Pattern Preset Selector -->
+          <div class="slider-item">
+            <label class="pattern-label" for="pattern-preset">
+              Select Preset
+            </label>
+            <select
+              id="pattern-preset"
+              class="pattern-select"
+              .value=${this._getCurrentPresetName()}
+              @change=${this._handlePatternPresetChange}
+            >
+              ${Object.entries(this._ringPatternPresets).map(([name, pattern]) => x `
+                  <option value=${name}>
+                    ${name}${pattern
+            ? x ` <span style="opacity: 0.6">— ${pattern}</span>`
+            : x ` <span style="opacity: 0.6">
+                          — device default
+                        </span>`}
+                  </option>
+                `)}
+            </select>
+          </div>
+
+          <!-- Custom Pattern Input -->
+          <div class="slider-item">
+            <label class="pattern-label" for="pattern-custom">
+              Custom Pattern
+            </label>
+            <div class="pattern-input-container">
+              <input
+                id="pattern-custom"
+                type="text"
+                class="pattern-input ${this._patternError ? "error" : ""}"
+                .value=${this._customPattern}
+                @input=${this._handleCustomPatternChange}
+                placeholder="e.g., 500,500,500 or 300,300x2"
+                aria-label="Custom ring pattern"
+              />
+              ${this._patternError
+            ? x `<div class="pattern-error">${this._patternError}</div>`
+            : x `
+                    <div class="pattern-hint">
+                      Format: duration1,duration2,... (in ms). Use 'x' for
+                      repeats (e.g., 300,300x2). Even segments for repeats, odd
+                      for single.
+                    </div>
+                  `}
+            </div>
+          </div>
+
+          <!-- Test Button -->
+          <div class="slider-item">
+            <button
+              class="test-button"
+              @click=${this._handleTestRing}
+              ?disabled=${!!this._patternError || this._loading}
+              aria-label="Test ring pattern"
+            >
+              <ha-icon icon="mdi:bell-ring"></ha-icon>
+              <span>Test Ring Pattern</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      ${this._loading
+            ? x `
+            <div class="loading-overlay">
+              <div class="loading-spinner"></div>
+            </div>
+          `
+            : ""}
+    `;
+    }
+};
+TsuryPhoneAudioSettings.styles = i$3 `
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--card-background-color);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      border-bottom: 1px solid var(--divider-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      gap: 12px;
+    }
+
+    .back-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--primary-text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .back-button:hover {
+      background: var(--divider-color);
+    }
+
+    .back-button:active {
+      background: var(--secondary-background-color);
+    }
+
+    .back-button ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    /* Setting Groups */
+    .settings-group {
+      background: var(--card-background-color);
+      margin-bottom: 12px;
+    }
+
+    .group-header {
+      padding: 20px 20px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+    }
+
+    /* Slider Items */
+    .slider-item {
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--divider-color);
+      gap: 12px;
+    }
+
+    .slider-item:last-child {
+      border-bottom: none;
+    }
+
+    .slider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .slider-label-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slider-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .slider-icon ha-icon {
+      --mdc-icon-size: 22px;
+    }
+
+    .slider-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .slider-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    .slider-description {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+
+    .slider-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+      min-width: 32px;
+      text-align: right;
+    }
+
+    /* Slider Control */
+    .slider-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .slider-min {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .slider-max {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* Custom Slider Styling */
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--divider-color);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(0.95);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    input[type="range"]::-moz-range-thumb:active {
+      transform: scale(0.95);
+    }
+
+    /* Help Text */
+    .help-text {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--secondary-background-color);
+      border-left: 3px solid var(--primary-color);
+      margin: 16px 20px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+    }
+
+    .help-text ha-icon {
+      --mdc-icon-size: 20px;
+      color: var(--primary-color);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .help-text strong {
+      color: var(--primary-text-color);
+    }
+
+    /* Ring Pattern Controls */
+    .pattern-select {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: var(--primary-text-color);
+      background: var(--card-background-color);
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .pattern-select:focus {
+      border-color: var(--primary-color);
+    }
+
+    .pattern-select option {
+      background: var(--card-background-color);
+      color: var(--primary-text-color);
+    }
+
+    .pattern-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      margin-bottom: 8px;
+    }
+
+    .pattern-input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pattern-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      color: var(--primary-text-color);
+      background: var(--card-background-color);
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .pattern-input:focus {
+      border-color: var(--primary-color);
+    }
+
+    .pattern-input.error {
+      border-color: rgb(244, 67, 54);
+    }
+
+    .pattern-error {
+      font-size: 12px;
+      color: rgb(244, 67, 54);
+      margin-top: 4px;
+    }
+
+    .pattern-hint {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+
+    .test-button {
+      width: 100%;
+      padding: 12px 24px;
+      margin-top: 12px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .test-button:hover {
+      opacity: 0.9;
+    }
+
+    .test-button:active {
+      opacity: 0.8;
+    }
+
+    .test-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .test-button ha-icon {
+      --mdc-icon-size: 20px;
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--divider-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  `;
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneAudioSettings.prototype, "hass", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneAudioSettings.prototype, "entityId", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_earpieceVolume", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_earpieceGain", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_speakerVolume", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_speakerGain", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_ringPattern", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_customPattern", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_patternError", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_loading", void 0);
+TsuryPhoneAudioSettings = __decorate([
+    t("tsuryphone-audio-settings")
+], TsuryPhoneAudioSettings);
+
+let TsuryPhoneDeviceSettings = class TsuryPhoneDeviceSettings extends i {
+    constructor() {
+        super(...arguments);
+        this._loading = false;
+        this._showRebootConfirm = false;
+        this._showFactoryResetConfirm = false;
+        this._maintenanceActive = false;
+        this._deviceIp = null;
+        this._sendModeEnabled = false;
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this._loadMaintenanceStatus();
+    }
+    willUpdate(changedProps) {
+        super.willUpdate(changedProps);
+        if (changedProps.has("hass") && this.hass && this.entityId) {
+            this._loadMaintenanceStatus();
+        }
+    }
+    _findEntity(prefix, keywords) {
+        if (!this.hass)
+            return null;
+        const allEntityIds = Object.keys(this.hass.states);
+        const found = allEntityIds.find((id) => id.startsWith(prefix) && keywords.some(kw => id.includes(kw))) || null;
+        return found;
+    }
+    async _loadMaintenanceStatus() {
+        if (!this.hass || !this.entityId)
+            return;
+        try {
+            const maintenanceSensorId = this._findEntity("binary_sensor.", ["maintenance_mode", "maintenance"]);
+            if (maintenanceSensorId) {
+                const state = this.hass.states[maintenanceSensorId].state;
+                this._maintenanceActive = state === "on";
+            }
+            const sendModeSwitchId = this._findEntity("switch.", ["send_mode"]);
+            if (sendModeSwitchId) {
+                const state = this.hass.states[sendModeSwitchId].state;
+                this._sendModeEnabled = state === "on";
+            }
+            const sensorEntity = this.hass.states[this.entityId];
+            if (sensorEntity?.attributes) {
+                this._deviceIp =
+                    sensorEntity.attributes.ip_address ||
+                        sensorEntity.attributes.device_ip ||
+                        sensorEntity.attributes.ip ||
+                        null;
+            }
+        }
+        catch (error) {
+            console.error("Failed to load maintenance status:", error);
+        }
+    }
+    _handleBack() {
+        this.dispatchEvent(new CustomEvent("navigate-back", {
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    _showRebootDialog() {
+        this._showRebootConfirm = true;
+    }
+    _showFactoryResetDialog() {
+        this._showFactoryResetConfirm = true;
+    }
+    _closeDialogs() {
+        this._showRebootConfirm = false;
+        this._showFactoryResetConfirm = false;
+    }
+    async _handleMaintenanceToggle(e) {
+        const target = e.target;
+        const enabled = target.checked;
+        const maintenanceSwitchId = this._findEntity("switch.", ["maintenance_mode", "maintenance"]);
+        if (!maintenanceSwitchId) {
+            console.error("Maintenance mode switch entity not found");
+            target.checked = !enabled;
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+                entity_id: maintenanceSwitchId,
+            });
+            this._maintenanceActive = enabled;
+        }
+        catch (error) {
+            console.error("Failed to toggle maintenance mode:", error);
+            target.checked = !enabled;
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleSendModeToggle(e) {
+        const target = e.target;
+        const enabled = target.checked;
+        const sendModeSwitchId = this._findEntity("switch.", ["send_mode"]);
+        if (!sendModeSwitchId) {
+            console.error("Send mode switch entity not found");
+            target.checked = !enabled;
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("switch", enabled ? "turn_on" : "turn_off", {}, {
+                entity_id: sendModeSwitchId,
+            });
+            this._sendModeEnabled = enabled;
+        }
+        catch (error) {
+            console.error("Failed to toggle send mode:", error);
+            target.checked = !enabled;
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleReboot() {
+        if (!this.entityId) {
+            console.error("Entity ID is required");
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("tsuryphone", "reset_device", {}, {
+                entity_id: this.entityId,
+            });
+            this._closeDialogs();
+            // Show success message (optional - could add toast notification)
+            console.log("Device reboot initiated");
+        }
+        catch (error) {
+            console.error("Failed to reboot device:", error);
+            // Could show error toast here
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleFactoryReset() {
+        if (!this.entityId) {
+            console.error("Entity ID is required");
+            return;
+        }
+        this._loading = true;
+        try {
+            await this.hass.callService("tsuryphone", "factory_reset_device", {}, {
+                entity_id: this.entityId,
+            });
+            this._closeDialogs();
+            // Show success message
+            console.log("Factory reset initiated");
+        }
+        catch (error) {
+            console.error("Failed to factory reset device:", error);
+            // Could show error toast here
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    render() {
+        return x `
+      <div class="settings-header">
+        <button
+          class="back-button"
+          @click=${this._handleBack}
+          aria-label="Back"
+        >
+          <ha-icon icon="mdi:arrow-left"></ha-icon>
+        </button>
+        <h1 class="header-title">Device Management</h1>
+      </div>
+
+      <div class="settings-content">
+        <!-- Maintenance Mode Section -->
+        <div class="settings-group">
+          <div class="group-header">Configuration Portal</div>
+          
+          <!-- Status Banner -->
+          <div class="status-banner ${this._maintenanceActive ? "active" : "inactive"}">
+            <div class="status-icon">
+              <ha-icon icon="${this._maintenanceActive ? "mdi:cog" : "mdi:check-circle"}"></ha-icon>
+            </div>
+            <div class="status-content">
+              <div class="status-title">
+                ${this._maintenanceActive ? "Web Portal Active" : "Portal Inactive"}
+              </div>
+              <div class="status-description">
+                ${this._maintenanceActive
+            ? "Configuration portal is accessible"
+            : "Enable to access WiFi and OTA settings"}
+              </div>
+            </div>
+          </div>
+
+          <!-- Web Portal Link (only shown when active) -->
+          ${this._maintenanceActive && this._deviceIp ? x `
+            <a
+              class="portal-link"
+              href="http://${this._deviceIp}/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div class="portal-link-content">
+                <div class="portal-link-title">Open Web Portal</div>
+                <div class="portal-link-url">http://${this._deviceIp}/</div>
+              </div>
+              <ha-icon icon="mdi:open-in-new"></ha-icon>
+            </a>
+          ` : ""}
+
+          <!-- Maintenance Mode Toggle -->
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title">Enable Web Portal</div>
+              <div class="setting-description">
+                Start configuration portal for WiFi and OTA updates
+              </div>
+            </div>
+            <ha-switch
+              .checked=${this._maintenanceActive}
+              @change=${this._handleMaintenanceToggle}
+              .disabled=${this._loading}
+            ></ha-switch>
+          </div>
+        </div>
+
+        <!-- Help Text for Maintenance Mode -->
+        ${this._maintenanceActive ? x `
+          <div class="help-text">
+            <ha-icon icon="mdi:clock-alert"></ha-icon>
+            <div>
+              <strong>Portal Timeout:</strong> The configuration portal will automatically close after 5 minutes of inactivity. 
+              Use the portal to change WiFi credentials or perform OTA firmware updates. 
+              Normal phone functionality is disabled while the portal is active.
+            </div>
+          </div>
+        ` : x `
+          <div class="help-text">
+            <ha-icon icon="mdi:information"></ha-icon>
+            <div>
+              Enable the web portal to access device configuration at <strong>http://DEVICE_IP/</strong>. 
+              You can change WiFi settings and upload firmware updates. 
+              The portal automatically times out after 5 minutes for security.
+            </div>
+          </div>
+        `}
+
+        <!-- Send Mode Section -->
+        <div class="settings-group">
+          <div class="group-header">Integration Behavior</div>
+          
+          <!-- Send Mode Toggle -->
+          <div class="setting-item">
+            <div class="setting-info">
+              <div class="setting-title">Send Mode</div>
+              <div class="setting-description">
+                Require explicit send action for integration dialing
+              </div>
+            </div>
+            <ha-switch
+              .checked=${this._sendModeEnabled}
+              @change=${this._handleSendModeToggle}
+              .disabled=${this._loading}
+            ></ha-switch>
+          </div>
+        </div>
+
+        <!-- Help Text for Send Mode -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            When <strong>Send Mode</strong> is enabled, digits entered through the integration (card keypad) 
+            are queued and require pressing the send button to dial. 
+            This does not affect the physical rotary dial, which always dials immediately. 
+            Useful for modern phone behavior when using the card interface.
+          </div>
+        </div>
+
+        <!-- Device Actions -->
+        <div class="settings-group">
+          <div class="group-header">Device Actions</div>
+          
+          <button
+            class="action-button"
+            @click=${this._showRebootDialog}
+            ?disabled=${this._loading}
+          >
+            <div class="action-icon">
+              <ha-icon icon="mdi:restart"></ha-icon>
+            </div>
+            <div class="action-content">
+              <div class="action-title">Reboot Device</div>
+              <div class="action-description">
+                Restart the device without losing settings
+              </div>
+            </div>
+          </button>
+
+          <button
+            class="action-button danger"
+            @click=${this._showFactoryResetDialog}
+            ?disabled=${this._loading}
+          >
+            <div class="action-icon">
+              <ha-icon icon="mdi:delete-forever"></ha-icon>
+            </div>
+            <div class="action-content">
+              <div class="action-title">Factory Reset</div>
+              <div class="action-description">
+                Erase all settings, contacts, and statistics
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Help Text -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            <strong>Reboot</strong> restarts the device while preserving all your settings and data. 
+            <strong>Factory Reset</strong> permanently erases everything and returns the device to its original state.
+          </div>
+        </div>
+      </div>
+
+      <!-- Reboot Confirmation Modal -->
+      ${this._showRebootConfirm ? x `
+        <div class="modal-overlay" @click=${this._closeDialogs}>
+          <div class="modal" @click=${(e) => e.stopPropagation()}>
+            <div class="modal-header">
+              <h2 class="modal-title">
+                <ha-icon icon="mdi:restart"></ha-icon>
+                Reboot Device
+              </h2>
+            </div>
+            <div class="modal-content">
+              <p class="modal-text">
+                The device will restart and reconnect automatically. 
+                This process takes about 30-60 seconds.
+              </p>
+              <p class="modal-text">
+                All settings, contacts, and call history will be preserved.
+              </p>
+            </div>
+            <div class="modal-actions">
+              <button
+                class="modal-button cancel"
+                @click=${this._closeDialogs}
+                ?disabled=${this._loading}
+              >
+                Cancel
+              </button>
+              <button
+                class="modal-button confirm"
+                @click=${this._handleReboot}
+                ?disabled=${this._loading}
+              >
+                ${this._loading ? "Rebooting..." : "Reboot"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ` : ""}
+
+      <!-- Factory Reset Confirmation Modal -->
+      ${this._showFactoryResetConfirm ? x `
+        <div class="modal-overlay" @click=${this._closeDialogs}>
+          <div class="modal" @click=${(e) => e.stopPropagation()}>
+            <div class="modal-header">
+              <h2 class="modal-title danger">
+                <ha-icon icon="mdi:alert"></ha-icon>
+                Factory Reset
+              </h2>
+            </div>
+            <div class="modal-content">
+              <div class="modal-warning">
+                <div class="modal-warning-title">⚠️ This action cannot be undone</div>
+                <div class="modal-warning-text">
+                  All data will be permanently deleted
+                </div>
+              </div>
+              <p class="modal-text">
+                Factory reset will erase:
+              </p>
+              <p class="modal-text">
+                • All contacts and call history<br>
+                • WiFi credentials<br>
+                • Do Not Disturb schedules<br>
+                • Audio settings<br>
+                • All statistics and configurations
+              </p>
+              <p class="modal-text">
+                The device will restart and require complete reconfiguration.
+              </p>
+            </div>
+            <div class="modal-actions">
+              <button
+                class="modal-button cancel"
+                @click=${this._closeDialogs}
+                ?disabled=${this._loading}
+              >
+                Cancel
+              </button>
+              <button
+                class="modal-button danger"
+                @click=${this._handleFactoryReset}
+                ?disabled=${this._loading}
+              >
+                ${this._loading ? "Resetting..." : "Factory Reset"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ` : ""}
+
+      ${this._loading ? x `
+        <div class="loading-overlay">
+          <ha-circular-progress active></ha-circular-progress>
+        </div>
+      ` : ""}
+    `;
+    }
+};
+TsuryPhoneDeviceSettings.styles = i$3 `
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--card-background-color);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      border-bottom: 1px solid var(--divider-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      gap: 12px;
+    }
+
+    .back-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--primary-text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .back-button:hover {
+      background: var(--divider-color);
+    }
+
+    .back-button ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    /* Settings Groups */
+    .settings-group {
+      margin-bottom: 32px;
+    }
+
+    .group-header {
+      padding: 8px 20px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--secondary-text-color);
+    }
+
+    /* Action Button */
+    .action-button {
+      margin: 0 20px 16px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: none;
+      background: var(--card-background-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.2s ease;
+      width: calc(100% - 40px);
+      text-align: left;
+    }
+
+    .action-button:hover {
+      background: var(--divider-color);
+    }
+
+    .action-button:active {
+      background: var(--secondary-background-color);
+    }
+
+    .action-button.danger:hover {
+      background: rgba(244, 67, 54, 0.1);
+    }
+
+    .action-button.danger:active {
+      background: rgba(244, 67, 54, 0.15);
+    }
+
+    .action-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .action-button:not(.danger) .action-icon {
+      background: rgba(var(--rgb-primary-color), 0.15);
+      color: var(--primary-color);
+    }
+
+    .action-button.danger .action-icon {
+      background: rgba(244, 67, 54, 0.15);
+      color: rgb(244, 67, 54);
+    }
+
+    .action-icon ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .action-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .action-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    .action-description {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+
+    .action-button.danger .action-description {
+      color: rgb(244, 67, 54);
+    }
+
+    /* Status Banner */
+    .status-banner {
+      margin: 0 20px 16px;
+      padding: 16px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.3s ease;
+    }
+
+    .status-banner.active {
+      background: linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 152, 0, 0.05) 100%);
+    }
+
+    .status-banner.inactive {
+      background: linear-gradient(135deg, rgba(158, 158, 158, 0.12) 0%, rgba(158, 158, 158, 0.04) 100%);
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .status-banner.active .status-icon {
+      background: rgba(255, 152, 0, 0.2);
+      color: rgb(255, 152, 0);
+    }
+
+    .status-banner.inactive .status-icon {
+      background: rgba(158, 158, 158, 0.15);
+      color: rgb(117, 117, 117);
+    }
+
+    .status-icon ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .status-content {
+      flex: 1;
+    }
+
+    .status-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin-bottom: 2px;
+    }
+
+    .status-description {
+      font-size: 12px;
+      color: var(--secondary-text-color);
+    }
+
+    /* Web Portal Link */
+    .portal-link {
+      margin: 0 20px 16px;
+      padding: 16px;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      border-radius: 12px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-weight: 500;
+      transition: opacity 0.2s ease;
+    }
+
+    .portal-link:hover {
+      opacity: 0.9;
+    }
+
+    .portal-link:active {
+      opacity: 0.8;
+    }
+
+    .portal-link-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .portal-link-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .portal-link-url {
+      font-size: 13px;
+      opacity: 0.9;
+      font-family: monospace;
+    }
+
+    .portal-link ha-icon {
+      --mdc-icon-size: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Maintenance Toggle Item */
+    .setting-item {
+      margin: 0 20px 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--card-background-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .setting-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .setting-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+    }
+
+    .setting-description {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.4;
+    }
+
+    /* Help Text */
+    .help-text {
+      margin: 0 20px 16px;
+      padding: 12px 16px;
+      background: var(--secondary-background-color);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .help-text ha-icon {
+      --mdc-icon-size: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      color: var(--primary-color);
+    }
+
+    /* Confirmation Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--card-background-color);
+      border-radius: 16px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--divider-color);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .modal-title.danger {
+      color: rgb(244, 67, 54);
+    }
+
+    .modal-title.danger ha-icon {
+      color: rgb(244, 67, 54);
+    }
+
+    .modal-content {
+      padding: 24px;
+    }
+
+    .modal-text {
+      font-size: 14px;
+      color: var(--secondary-text-color);
+      line-height: 1.6;
+      margin: 0 0 16px;
+    }
+
+    .modal-warning {
+      padding: 12px 16px;
+      background: rgba(244, 67, 54, 0.1);
+      border-left: 4px solid rgb(244, 67, 54);
+      border-radius: 4px;
+      margin: 0 0 16px;
+    }
+
+    .modal-warning-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgb(244, 67, 54);
+      margin: 0 0 4px;
+    }
+
+    .modal-warning-text {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding: 16px 24px;
+      border-top: 1px solid var(--divider-color);
+    }
+
+    .modal-button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 80px;
+    }
+
+    .modal-button.cancel {
+      background: transparent;
+      color: var(--primary-text-color);
+      border: 1px solid var(--divider-color);
+    }
+
+    .modal-button.cancel:hover {
+      background: var(--divider-color);
+    }
+
+    .modal-button.confirm {
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+    }
+
+    .modal-button.confirm:hover {
+      opacity: 0.9;
+    }
+
+    .modal-button.danger {
+      background: rgb(244, 67, 54);
+      color: white;
+    }
+
+    .modal-button.danger:hover {
+      background: rgb(229, 57, 53);
+    }
+
+    .modal-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    @media (max-width: 480px) {
+      .settings-header {
+        padding: 12px 16px;
+      }
+
+      .action-button {
+        margin: 0 16px 14px;
+        padding: 14px 16px;
+        width: calc(100% - 32px);
+      }
+
+      .help-text {
+        margin: 0 16px 14px;
+        padding: 10px 14px;
+      }
+
+      .modal {
+        margin: 0 16px;
+      }
+    }
+  `;
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneDeviceSettings.prototype, "hass", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneDeviceSettings.prototype, "entityId", void 0);
+__decorate([
+    r()
+], TsuryPhoneDeviceSettings.prototype, "_loading", void 0);
+__decorate([
+    r()
+], TsuryPhoneDeviceSettings.prototype, "_showRebootConfirm", void 0);
+__decorate([
+    r()
+], TsuryPhoneDeviceSettings.prototype, "_showFactoryResetConfirm", void 0);
+__decorate([
+    r()
+], TsuryPhoneDeviceSettings.prototype, "_maintenanceActive", void 0);
+__decorate([
+    r()
+], TsuryPhoneDeviceSettings.prototype, "_deviceIp", void 0);
+__decorate([
+    r()
+], TsuryPhoneDeviceSettings.prototype, "_sendModeEnabled", void 0);
+TsuryPhoneDeviceSettings = __decorate([
+    t("tsuryphone-device-settings")
+], TsuryPhoneDeviceSettings);
+
+let TsuryPhoneWebhooksSettings = class TsuryPhoneWebhooksSettings extends i {
+    constructor() {
+        super(...arguments);
+        this._loading = false;
+        this._webhooks = [];
+        this._selectedAutomation = null;
+        this._detectedWebhookIds = [];
+        this._selectedWebhookId = ""; // Store the selected webhook ID
+        this._newCode = "";
+        this._newActionName = "";
+        this._entityPickerLoaded = false;
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this._loadWebhooks();
+        this._loadEntityPicker();
+    }
+    // Load ha-entity-picker component by triggering glance card editor
+    // See: https://community.home-assistant.io/t/re-using-existing-frontend-components-in-lovelace-card-editor/103415
+    async _loadEntityPicker() {
+        if (!customElements.get("ha-entity-picker")) {
+            const glanceCard = customElements.get("hui-glance-card");
+            if (glanceCard && typeof glanceCard.getConfigElement === "function") {
+                try {
+                    await glanceCard.getConfigElement();
+                }
+                catch (e) {
+                    console.warn("Failed to load ha-entity-picker:", e);
+                }
+            }
+        }
+        this._entityPickerLoaded = true;
+    }
+    willUpdate(changedProps) {
+        super.willUpdate(changedProps);
+        if (changedProps.has("hass") && this.hass && this.entityId) {
+            this._loadWebhooks();
+        }
+    }
+    _findEntity(prefix, keywords) {
+        if (!this.hass)
+            return null;
+        const allEntityIds = Object.keys(this.hass.states);
+        const found = allEntityIds.find((id) => id.startsWith(prefix) && keywords.some((kw) => id.includes(kw))) || null;
+        return found;
+    }
+    async _loadWebhooks() {
+        if (!this.hass || !this.entityId)
+            return;
+        try {
+            // Get webhooks from coordinator state via sensor attributes
+            const sensorEntity = this.hass.states[this.entityId];
+            if (sensorEntity?.attributes?.webhooks) {
+                this._webhooks = sensorEntity.attributes.webhooks;
+            }
+        }
+        catch (error) {
+            console.error("Failed to load webhooks:", error);
+        }
+    }
+    _handleBack() {
+        this.dispatchEvent(new CustomEvent("navigate-back", {
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    async _handleAutomationSelected(e) {
+        const entityId = e.detail.value;
+        this._selectedAutomation = entityId;
+        this._detectedWebhookIds = [];
+        if (!entityId)
+            return;
+        this._loading = true;
+        try {
+            // Fetch automation config via WebSocket
+            const config = await this.hass.callWS({
+                type: "automation/config",
+                entity_id: entityId,
+            });
+            // Extract webhook triggers - handle both 'trigger' and 'triggers' keys
+            let triggers = [];
+            if (Array.isArray(config?.trigger)) {
+                triggers = config.trigger;
+            }
+            else if (Array.isArray(config?.triggers)) {
+                triggers = config.triggers;
+            }
+            else if (config?.config?.triggers) {
+                // Try nested config.config.triggers path
+                triggers = Array.isArray(config.config.triggers) ? config.config.triggers : [config.config.triggers];
+            }
+            else if (config?.trigger) {
+                triggers = [config.trigger];
+            }
+            else if (config?.triggers) {
+                triggers = [config.triggers];
+            }
+            // Filter for webhook triggers - check both 'platform' and 'trigger' fields
+            this._detectedWebhookIds = triggers
+                .filter((t) => {
+                const isWebhook = t?.platform === "webhook" || t?.trigger === "webhook";
+                const hasWebhookId = t?.webhook_id;
+                return isWebhook && hasWebhookId;
+            })
+                .map((t) => t.webhook_id);
+            // Auto-select if there's only one webhook ID
+            if (this._detectedWebhookIds.length === 1) {
+                this._selectedWebhookId = this._detectedWebhookIds[0];
+                // Force re-render to update the selected chip styling
+                this.requestUpdate();
+            }
+            // Auto-fill action name from automation friendly_name
+            if (config?.alias) {
+                this._newActionName = config.alias;
+            }
+        }
+        catch (error) {
+            console.error("Failed to fetch automation config:", error);
+            this._detectedWebhookIds = [];
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    _handleWebhookIdClick(webhookId) {
+        this._selectedWebhookId = webhookId;
+    }
+    async _handleAddWebhook() {
+        if (!this.entityId) {
+            console.error("Entity ID is required");
+            return;
+        }
+        if (!this._selectedWebhookId || !this._newCode || !this._newActionName) {
+            console.error("Missing required fields:", {
+                webhookId: this._selectedWebhookId,
+                code: this._newCode,
+                name: this._newActionName,
+            });
+            return;
+        }
+        // Validate code is numeric only
+        if (!/^\d+$/.test(this._newCode)) {
+            alert("Code must contain only numbers (0-9). This is what you dial on your rotary phone.");
+            return;
+        }
+        this._loading = true;
+        try {
+            // Call tsuryphone.webhook_add service
+            await this.hass.callService("tsuryphone", "webhook_add", {
+                webhook_id: this._selectedWebhookId,
+                code: this._newCode,
+                name: this._newActionName,
+            }, {
+                entity_id: this.entityId,
+            });
+            // Clear form
+            this._newCode = "";
+            this._newActionName = "";
+            this._selectedAutomation = null;
+            this._detectedWebhookIds = [];
+            this._selectedWebhookId = "";
+            // Reload webhooks after a short delay to allow backend to update
+            setTimeout(() => {
+                this._loadWebhooks();
+            }, 500);
+        }
+        catch (error) {
+            console.error("Failed to add webhook:", error);
+            alert(`Failed to add webhook: ${error}`);
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    async _handleDeleteWebhook(webhook) {
+        if (!this.entityId) {
+            console.error("Entity ID is required");
+            return;
+        }
+        this._loading = true;
+        try {
+            // Call tsuryphone.webhook_remove service
+            await this.hass.callService("tsuryphone", "webhook_remove", {
+                code: webhook.code,
+            }, {
+                entity_id: this.entityId,
+            });
+            // Reload webhooks after a short delay
+            setTimeout(() => {
+                this._loadWebhooks();
+            }, 500);
+        }
+        catch (error) {
+            console.error("Failed to delete webhook:", error);
+            alert(`Failed to delete webhook: ${error}`);
+        }
+        finally {
+            this._loading = false;
+        }
+    }
+    _handleCodeInput(e) {
+        const input = e.target;
+        let value = input.value;
+        // Only allow numeric characters (0-9)
+        value = value.replace(/[^0-9]/g, "");
+        // Update the input field if we stripped characters
+        if (input.value !== value) {
+            input.value = value;
+        }
+        this._newCode = value;
+        // Update backend entity
+        const codeEntity = this._findEntity("text.", ["webhook_code"]);
+        if (codeEntity) {
+            this.hass.callService("text", "set_value", {
+                entity_id: codeEntity,
+                value: this._newCode,
+            });
+        }
+    }
+    _handleActionNameInput(e) {
+        this._newActionName = e.target.value;
+        // Update backend entity
+        const nameEntity = this._findEntity("text.", ["webhook", "action_name"]);
+        if (nameEntity) {
+            this.hass.callService("text", "set_value", {
+                entity_id: nameEntity,
+                value: this._newActionName,
+            });
+        }
+    }
+    render() {
+        return x `
+      <div class="settings-header">
+        <button
+          class="back-button"
+          @click=${this._handleBack}
+          aria-label="Back"
+        >
+          <ha-icon icon="mdi:arrow-left"></ha-icon>
+        </button>
+        <h1 class="header-title">Webhooks</h1>
+      </div>
+
+      <div class="settings-content">
+        <!-- Help Text -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            Configure webhook actions that trigger Home Assistant automations.
+            Select an automation to automatically detect and extract webhook IDs.
+          </div>
+        </div>
+
+        <!-- Add Webhook Form -->
+        <div class="settings-group">
+          <div class="group-header">Add Webhook</div>
+
+          <div class="add-webhook-form">
+            ${!this._entityPickerLoaded
+            ? x `<div class="loading-message">Loading picker...</div>`
+            : x `
+                  <!-- Automation Picker -->
+                  <div class="form-row">
+                    <label class="form-label">Select Automation</label>
+                    <ha-entity-picker
+                      .hass=${this.hass}
+                      .includeDomains=${["automation"]}
+                      .value=${this._selectedAutomation}
+                      @value-changed=${this._handleAutomationSelected}
+                      ?disabled=${this._loading}
+                      label="Choose automation with webhook trigger"
+                      allow-custom-entity
+                    ></ha-entity-picker>
+                  </div>
+                `}
+
+            ${this._detectedWebhookIds.length > 0
+            ? x `
+                  <div class="detected-webhooks">
+                    <div class="detected-title">
+                      Detected webhook IDs (click to select):
+                    </div>
+                    ${this._detectedWebhookIds.map((id) => x `
+                        <span
+                          class="webhook-chip ${id === this._selectedWebhookId ? 'selected' : ''}"
+                          @click=${() => this._handleWebhookIdClick(id)}
+                          title="Click to select this webhook ID"
+                        >
+                          ${id}
+                        </span>
+                      `)}
+                  </div>
+                `
+            : this._selectedAutomation
+                ? x `
+                  <div class="detected-webhooks">
+                    <div class="detected-title">
+                      ⚠️ No webhook triggers found in this automation
+                    </div>
+                  </div>
+                `
+                : ""}
+
+            <!-- Code Input -->
+            <div class="form-row">
+              <label class="form-label">Code</label>
+              <input
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="form-input"
+                .value=${this._newCode}
+                @input=${this._handleCodeInput}
+                placeholder="1234"
+                ?disabled=${this._loading}
+              />
+            </div>
+
+            <!-- Action Name Input -->
+            <div class="form-row">
+              <label class="form-label">Action Name</label>
+              <input
+                type="text"
+                class="form-input"
+                .value=${this._newActionName}
+                @input=${this._handleActionNameInput}
+                placeholder="Front Door Bell"
+                ?disabled=${this._loading}
+              />
+            </div>
+
+            <!-- Add Button -->
+            <button
+              class="add-button"
+              @click=${this._handleAddWebhook}
+              ?disabled=${this._loading ||
+            !this._selectedWebhookId ||
+            !this._newCode ||
+            !this._newActionName}
+            >
+              <ha-icon icon="mdi:plus"></ha-icon>
+              <span>Add Webhook</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Webhook List -->
+        <div class="settings-group">
+          <div class="group-header">
+            Configured Webhooks (${this._webhooks.length})
+          </div>
+
+          ${this._webhooks.length === 0
+            ? x `
+                <div class="empty-state">
+                  <ha-icon icon="mdi:webhook"></ha-icon>
+                  <div class="empty-state-title">No Webhooks Configured</div>
+                  <div class="empty-state-description">
+                    Add a webhook above to trigger automations from your device
+                  </div>
+                </div>
+              `
+            : x `
+                <div class="webhook-list">
+                  ${this._webhooks.map((webhook) => x `
+                      <div class="webhook-item">
+                        <div class="webhook-icon">
+                          <ha-icon icon="mdi:webhook"></ha-icon>
+                        </div>
+                        <div class="webhook-info">
+                          <div class="webhook-title">
+                            ${webhook.action_name || webhook.code}
+                          </div>
+                          <div class="webhook-details">
+                            <span class="webhook-code">Code: ${webhook.code}</span>
+                            <span class="webhook-id">ID: ${webhook.webhook_id}</span>
+                          </div>
+                        </div>
+                        <div class="webhook-actions">
+                          <button
+                            class="delete-button"
+                            @click=${() => this._handleDeleteWebhook(webhook)}
+                            ?disabled=${this._loading}
+                            title="Delete webhook"
+                          >
+                            <ha-icon icon="mdi:delete"></ha-icon>
+                          </button>
+                        </div>
+                      </div>
+                    `)}
+                </div>
+              `}
+        </div>
+      </div>
+
+      ${this._loading
+            ? x `
+            <div class="loading-overlay">
+              <ha-circular-progress active></ha-circular-progress>
+            </div>
+          `
+            : ""}
+    `;
+    }
+};
+TsuryPhoneWebhooksSettings.styles = i$3 `
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--card-background-color);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      border-bottom: 1px solid var(--divider-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      gap: 12px;
+    }
+
+    .back-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--primary-text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .back-button:hover {
+      background: var(--divider-color);
+    }
+
+    .back-button ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    /* Settings Groups */
+    .settings-group {
+      margin-bottom: 32px;
+    }
+
+    .group-header {
+      padding: 8px 20px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--secondary-text-color);
+    }
+
+    /* Add Webhook Form */
+    .add-webhook-form {
+      margin: 0 20px;
+      padding: 20px;
+      background: var(--card-background-color);
+      border-radius: 12px;
+      border: 1px solid var(--divider-color);
+    }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      margin-bottom: 4px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      background: var(--card-background-color);
+      color: var(--primary-text-color);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .form-input::placeholder {
+      color: var(--secondary-text-color);
+      opacity: 0.6;
+    }
+
+    .loading-message {
+      padding: 16px;
+      text-align: center;
+      color: var(--secondary-text-color);
+      font-size: 14px;
+    }
+
+    /* Webhook detected list */
+    .detected-webhooks {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--secondary-background-color);
+      border-radius: 8px;
+    }
+
+    .detected-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      margin-bottom: 8px;
+    }
+
+    .webhook-chip {
+      display: inline-block;
+      padding: 6px 12px;
+      margin: 4px 4px 4px 0;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      border-radius: 16px;
+      font-size: 12px;
+      font-family: monospace;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .webhook-chip:hover {
+      opacity: 0.8;
+    }
+
+    .webhook-chip.selected {
+      border-color: var(--accent-color, white);
+      box-shadow: 0 0 8px var(--primary-color);
+    }
+
+    /* Add Button */
+    .add-button {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .add-button:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .add-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .add-button ha-icon {
+      --mdc-icon-size: 20px;
+    }
+
+    /* Webhook List */
+    .webhook-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 0 20px;
+    }
+
+    .webhook-item {
+      padding: 16px;
+      background: var(--card-background-color);
+      border-radius: 12px;
+      border: 1px solid var(--divider-color);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .webhook-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .webhook-icon ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .webhook-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .webhook-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--primary-text-color);
+      margin-bottom: 4px;
+    }
+
+    .webhook-details {
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .webhook-code {
+      font-family: monospace;
+      color: var(--primary-color);
+    }
+
+    .webhook-id {
+      font-family: monospace;
+      opacity: 0.8;
+    }
+
+    .webhook-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .delete-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--divider-color);
+      background: transparent;
+      color: rgb(244, 67, 54);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .delete-button:hover {
+      background: rgba(244, 67, 54, 0.1);
+      border-color: rgb(244, 67, 54);
+    }
+
+    .delete-button ha-icon {
+      --mdc-icon-size: 20px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      margin: 0 20px;
+      padding: 48px 20px;
+      text-align: center;
+      color: var(--secondary-text-color);
+    }
+
+    .empty-state ha-icon {
+      --mdc-icon-size: 64px;
+      opacity: 0.3;
+      margin-bottom: 16px;
+    }
+
+    .empty-state-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--primary-text-color);
+    }
+
+    .empty-state-description {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Help Text */
+    .help-text {
+      margin: 0 20px 16px;
+      padding: 12px 16px;
+      background: var(--secondary-background-color);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .help-text ha-icon {
+      --mdc-icon-size: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      color: var(--primary-color);
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    @media (max-width: 480px) {
+      .settings-header {
+        padding: 12px 16px;
+      }
+
+      .add-webhook-form,
+      .webhook-list,
+      .help-text,
+      .empty-state {
+        margin: 0 16px;
+      }
+
+      .webhook-item {
+        padding: 14px;
+      }
+    }
+  `;
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneWebhooksSettings.prototype, "hass", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneWebhooksSettings.prototype, "entityId", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_loading", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_webhooks", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_selectedAutomation", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_detectedWebhookIds", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_selectedWebhookId", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_newCode", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_newActionName", void 0);
+__decorate([
+    r()
+], TsuryPhoneWebhooksSettings.prototype, "_entityPickerLoaded", void 0);
+TsuryPhoneWebhooksSettings = __decorate([
+    t("tsuryphone-webhooks-settings")
+], TsuryPhoneWebhooksSettings);
+
+let TsuryPhoneStatisticsSettings = class TsuryPhoneStatisticsSettings extends i {
+    constructor() {
+        super(...arguments);
+        this._blockedCalls = 0;
+        this._callHistorySize = 0;
+        this._incomingCalls = 0;
+        this._outgoingCalls = 0;
+        this._totalCalls = 0;
+        this._totalTalkTime = 0;
+        this._loading = true;
+    }
+    connectedCallback() {
+        super.connectedCallback();
+        this._loadStatistics();
+    }
+    willUpdate(changedProps) {
+        super.willUpdate(changedProps);
+        if (changedProps.has("hass") && this.hass && this.entityId) {
+            this._loadStatistics();
+        }
+    }
+    updated(changedProps) {
+        super.updated(changedProps);
+        if (changedProps.has("hass") && this.hass && this.entityId) {
+            this._loadStatistics();
+        }
+    }
+    _findEntity(prefix, keywords) {
+        if (!this.hass)
+            return null;
+        const allEntityIds = Object.keys(this.hass.states);
+        // Backend entities DON'T have device_id prefix - search by prefix + keywords only
+        const found = allEntityIds.find((id) => id.startsWith(prefix) && keywords.some(kw => id.includes(kw))) || null;
+        return found;
+    }
+    _loadStatistics() {
+        if (!this.hass || !this.entityId)
+            return;
+        try {
+            // Find diagnostic sensor entities using keyword search
+            // Based on backend screenshot: Blocked Calls, Call History Size, Incoming Calls, etc.
+            // Blocked Calls
+            const blockedCallsSensor = this._findEntity("sensor.", ["blocked_calls"]);
+            if (blockedCallsSensor) {
+                this._blockedCalls = parseInt(this.hass.states[blockedCallsSensor].state) || 0;
+            }
+            // Call History Size
+            const callHistorySensor = this._findEntity("sensor.", ["call_history_size"]);
+            if (callHistorySensor) {
+                this._callHistorySize = parseInt(this.hass.states[callHistorySensor].state) || 0;
+            }
+            // Incoming Calls
+            const incomingCallsSensor = this._findEntity("sensor.", ["incoming_calls"]);
+            if (incomingCallsSensor) {
+                this._incomingCalls = parseInt(this.hass.states[incomingCallsSensor].state) || 0;
+            }
+            // Outgoing Calls
+            const outgoingCallsSensor = this._findEntity("sensor.", ["outgoing_calls"]);
+            if (outgoingCallsSensor) {
+                this._outgoingCalls = parseInt(this.hass.states[outgoingCallsSensor].state) || 0;
+            }
+            // Total Calls
+            const totalCallsSensor = this._findEntity("sensor.", ["total_calls"]);
+            if (totalCallsSensor) {
+                this._totalCalls = parseInt(this.hass.states[totalCallsSensor].state) || 0;
+            }
+            // Total Talk Time (in seconds)
+            const totalTalkTimeSensor = this._findEntity("sensor.", ["total_talk_time"]);
+            if (totalTalkTimeSensor) {
+                this._totalTalkTime = parseFloat(this.hass.states[totalTalkTimeSensor].state) || 0;
+            }
+            this._loading = false;
+        }
+        catch (err) {
+            console.error("Error loading statistics:", err);
+            this._loading = false;
+        }
+    }
+    _formatTalkTime(seconds) {
+        if (seconds < 60) {
+            return `${Math.floor(seconds)}s`;
+        }
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        if (hours > 0) {
+            return `${hours}h ${minutes}m ${secs}s`;
+        }
+        return `${minutes}m ${secs}s`;
+    }
+    _handleBack() {
+        this.dispatchEvent(new CustomEvent("navigate", {
+            detail: { view: "settings" },
+            bubbles: true,
+            composed: true,
+        }));
+    }
+    render() {
+        return x `
+      <div class="settings-header">
+        <button class="back-button" @click=${this._handleBack}>
+          <ha-icon icon="mdi:arrow-left"></ha-icon>
+        </button>
+        <h2 class="header-title">Statistics</h2>
+      </div>
+
+      <div class="settings-content">
+        ${this._loading
+            ? x `
+              <div class="loading-overlay">
+                <div class="loading-spinner"></div>
+              </div>
+            `
+            : ""}
+
+        <div class="statistics-grid">
+          <!-- Blocked Calls -->
+          <div class="stat-card" data-type="blocked">
+            <div class="stat-icon">
+              <ha-icon icon="mdi:phone-cancel"></ha-icon>
+            </div>
+            <div class="stat-value">${this._blockedCalls}</div>
+            <div class="stat-label">Blocked Calls</div>
+          </div>
+
+          <!-- Call History Size -->
+          <div class="stat-card" data-type="history">
+            <div class="stat-icon">
+              <ha-icon icon="mdi:history"></ha-icon>
+            </div>
+            <div class="stat-value">${this._callHistorySize}</div>
+            <div class="stat-label">Call History</div>
+          </div>
+
+          <!-- Incoming Calls -->
+          <div class="stat-card" data-type="incoming">
+            <div class="stat-icon">
+              <ha-icon icon="mdi:phone-incoming"></ha-icon>
+            </div>
+            <div class="stat-value">${this._incomingCalls}</div>
+            <div class="stat-label">Incoming</div>
+          </div>
+
+          <!-- Outgoing Calls -->
+          <div class="stat-card" data-type="outgoing">
+            <div class="stat-icon">
+              <ha-icon icon="mdi:phone-outgoing"></ha-icon>
+            </div>
+            <div class="stat-value">${this._outgoingCalls}</div>
+            <div class="stat-label">Outgoing</div>
+          </div>
+
+          <!-- Total Calls -->
+          <div class="stat-card" data-type="total">
+            <div class="stat-icon">
+              <ha-icon icon="mdi:phone"></ha-icon>
+            </div>
+            <div class="stat-value">${this._totalCalls}</div>
+            <div class="stat-label">Total Calls</div>
+          </div>
+
+          <!-- Total Talk Time -->
+          <div class="stat-card" data-type="time">
+            <div class="stat-icon">
+              <ha-icon icon="mdi:clock-outline"></ha-icon>
+            </div>
+            <div class="stat-value">${this._formatTalkTime(this._totalTalkTime)}</div>
+            <div class="stat-label">Talk Time</div>
+          </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+          <div class="info-title">
+            <ha-icon icon="mdi:information-outline"></ha-icon>
+            About Statistics
+          </div>
+          <p class="info-text">
+            Statistics are collected from your device and show cumulative data
+            since the last factory reset. Call history is limited to the most
+            recent ${this._callHistorySize} calls.
+          </p>
+        </div>
+      </div>
+    `;
+    }
+};
+TsuryPhoneStatisticsSettings.styles = i$3 `
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--card-background-color);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card-background-color);
+      border-bottom: 1px solid var(--divider-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      gap: 12px;
+    }
+
+    .back-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: var(--primary-text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .back-button:hover {
+      background: var(--divider-color);
+    }
+
+    .back-button:active {
+      background: var(--secondary-background-color);
+    }
+
+    .back-button ha-icon {
+      --mdc-icon-size: 24px;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0;
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* Statistics Grid */
+    .statistics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Stat Card */
+    .stat-card {
+      background: var(--card-background-color);
+      border: 1px solid var(--divider-color);
+      border-radius: 12px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-color);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-color);
+      opacity: 0.15;
+    }
+
+    .stat-icon ha-icon {
+      --mdc-icon-size: 28px;
+      color: var(--primary-color);
+    }
+
+    /* Icon color variations */
+    .stat-card[data-type="blocked"] .stat-icon {
+      background: #ff5252;
+      opacity: 0.15;
+    }
+
+    .stat-card[data-type="blocked"] .stat-icon ha-icon {
+      color: #ff5252;
+    }
+
+    .stat-card[data-type="history"] .stat-icon {
+      background: #9c27b0;
+      opacity: 0.15;
+    }
+
+    .stat-card[data-type="history"] .stat-icon ha-icon {
+      color: #9c27b0;
+    }
+
+    .stat-card[data-type="incoming"] .stat-icon {
+      background: #2196f3;
+      opacity: 0.15;
+    }
+
+    .stat-card[data-type="incoming"] .stat-icon ha-icon {
+      color: #2196f3;
+    }
+
+    .stat-card[data-type="outgoing"] .stat-icon {
+      background: #4caf50;
+      opacity: 0.15;
+    }
+
+    .stat-card[data-type="outgoing"] .stat-icon ha-icon {
+      color: #4caf50;
+    }
+
+    .stat-card[data-type="total"] .stat-icon {
+      background: #ff9800;
+      opacity: 0.15;
+    }
+
+    .stat-card[data-type="total"] .stat-icon ha-icon {
+      color: #ff9800;
+    }
+
+    .stat-card[data-type="time"] .stat-icon {
+      background: #00bcd4;
+      opacity: 0.15;
+    }
+
+    .stat-card[data-type="time"] .stat-icon ha-icon {
+      color: #00bcd4;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-text-color);
+      line-height: 1;
+      margin: 0;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--secondary-text-color);
+      text-align: center;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(var(--rgb-card-background-color, 255, 255, 255), 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--divider-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Info Section */
+    .info-section {
+      background: var(--card-background-color);
+      border: 1px solid var(--divider-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .info-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary-text-color);
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-title ha-icon {
+      --mdc-icon-size: 20px;
+      color: var(--primary-color);
+    }
+
+    .info-text {
+      font-size: 14px;
+      color: var(--secondary-text-color);
+      line-height: 1.5;
+      margin: 0;
+    }
+  `;
+__decorate([
+    n({ attribute: false })
+], TsuryPhoneStatisticsSettings.prototype, "hass", void 0);
+__decorate([
+    n({ type: String })
+], TsuryPhoneStatisticsSettings.prototype, "entityId", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_blockedCalls", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_callHistorySize", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_incomingCalls", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_outgoingCalls", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_totalCalls", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_totalTalkTime", void 0);
+__decorate([
+    r()
+], TsuryPhoneStatisticsSettings.prototype, "_loading", void 0);
+TsuryPhoneStatisticsSettings = __decorate([
+    t("tsuryphone-statistics-settings")
+], TsuryPhoneStatisticsSettings);
+
 const SETTINGS_SECTIONS = [
     // General Settings
     {
@@ -4277,29 +8064,15 @@ const SETTINGS_SECTIONS = [
         id: "audio",
         title: "Audio",
         icon: "mdi:volume-high",
-        description: "Earpiece and speaker volume settings",
-        category: "general",
-    },
-    {
-        id: "ring-pattern",
-        title: "Ring Pattern",
-        icon: "mdi:bell-ring",
-        description: "Customize ring tone pattern",
+        description: "Volume, gain, and ring pattern settings",
         category: "general",
     },
     // Device Settings
     {
-        id: "maintenance",
-        title: "Maintenance Mode",
-        icon: "mdi:wrench",
-        description: "Prevent automatic device reboots",
-        category: "device",
-    },
-    {
         id: "device",
         title: "Device Management",
         icon: "mdi:cellphone-cog",
-        description: "Reset and reboot options",
+        description: "Reset, reboot, and integration options",
         category: "device",
     },
     {
@@ -4311,17 +8084,10 @@ const SETTINGS_SECTIONS = [
     },
     // Advanced Settings
     {
-        id: "send-mode",
-        title: "Send Mode",
-        icon: "mdi:send",
-        description: "Dial behavior and card communication",
-        category: "advanced",
-    },
-    {
         id: "webhooks",
         title: "Webhooks",
         icon: "mdi:webhook",
-        description: "Configure event notifications",
+        description: "Dial codes to trigger automations",
         category: "advanced",
     },
     {
@@ -4333,6 +8099,10 @@ const SETTINGS_SECTIONS = [
     },
 ];
 let TsuryPhoneSettingsView = class TsuryPhoneSettingsView extends i {
+    constructor() {
+        super(...arguments);
+        this._activeSetting = null;
+    }
     _handleBack() {
         this.dispatchEvent(new CustomEvent("navigate-back", {
             bubbles: true,
@@ -4340,11 +8110,13 @@ let TsuryPhoneSettingsView = class TsuryPhoneSettingsView extends i {
         }));
     }
     _handleItemClick(sectionId) {
-        this.dispatchEvent(new CustomEvent("settings-navigate", {
-            detail: { section: sectionId },
-            bubbles: true,
-            composed: true,
-        }));
+        this._activeSetting = sectionId;
+    }
+    _handleBackFromSettings(e) {
+        // Stop propagation so the event doesn't bubble up to the main card
+        // This allows individual settings pages to navigate back to settings overview
+        e.stopPropagation();
+        this._activeSetting = null;
     }
     _renderCategorySection(category, label) {
         const sections = SETTINGS_SECTIONS.filter((s) => s.category === category);
@@ -4378,6 +8150,53 @@ let TsuryPhoneSettingsView = class TsuryPhoneSettingsView extends i {
     `;
     }
     render() {
+        // Show individual setting page if active
+        if (this._activeSetting === "dnd") {
+            return x `
+        <tsuryphone-dnd-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-dnd-settings>
+      `;
+        }
+        if (this._activeSetting === "audio") {
+            return x `
+        <tsuryphone-audio-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-audio-settings>
+      `;
+        }
+        if (this._activeSetting === "device") {
+            return x `
+        <tsuryphone-device-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-device-settings>
+      `;
+        }
+        if (this._activeSetting === "webhooks") {
+            return x `
+        <tsuryphone-webhooks-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-webhooks-settings>
+      `;
+        }
+        if (this._activeSetting === "statistics") {
+            return x `
+        <tsuryphone-statistics-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-statistics-settings>
+      `;
+        }
+        // Show settings overview
         return x `
       <div class="settings-header">
         <button
@@ -4601,6 +8420,9 @@ __decorate([
 __decorate([
     n({ type: String })
 ], TsuryPhoneSettingsView.prototype, "entityId", void 0);
+__decorate([
+    r()
+], TsuryPhoneSettingsView.prototype, "_activeSetting", void 0);
 TsuryPhoneSettingsView = __decorate([
     t("tsuryphone-settings-view")
 ], TsuryPhoneSettingsView);
@@ -6993,14 +10815,18 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
                 // Default to missed for unknown types
                 callType = "missed";
             }
+            const normalizedNumber = normalizePhoneNumberForDisplay(call.number, this._defaultDialCode);
+            const contactName = call.name && call.name.trim() ? call.name : normalizedNumber;
+            const hasContactName = !!(call.name && call.name.trim());
             const entry = {
                 id: call.seq || `${call.received_ts}-${call.number}`,
-                contactName: call.name || call.number,
+                contactName: contactName,
                 phoneNumber: call.number,
                 timestamp: new Date(call.received_ts * 1000).toISOString(), // Convert Unix timestamp to ISO string
                 duration: call.duration_s || 0,
                 type: callType,
                 isBlocked: call.call_type === "blocked",
+                hasContactName: hasContactName,
             };
             return entry;
         });
