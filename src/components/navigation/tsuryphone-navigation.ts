@@ -97,6 +97,7 @@ export class TsuryPhoneNavigation extends LitElement {
           flex: 1;
           gap: 4px;
           padding: var(--tsury-spacing-sm);
+          padding-bottom: calc(var(--tsury-spacing-sm) + 6px);
           background: transparent;
           border: none;
           cursor: pointer;
