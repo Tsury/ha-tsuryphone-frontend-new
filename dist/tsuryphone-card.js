@@ -7883,8 +7883,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--primary-color);
-      opacity: 0.15;
+      background: rgba(var(--rgb-primary-color), 0.15);
     }
 
     .stat-icon ha-icon {
@@ -7894,8 +7893,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
 
     /* Icon color variations */
     .stat-card[data-type="blocked"] .stat-icon {
-      background: #ff5252;
-      opacity: 0.15;
+      background: rgba(255, 82, 82, 0.15);
     }
 
     .stat-card[data-type="blocked"] .stat-icon ha-icon {
@@ -7903,8 +7901,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
     }
 
     .stat-card[data-type="history"] .stat-icon {
-      background: #9c27b0;
-      opacity: 0.15;
+      background: rgba(156, 39, 176, 0.15);
     }
 
     .stat-card[data-type="history"] .stat-icon ha-icon {
@@ -7912,8 +7909,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
     }
 
     .stat-card[data-type="incoming"] .stat-icon {
-      background: #2196f3;
-      opacity: 0.15;
+      background: rgba(33, 150, 243, 0.15);
     }
 
     .stat-card[data-type="incoming"] .stat-icon ha-icon {
@@ -7921,8 +7917,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
     }
 
     .stat-card[data-type="outgoing"] .stat-icon {
-      background: #4caf50;
-      opacity: 0.15;
+      background: rgba(76, 175, 80, 0.15);
     }
 
     .stat-card[data-type="outgoing"] .stat-icon ha-icon {
@@ -7930,8 +7925,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
     }
 
     .stat-card[data-type="total"] .stat-icon {
-      background: #ff9800;
-      opacity: 0.15;
+      background: rgba(255, 152, 0, 0.15);
     }
 
     .stat-card[data-type="total"] .stat-icon ha-icon {
@@ -7939,8 +7933,7 @@ TsuryPhoneStatisticsSettings.styles = i$3 `
     }
 
     .stat-card[data-type="time"] .stat-icon {
-      background: #00bcd4;
-      opacity: 0.15;
+      background: rgba(0, 188, 212, 0.15);
     }
 
     .stat-card[data-type="time"] .stat-icon ha-icon {
