@@ -266,7 +266,7 @@ export class TsuryPhoneDiagnosticsSettings extends LitElement {
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;

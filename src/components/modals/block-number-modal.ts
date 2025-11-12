@@ -385,7 +385,7 @@ export class BlockNumberModal extends LitElement {
     .button-primary:hover:not(:disabled) {
       background: var(--error-color-dark, #d32f2f);
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+      opacity: 0.9;
     }
 
     .button-primary:active:not(:disabled) {

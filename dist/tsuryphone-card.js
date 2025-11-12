@@ -4234,9 +4234,10 @@ let TsuryPhoneBlockedView = class TsuryPhoneBlockedView extends i {
           width: 18px;
           height: 18px;
           border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.6);
-          border-top-color: rgba(255, 255, 255, 1);
+          border: 2px solid currentColor;
+          border-top-color: transparent;
           animation: spin 0.8s linear infinite;
+          opacity: 0.6;
         }
 
         @keyframes spin {
@@ -6606,7 +6607,7 @@ TsuryPhoneDeviceSettings.styles = i$3 `
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.5));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -8540,7 +8541,7 @@ TsuryPhoneDiagnosticsSettings.styles = i$3 `
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: var(--mdc-dialog-scrim-color, rgba(0, 0, 0, 0.3));
       display: flex;
       align-items: center;
       justify-content: center;

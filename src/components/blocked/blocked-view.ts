@@ -394,9 +394,10 @@ export class TsuryPhoneBlockedView extends LitElement {
           width: 18px;
           height: 18px;
           border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.6);
-          border-top-color: rgba(255, 255, 255, 1);
+          border: 2px solid currentColor;
+          border-top-color: transparent;
           animation: spin 0.8s linear infinite;
+          opacity: 0.6;
         }
 
         @keyframes spin {
