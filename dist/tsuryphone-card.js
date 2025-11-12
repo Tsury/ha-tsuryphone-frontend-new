@@ -8620,19 +8620,19 @@ const SETTINGS_SECTIONS = [
         description: "Device health and system information",
         category: "device",
     },
+    {
+        id: "statistics",
+        title: "Statistics",
+        icon: "mdi:chart-line",
+        description: "Call history and usage data",
+        category: "device",
+    },
     // Advanced Settings
     {
         id: "webhooks",
         title: "Webhooks",
         icon: "mdi:webhook",
         description: "Dial codes to trigger automations",
-        category: "advanced",
-    },
-    {
-        id: "statistics",
-        title: "Statistics",
-        icon: "mdi:chart-line",
-        description: "Call history and usage data",
         category: "advanced",
     },
 ];
