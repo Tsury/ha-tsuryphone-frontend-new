@@ -574,9 +574,13 @@ export class TsuryPhoneAudioSettings extends LitElement {
     this._handleSliderChange("number.speaker_gain", value);
   }
 
-  private _handleRingerCycleDurationChange(e: Event): void {
+  private _handleRingerCycleDurationInput(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value);
     this._ringerCycleDuration = value;
+  }
+
+  private _handleRingerCycleDurationChange(e: Event): void {
+    const value = parseInt((e.target as HTMLInputElement).value);
     this._handleSliderChange("number.ringer_cycle_duration", value);
   }
 
@@ -930,7 +934,8 @@ export class TsuryPhoneAudioSettings extends LitElement {
                 max="100"
                 step="1"
                 .value=${this._ringerCycleDuration.toString()}
-                @input=${this._handleRingerCycleDurationChange}
+                @input=${this._handleRingerCycleDurationInput}
+                @change=${this._handleRingerCycleDurationChange}
                 aria-label="Ringer cycle duration"
               />
               <div class="slider-max">100</div>

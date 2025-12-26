@@ -5089,9 +5089,12 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
         this._speakerGain = value;
         this._handleSliderChange("number.speaker_gain", value);
     }
-    _handleRingerCycleDurationChange(e) {
+    _handleRingerCycleDurationInput(e) {
         const value = parseInt(e.target.value);
         this._ringerCycleDuration = value;
+    }
+    _handleRingerCycleDurationChange(e) {
+        const value = parseInt(e.target.value);
         this._handleSliderChange("number.ringer_cycle_duration", value);
     }
     _validateRingPattern(pattern) {
@@ -5413,7 +5416,8 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
                 max="100"
                 step="1"
                 .value=${this._ringerCycleDuration.toString()}
-                @input=${this._handleRingerCycleDurationChange}
+                @input=${this._handleRingerCycleDurationInput}
+                @change=${this._handleRingerCycleDurationChange}
                 aria-label="Ringer cycle duration"
               />
               <div class="slider-max">100</div>
