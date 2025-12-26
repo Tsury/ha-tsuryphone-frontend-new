@@ -11,6 +11,7 @@ export class TsuryPhoneAudioSettings extends LitElement {
   @state() private _earpieceGain = 4;
   @state() private _speakerVolume = 4;
   @state() private _speakerGain = 4;
+  @state() private _ringerCycleDuration = 30;
   @state() private _ringPattern = "";
   @state() private _customPattern = "";
   @state() private _patternError = "";
@@ -307,6 +308,33 @@ export class TsuryPhoneAudioSettings extends LitElement {
       gap: 8px;
     }
 
+    .pattern-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .save-button {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 80px;
+      height: 44px; /* Match input height approx */
+    }
+
+    .save-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .pattern-input {
       width: 100%;
       padding: 12px 16px;
@@ -422,6 +450,7 @@ export class TsuryPhoneAudioSettings extends LitElement {
     const earpieceGainEntity = this._findEntity("number.earpiece_gain");
     const speakerVolumeEntity = this._findEntity("number.speaker_volume");
     const speakerGainEntity = this._findEntity("number.speaker_gain");
+    const ringerCycleDurationEntity = this._findEntity("number.ringer_cycle_duration");
     const ringPatternCustomEntity = this._findEntity("text.ring_pattern_custom");
 
     if (earpieceVolumeEntity) {
@@ -452,10 +481,21 @@ export class TsuryPhoneAudioSettings extends LitElement {
       }
     }
 
+    if (ringerCycleDurationEntity) {
+      const value = parseFloat(this.hass.states[ringerCycleDurationEntity].state);
+      if (!isNaN(value)) {
+        this._ringerCycleDuration = Math.round(value);
+      }
+    }
+
     if (ringPatternCustomEntity) {
       const pattern = this.hass.states[ringPatternCustomEntity].state || "";
-      this._ringPattern = pattern;
-      this._customPattern = pattern;
+      
+      // Only update if server state changed
+      if (pattern !== this._ringPattern) {
+        this._ringPattern = pattern;
+        this._customPattern = pattern;
+      }
     }
   }
 
@@ -532,6 +572,12 @@ export class TsuryPhoneAudioSettings extends LitElement {
     const value = parseInt((e.target as HTMLInputElement).value);
     this._speakerGain = value;
     this._handleSliderChange("number.speaker_gain", value);
+  }
+
+  private _handleRingerCycleDurationChange(e: Event): void {
+    const value = parseInt((e.target as HTMLInputElement).value);
+    this._ringerCycleDuration = value;
+    this._handleSliderChange("number.ringer_cycle_duration", value);
   }
 
   private _validateRingPattern(pattern: string): string | null {
@@ -624,12 +670,13 @@ export class TsuryPhoneAudioSettings extends LitElement {
     // Validate pattern
     const error = this._validateRingPattern(pattern);
     this._patternError = error || "";
+  }
 
-    // Only save if valid
-    if (!error) {
-      this._ringPattern = pattern;
-      this._saveRingPattern(pattern);
-    }
+  private _handleSavePattern(): void {
+    if (this._patternError) return;
+    // Don't update local _ringPattern yet, let the state update handle it
+    // to avoid race condition in _loadAudioSettings
+    this._saveRingPattern(this._customPattern);
   }
 
   private async _saveRingPattern(pattern: string): Promise<void> {
@@ -858,6 +905,37 @@ export class TsuryPhoneAudioSettings extends LitElement {
               <div class="slider-max">7</div>
             </div>
           </div>
+
+          <!-- Ringer Cycle Duration -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:sine-wave"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Ringer Cycle Duration</div>
+                  <div class="slider-description">
+                    Adjust ringer frequency (ms)
+                  </div>
+                </div>
+              </div>
+              <div class="slider-value">${this._ringerCycleDuration}</div>
+            </div>
+            <div class="slider-control">
+              <div class="slider-min">10</div>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                step="1"
+                .value=${this._ringerCycleDuration.toString()}
+                @input=${this._handleRingerCycleDurationChange}
+                aria-label="Ringer cycle duration"
+              />
+              <div class="slider-max">100</div>
+            </div>
+          </div>
         </div>
 
         <!-- Audio Help Text -->
@@ -866,8 +944,9 @@ export class TsuryPhoneAudioSettings extends LitElement {
           <div>
             <strong>Volume</strong> controls the overall loudness, while
             <strong>Gain</strong> controls the signal amplification. Adjust
-            both settings to find your optimal audio quality. Changes take
-            effect immediately.
+            both settings to find your optimal audio quality. 
+            <strong>Ringer Cycle Duration</strong> tunes the mechanical ringer frequency.
+            Changes take effect immediately.
           </div>
         </div>
 
@@ -906,15 +985,25 @@ export class TsuryPhoneAudioSettings extends LitElement {
               Custom Pattern
             </label>
             <div class="pattern-input-container">
-              <input
-                id="pattern-custom"
-                type="text"
-                class="pattern-input ${this._patternError ? "error" : ""}"
-                .value=${this._customPattern}
-                @input=${this._handleCustomPatternChange}
-                placeholder="e.g., 500,500,500 or 300,300x2"
-                aria-label="Custom ring pattern"
-              />
+              <div class="pattern-input-row">
+                <input
+                  id="pattern-custom"
+                  type="text"
+                  class="pattern-input ${this._patternError ? "error" : ""}"
+                  .value=${this._customPattern}
+                  @input=${this._handleCustomPatternChange}
+                  placeholder="e.g., 500,500,500 or 300,300x2"
+                  aria-label="Custom ring pattern"
+                />
+                <button
+                  class="save-button"
+                  @click=${this._handleSavePattern}
+                  ?disabled=${!!this._patternError ||
+                  this._customPattern === this._ringPattern}
+                >
+                  Save
+                </button>
+              </div>
               ${this._patternError
                 ? html`<div class="pattern-error">${this._patternError}</div>`
                 : html`

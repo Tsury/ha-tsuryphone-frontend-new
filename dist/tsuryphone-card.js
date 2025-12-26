@@ -605,6 +605,7 @@ let TsuryPhoneNavigation = class TsuryPhoneNavigation extends i {
           flex: 1;
           gap: 4px;
           padding: var(--tsury-spacing-sm);
+          padding-bottom: calc(var(--tsury-spacing-sm) + 6px);
           background: transparent;
           border: none;
           cursor: pointer;
@@ -4958,6 +4959,7 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
         this._earpieceGain = 4;
         this._speakerVolume = 4;
         this._speakerGain = 4;
+        this._ringerCycleDuration = 30;
         this._ringPattern = "";
         this._customPattern = "";
         this._patternError = "";
@@ -4990,6 +4992,7 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
         const earpieceGainEntity = this._findEntity("number.earpiece_gain");
         const speakerVolumeEntity = this._findEntity("number.speaker_volume");
         const speakerGainEntity = this._findEntity("number.speaker_gain");
+        const ringerCycleDurationEntity = this._findEntity("number.ringer_cycle_duration");
         const ringPatternCustomEntity = this._findEntity("text.ring_pattern_custom");
         if (earpieceVolumeEntity) {
             const value = parseFloat(this.hass.states[earpieceVolumeEntity].state);
@@ -5015,10 +5018,19 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
                 this._speakerGain = Math.round(value);
             }
         }
+        if (ringerCycleDurationEntity) {
+            const value = parseFloat(this.hass.states[ringerCycleDurationEntity].state);
+            if (!isNaN(value)) {
+                this._ringerCycleDuration = Math.round(value);
+            }
+        }
         if (ringPatternCustomEntity) {
             const pattern = this.hass.states[ringPatternCustomEntity].state || "";
-            this._ringPattern = pattern;
-            this._customPattern = pattern;
+            // Only update if server state changed
+            if (pattern !== this._ringPattern) {
+                this._ringPattern = pattern;
+                this._customPattern = pattern;
+            }
         }
     }
     _findEntity(entitySuffix) {
@@ -5076,6 +5088,11 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
         const value = parseInt(e.target.value);
         this._speakerGain = value;
         this._handleSliderChange("number.speaker_gain", value);
+    }
+    _handleRingerCycleDurationChange(e) {
+        const value = parseInt(e.target.value);
+        this._ringerCycleDuration = value;
+        this._handleSliderChange("number.ringer_cycle_duration", value);
     }
     _validateRingPattern(pattern) {
         const normalized = pattern.trim();
@@ -5153,11 +5170,13 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
         // Validate pattern
         const error = this._validateRingPattern(pattern);
         this._patternError = error || "";
-        // Only save if valid
-        if (!error) {
-            this._ringPattern = pattern;
-            this._saveRingPattern(pattern);
-        }
+    }
+    _handleSavePattern() {
+        if (this._patternError)
+            return;
+        // Don't update local _ringPattern yet, let the state update handle it
+        // to avoid race condition in _loadAudioSettings
+        this._saveRingPattern(this._customPattern);
     }
     async _saveRingPattern(pattern) {
         const entityId = this._findEntity("text.ring_pattern_custom");
@@ -5196,6 +5215,8 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
             await this.hass.callService("tsuryphone", "ring_device", {
                 pattern: pattern,
                 force: false,
+            }, {
+                entity_id: this.entityId,
             });
         }
         catch (error) {
@@ -5367,6 +5388,37 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
               <div class="slider-max">7</div>
             </div>
           </div>
+
+          <!-- Ringer Cycle Duration -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:sine-wave"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Ringer Cycle Duration</div>
+                  <div class="slider-description">
+                    Adjust ringer frequency (ms)
+                  </div>
+                </div>
+              </div>
+              <div class="slider-value">${this._ringerCycleDuration}</div>
+            </div>
+            <div class="slider-control">
+              <div class="slider-min">10</div>
+              <input
+                type="range"
+                min="10"
+                max="100"
+                step="1"
+                .value=${this._ringerCycleDuration.toString()}
+                @input=${this._handleRingerCycleDurationChange}
+                aria-label="Ringer cycle duration"
+              />
+              <div class="slider-max">100</div>
+            </div>
+          </div>
         </div>
 
         <!-- Audio Help Text -->
@@ -5375,8 +5427,9 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
           <div>
             <strong>Volume</strong> controls the overall loudness, while
             <strong>Gain</strong> controls the signal amplification. Adjust
-            both settings to find your optimal audio quality. Changes take
-            effect immediately.
+            both settings to find your optimal audio quality. 
+            <strong>Ringer Cycle Duration</strong> tunes the mechanical ringer frequency.
+            Changes take effect immediately.
           </div>
         </div>
 
@@ -5413,15 +5466,25 @@ let TsuryPhoneAudioSettings = class TsuryPhoneAudioSettings extends i {
               Custom Pattern
             </label>
             <div class="pattern-input-container">
-              <input
-                id="pattern-custom"
-                type="text"
-                class="pattern-input ${this._patternError ? "error" : ""}"
-                .value=${this._customPattern}
-                @input=${this._handleCustomPatternChange}
-                placeholder="e.g., 500,500,500 or 300,300x2"
-                aria-label="Custom ring pattern"
-              />
+              <div class="pattern-input-row">
+                <input
+                  id="pattern-custom"
+                  type="text"
+                  class="pattern-input ${this._patternError ? "error" : ""}"
+                  .value=${this._customPattern}
+                  @input=${this._handleCustomPatternChange}
+                  placeholder="e.g., 500,500,500 or 300,300x2"
+                  aria-label="Custom ring pattern"
+                />
+                <button
+                  class="save-button"
+                  @click=${this._handleSavePattern}
+                  ?disabled=${!!this._patternError ||
+            this._customPattern === this._ringPattern}
+                >
+                  Save
+                </button>
+              </div>
               ${this._patternError
             ? x `<div class="pattern-error">${this._patternError}</div>`
             : x `
@@ -5737,6 +5800,33 @@ TsuryPhoneAudioSettings.styles = i$3 `
       gap: 8px;
     }
 
+    .pattern-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .save-button {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-color);
+      color: var(--text-primary-color, white);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 80px;
+      height: 44px; /* Match input height approx */
+    }
+
+    .save-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .pattern-input {
       width: 100%;
       padding: 12px 16px;
@@ -5852,6 +5942,9 @@ __decorate([
 __decorate([
     r()
 ], TsuryPhoneAudioSettings.prototype, "_speakerGain", void 0);
+__decorate([
+    r()
+], TsuryPhoneAudioSettings.prototype, "_ringerCycleDuration", void 0);
 __decorate([
     r()
 ], TsuryPhoneAudioSettings.prototype, "_ringPattern", void 0);
@@ -11111,9 +11204,10 @@ let TsuryPhoneCard = class TsuryPhoneCard extends i {
     async _refreshData() {
         if (!this.hass)
             return;
+        const entityId = this._getPhoneStateEntityId();
         try {
             // Call service to get latest call history
-            const response = (await this.hass.callService("tsuryphone", "get_call_history", { limit: 1000 }, true));
+            const response = (await this.hass.callService("tsuryphone", "get_call_history", { limit: 1000, entity_id: entityId }, true));
             if (response && response.call_history) {
                 this._callHistoryCache = response.call_history;
             }
