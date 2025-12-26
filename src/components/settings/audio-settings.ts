@@ -672,10 +672,17 @@ export class TsuryPhoneAudioSettings extends LitElement {
     this._loading = true;
 
     try {
-      await this.hass.callService("tsuryphone", "ring_device", {
-        pattern: pattern,
-        force: false,
-      });
+      await this.hass.callService(
+        "tsuryphone",
+        "ring_device",
+        {
+          pattern: pattern,
+          force: false,
+        },
+        {
+          entity_id: this.entityId,
+        }
+      );
     } catch (error) {
       console.error("Failed to test ring:", error);
     } finally {

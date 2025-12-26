@@ -575,12 +575,14 @@ export class TsuryPhoneCard extends LitElement {
   private async _refreshData(): Promise<void> {
     if (!this.hass) return;
 
+    const entityId = this._getPhoneStateEntityId();
+
     try {
       // Call service to get latest call history
       const response = (await this.hass.callService(
         "tsuryphone",
         "get_call_history",
-        { limit: 1000 },
+        { limit: 1000, entity_id: entityId },
         true
       )) as any;
 
