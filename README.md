@@ -50,8 +50,8 @@ src/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Tsury/ha-tsuryphone-frontend-new.git
-cd ha-tsuryphone-frontend-new
+git clone https://github.com/Tsury/ha-tsuryphone-frontend.git
+cd ha-tsuryphone-frontend
 ```
 
 2. Install dependencies:

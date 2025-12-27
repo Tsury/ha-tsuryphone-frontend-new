@@ -6,12 +6,12 @@
   "main": "dist/tsuryphone-card.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Tsury/ha-tsuryphone-frontend-new.git"
+    "url": "https://github.com/Tsury/ha-tsuryphone-frontend.git"
   },
   "bugs": {
-    "url": "https://github.com/Tsury/ha-tsuryphone-frontend-new/issues"
+    "url": "https://github.com/Tsury/ha-tsuryphone-frontend/issues"
   },
-  "homepage": "https://github.com/Tsury/ha-tsuryphone-frontend-new#readme",
+  "homepage": "https://github.com/Tsury/ha-tsuryphone-frontend#readme",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",

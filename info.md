@@ -38,7 +38,7 @@ A custom Home Assistant Lovelace card for managing calls with the TsuryPhone int
 
 ### Manual Installation
 
-1. Download `tsuryphone-card.js` from the [latest release](https://github.com/Tsury/ha-tsuryphone-frontend-new/releases)
+1. Download `tsuryphone-card.js` from the [latest release](https://github.com/Tsury/ha-tsuryphone-frontend/releases)
 2. Copy it to your `config/www` folder
 3. Add the resource in your Lovelace configuration:
    ```yaml
@@ -73,7 +73,7 @@ entity: sensor.tsuryphone_phone_state
 ## Support
 
 For issues, feature requests, or questions:
-- [GitHub Issues](https://github.com/Tsury/ha-tsuryphone-frontend-new/issues)
+- [GitHub Issues](https://github.com/Tsury/ha-tsuryphone-frontend/issues)
 - [Home Assistant Community](https://community.home-assistant.io/)
 
 ## Credits
