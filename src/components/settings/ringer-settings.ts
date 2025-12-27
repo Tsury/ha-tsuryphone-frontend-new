@@ -799,79 +799,6 @@ export class TsuryPhoneRingerSettings extends LitElement {
       </div>
 
       <div class="settings-content">
-        <!-- Ringer Calibration -->
-        <div class="settings-group">
-          <div class="group-header">Calibration</div>
-
-          <div class="slider-item">
-            <div class="slider-header">
-              <div class="slider-label-container">
-                <div class="slider-icon">
-                  <ha-icon icon="mdi:sine-wave"></ha-icon>
-                </div>
-                <div class="slider-info">
-                  <div class="slider-title">Ringer Calibration</div>
-                  <div class="slider-description">
-                    Tune mechanical resonance (ms)
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="calibration-control">
-              <div class="calibration-input-group">
-                <button 
-                  class="calibration-button" 
-                  @click=${this._decrementDuration}
-                  ?disabled=${this._ringerCycleDuration <= 1}
-                >-</button>
-                <input
-                  type="number"
-                  class="calibration-input"
-                  min="1"
-                  max="100"
-                  .value=${this._ringerCycleDuration.toString()}
-                  @change=${this._handleCycleDurationInput}
-                />
-                <button 
-                  class="calibration-button" 
-                  @click=${this._incrementDuration}
-                  ?disabled=${this._ringerCycleDuration >= 100}
-                >+</button>
-              </div>
-              
-              <div class="ring-actions">
-                <button 
-                  class="action-button btn-ring"
-                  @click=${this._handleCalibrationRing}
-                  ?disabled=${this._isRinging}
-                >
-                  <ha-icon icon="mdi:bell-ring"></ha-icon>
-                  Ring
-                </button>
-                <button 
-                  class="action-button btn-stop"
-                  @click=${this._handleStopRinging}
-                  ?disabled=${!this._isRinging}
-                >
-                  <ha-icon icon="mdi:bell-off"></ha-icon>
-                  Stop
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Audio Help Text -->
-        <div class="help-text">
-          <ha-icon icon="mdi:information"></ha-icon>
-          <div>
-            <strong>Ringer Calibration</strong> allows you to find the perfect frequency for your mechanical bell. 
-            Adjust the cycle duration while the phone is ringing to find the "sweet spot" where the ring is loudest and most harmonic.
-            Changes take effect immediately.
-          </div>
-        </div>
-
         <!-- Ring Pattern Settings -->
         <div class="settings-group">
           <div class="group-header">Ring Pattern</div>
@@ -949,6 +876,79 @@ export class TsuryPhoneRingerSettings extends LitElement {
               <ha-icon icon="mdi:bell-ring"></ha-icon>
               <span>Test Ring Pattern</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Ringer Calibration -->
+        <div class="settings-group">
+          <div class="group-header">Calibration</div>
+
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-label-container">
+                <div class="slider-icon">
+                  <ha-icon icon="mdi:sine-wave"></ha-icon>
+                </div>
+                <div class="slider-info">
+                  <div class="slider-title">Ringer Calibration</div>
+                  <div class="slider-description">
+                    Tune mechanical resonance (ms)
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="calibration-control">
+              <div class="calibration-input-group">
+                <button 
+                  class="calibration-button" 
+                  @click=${this._decrementDuration}
+                  ?disabled=${this._ringerCycleDuration <= 1}
+                >-</button>
+                <input
+                  type="number"
+                  class="calibration-input"
+                  min="1"
+                  max="100"
+                  .value=${this._ringerCycleDuration.toString()}
+                  @change=${this._handleCycleDurationInput}
+                />
+                <button 
+                  class="calibration-button" 
+                  @click=${this._incrementDuration}
+                  ?disabled=${this._ringerCycleDuration >= 100}
+                >+</button>
+              </div>
+              
+              <div class="ring-actions">
+                <button 
+                  class="action-button btn-ring"
+                  @click=${this._handleCalibrationRing}
+                  ?disabled=${this._isRinging}
+                >
+                  <ha-icon icon="mdi:bell-ring"></ha-icon>
+                  Ring
+                </button>
+                <button 
+                  class="action-button btn-stop"
+                  @click=${this._handleStopRinging}
+                  ?disabled=${!this._isRinging}
+                >
+                  <ha-icon icon="mdi:bell-off"></ha-icon>
+                  Stop
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Help Text -->
+        <div class="help-text">
+          <ha-icon icon="mdi:information"></ha-icon>
+          <div>
+            <strong>Ringer Calibration</strong> allows you to find the perfect frequency for your mechanical bell. 
+            Adjust the cycle duration while the phone is ringing to find the "sweet spot" where the ring is loudest and most harmonic.
+            Changes take effect immediately.
           </div>
         </div>
       </div>
