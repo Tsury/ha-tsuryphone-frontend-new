@@ -1,4 +1,4 @@
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { LitElement, html, css, CSSResultGroup, TemplateResult, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 
@@ -453,8 +453,10 @@ export class TsuryPhoneRingerSettings extends LitElement {
     this._loadRingerSettings();
   }
 
-  protected willUpdate(): void {
-    this._loadRingerSettings();
+  protected willUpdate(changedProperties: PropertyValues): void {
+    if (changedProperties.has("hass")) {
+      this._loadRingerSettings();
+    }
   }
 
   private _loadRingerSettings(): void {
