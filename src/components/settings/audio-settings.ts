@@ -1,4 +1,4 @@
-import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
+import { LitElement, html, css, CSSResultGroup, TemplateResult, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 
@@ -421,8 +421,10 @@ export class TsuryPhoneAudioSettings extends LitElement {
     this._loadAudioSettings();
   }
 
-  protected willUpdate(): void {
-    this._loadAudioSettings();
+  protected willUpdate(changedProperties: PropertyValues): void {
+    if (changedProperties.has("hass")) {
+      this._loadAudioSettings();
+    }
   }
 
   private _loadAudioSettings(): void {
@@ -514,27 +516,43 @@ export class TsuryPhoneAudioSettings extends LitElement {
     }
   }
 
-  private _handleEarpieceVolumeChange(e: Event): void {
+  private _handleEarpieceVolumeInput(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value);
     this._earpieceVolume = value;
+  }
+
+  private _handleEarpieceVolumeChange(e: Event): void {
+    const value = parseInt((e.target as HTMLInputElement).value);
     this._handleSliderChange("number.earpiece_volume", value);
+  }
+
+  private _handleEarpieceGainInput(e: Event): void {
+    const value = parseInt((e.target as HTMLInputElement).value);
+    this._earpieceGain = value;
   }
 
   private _handleEarpieceGainChange(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value);
-    this._earpieceGain = value;
     this._handleSliderChange("number.earpiece_gain", value);
+  }
+
+  private _handleSpeakerVolumeInput(e: Event): void {
+    const value = parseInt((e.target as HTMLInputElement).value);
+    this._speakerVolume = value;
   }
 
   private _handleSpeakerVolumeChange(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value);
-    this._speakerVolume = value;
     this._handleSliderChange("number.speaker_volume", value);
+  }
+
+  private _handleSpeakerGainInput(e: Event): void {
+    const value = parseInt((e.target as HTMLInputElement).value);
+    this._speakerGain = value;
   }
 
   private _handleSpeakerGainChange(e: Event): void {
     const value = parseInt((e.target as HTMLInputElement).value);
-    this._speakerGain = value;
     this._handleSliderChange("number.speaker_gain", value);
   }
 
@@ -589,7 +607,8 @@ export class TsuryPhoneAudioSettings extends LitElement {
                 max="7"
                 step="1"
                 .value=${this._earpieceVolume.toString()}
-                @input=${this._handleEarpieceVolumeChange}
+                @input=${this._handleEarpieceVolumeInput}
+                @change=${this._handleEarpieceVolumeChange}
                 aria-label="Earpiece volume"
               />
               <div class="slider-max">7</div>
@@ -620,7 +639,8 @@ export class TsuryPhoneAudioSettings extends LitElement {
                 max="7"
                 step="1"
                 .value=${this._earpieceGain.toString()}
-                @input=${this._handleEarpieceGainChange}
+                @input=${this._handleEarpieceGainInput}
+                @change=${this._handleEarpieceGainChange}
                 aria-label="Earpiece gain"
               />
               <div class="slider-max">7</div>
@@ -656,7 +676,8 @@ export class TsuryPhoneAudioSettings extends LitElement {
                 max="7"
                 step="1"
                 .value=${this._speakerVolume.toString()}
-                @input=${this._handleSpeakerVolumeChange}
+                @input=${this._handleSpeakerVolumeInput}
+                @change=${this._handleSpeakerVolumeChange}
                 aria-label="Speaker volume"
               />
               <div class="slider-max">7</div>
@@ -687,7 +708,8 @@ export class TsuryPhoneAudioSettings extends LitElement {
                 max="7"
                 step="1"
                 .value=${this._speakerGain.toString()}
-                @input=${this._handleSpeakerGainChange}
+                @input=${this._handleSpeakerGainInput}
+                @change=${this._handleSpeakerGainChange}
                 aria-label="Speaker gain"
               />
               <div class="slider-max">7</div>
