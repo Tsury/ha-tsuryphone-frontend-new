@@ -11,24 +11,7 @@ export class TsuryPhoneAudioSettings extends LitElement {
   @state() private _earpieceGain = 4;
   @state() private _speakerVolume = 4;
   @state() private _speakerGain = 4;
-  @state() private _ringerCycleDuration = 30;
-  @state() private _ringPattern = "";
-  @state() private _customPattern = "";
-  @state() private _patternError = "";
   @state() private _loading = false;
-
-  // Ring pattern presets from backend
-  private readonly _ringPatternPresets = {
-    Default: "",
-    "Pulse Short": "300,300x2",
-    Classic: "500,500,500",
-    "Long Gap": "800,400,800",
-    Triple: "300,300,300",
-    Stagger: "500,250,500",
-    Alarm: "200,200x5",
-    Slow: "1000",
-    Burst: "150,150x3",
-  };
 
   static styles: CSSResultGroup = css`
     :host {
@@ -450,8 +433,6 @@ export class TsuryPhoneAudioSettings extends LitElement {
     const earpieceGainEntity = this._findEntity("number.earpiece_gain");
     const speakerVolumeEntity = this._findEntity("number.speaker_volume");
     const speakerGainEntity = this._findEntity("number.speaker_gain");
-    const ringerCycleDurationEntity = this._findEntity("number.ringer_cycle_duration");
-    const ringPatternCustomEntity = this._findEntity("text.ring_pattern_custom");
 
     if (earpieceVolumeEntity) {
       const value = parseFloat(this.hass.states[earpieceVolumeEntity].state);
@@ -478,23 +459,6 @@ export class TsuryPhoneAudioSettings extends LitElement {
       const value = parseFloat(this.hass.states[speakerGainEntity].state);
       if (!isNaN(value)) {
         this._speakerGain = Math.round(value);
-      }
-    }
-
-    if (ringerCycleDurationEntity) {
-      const value = parseFloat(this.hass.states[ringerCycleDurationEntity].state);
-      if (!isNaN(value)) {
-        this._ringerCycleDuration = Math.round(value);
-      }
-    }
-
-    if (ringPatternCustomEntity) {
-      const pattern = this.hass.states[ringPatternCustomEntity].state || "";
-      
-      // Only update if server state changed
-      if (pattern !== this._ringPattern) {
-        this._ringPattern = pattern;
-        this._customPattern = pattern;
       }
     }
   }
@@ -572,186 +536,6 @@ export class TsuryPhoneAudioSettings extends LitElement {
     const value = parseInt((e.target as HTMLInputElement).value);
     this._speakerGain = value;
     this._handleSliderChange("number.speaker_gain", value);
-  }
-
-  private _handleRingerCycleDurationInput(e: Event): void {
-    const value = parseInt((e.target as HTMLInputElement).value);
-    this._ringerCycleDuration = value;
-  }
-
-  private _handleRingerCycleDurationChange(e: Event): void {
-    const value = parseInt((e.target as HTMLInputElement).value);
-    this._handleSliderChange("number.ringer_cycle_duration", value);
-  }
-
-  private _validateRingPattern(pattern: string): string | null {
-    const normalized = pattern.trim();
-
-    // Empty pattern is valid (device default)
-    if (!normalized) {
-      return null;
-    }
-
-    // Max length check
-    if (normalized.length > 32) {
-      return "Pattern too long (max 32 characters)";
-    }
-
-    // Valid characters check
-    const validChars = /^[0-9,x]+$/;
-    if (!validChars.test(normalized)) {
-      return "Pattern can only contain digits, commas, and 'x'";
-    }
-
-    // Parse pattern and repeat
-    let base = normalized;
-    let repeatCount = 1;
-
-    if (normalized.includes("x")) {
-      const parts = normalized.split("x");
-      if (parts.length !== 2) {
-        return "Only one 'x' allowed for repeat count";
-      }
-      base = parts[0];
-      const repeatStr = parts[1];
-      if (!repeatStr || !/^\d+$/.test(repeatStr)) {
-        return "Repeat count must be a positive number";
-      }
-      repeatCount = parseInt(repeatStr);
-      if (repeatCount <= 0) {
-        return "Repeat count must be greater than 0";
-      }
-    }
-
-    // Validate segments
-    const segments = base.split(",");
-    if (segments.length === 0 || segments.some((s) => s === "")) {
-      return "Empty segments not allowed";
-    }
-
-    for (const segment of segments) {
-      if (!/^\d+$/.test(segment)) {
-        return "Each segment must be a positive number";
-      }
-      if (parseInt(segment) <= 0) {
-        return "Segment durations must be greater than 0";
-      }
-    }
-
-    // Segment count validation based on repeat
-    if (repeatCount > 1) {
-      if (segments.length % 2 !== 0) {
-        return "Repeated patterns must have even number of segments";
-      }
-    } else {
-      if (segments.length % 2 !== 1) {
-        return "Single patterns must have odd number of segments";
-      }
-    }
-
-    return null;
-  }
-
-  private _handlePatternPresetChange(e: Event): void {
-    const select = e.target as HTMLSelectElement;
-    const presetName = select.value as keyof typeof this._ringPatternPresets;
-    const pattern = this._ringPatternPresets[presetName];
-
-    this._ringPattern = pattern;
-    this._customPattern = pattern;
-    this._patternError = "";
-
-    // Save pattern
-    this._saveRingPattern(pattern);
-  }
-
-  private _handleCustomPatternChange(e: Event): void {
-    const input = e.target as HTMLInputElement;
-    const pattern = input.value;
-
-    this._customPattern = pattern;
-
-    // Validate pattern
-    const error = this._validateRingPattern(pattern);
-    this._patternError = error || "";
-  }
-
-  private _handleSavePattern(): void {
-    if (this._patternError) return;
-    // Don't update local _ringPattern yet, let the state update handle it
-    // to avoid race condition in _loadAudioSettings
-    this._saveRingPattern(this._customPattern);
-  }
-
-  private async _saveRingPattern(pattern: string): Promise<void> {
-    const entityId = this._findEntity("text.ring_pattern_custom");
-
-    if (!entityId) {
-      console.error("Ring pattern custom entity not found");
-      return;
-    }
-
-    this._loading = true;
-
-    try {
-      await this.hass.callService("text", "set_value", {
-        entity_id: entityId,
-        value: pattern,
-      });
-    } catch (error) {
-      console.error("Failed to set ring pattern:", error);
-    } finally {
-      this._loading = false;
-    }
-  }
-
-  private async _handleTestRing(): Promise<void> {
-    if (!this.entityId) {
-      console.error("Entity ID required for test ring");
-      return;
-    }
-
-    const pattern = this._customPattern || this._ringPattern;
-
-    // Validate before testing
-    const error = this._validateRingPattern(pattern);
-    if (error) {
-      this._patternError = error;
-      return;
-    }
-
-    this._loading = true;
-
-    try {
-      await this.hass.callService(
-        "tsuryphone",
-        "ring_device",
-        {
-          pattern: pattern,
-          force: false,
-        },
-        {
-          entity_id: this.entityId,
-        }
-      );
-    } catch (error) {
-      console.error("Failed to test ring:", error);
-    } finally {
-      this._loading = false;
-    }
-  }
-
-  private _getCurrentPresetName(): string {
-    const currentPattern = this._ringPattern;
-
-    // Find matching preset
-    for (const [name, pattern] of Object.entries(this._ringPatternPresets)) {
-      if (pattern === currentPattern) {
-        return name;
-      }
-    }
-
-    return "Default";
   }
 
   private _handleBack(): void {
@@ -909,38 +693,6 @@ export class TsuryPhoneAudioSettings extends LitElement {
               <div class="slider-max">7</div>
             </div>
           </div>
-
-          <!-- Ringer Cycle Duration -->
-          <div class="slider-item">
-            <div class="slider-header">
-              <div class="slider-label-container">
-                <div class="slider-icon">
-                  <ha-icon icon="mdi:sine-wave"></ha-icon>
-                </div>
-                <div class="slider-info">
-                  <div class="slider-title">Ringer Cycle Duration</div>
-                  <div class="slider-description">
-                    Adjust ringer frequency (ms)
-                  </div>
-                </div>
-              </div>
-              <div class="slider-value">${this._ringerCycleDuration}</div>
-            </div>
-            <div class="slider-control">
-              <div class="slider-min">10</div>
-              <input
-                type="range"
-                min="10"
-                max="100"
-                step="1"
-                .value=${this._ringerCycleDuration.toString()}
-                @input=${this._handleRingerCycleDurationInput}
-                @change=${this._handleRingerCycleDurationChange}
-                aria-label="Ringer cycle duration"
-              />
-              <div class="slider-max">100</div>
-            </div>
-          </div>
         </div>
 
         <!-- Audio Help Text -->
@@ -949,89 +701,7 @@ export class TsuryPhoneAudioSettings extends LitElement {
           <div>
             <strong>Volume</strong> controls the overall loudness, while
             <strong>Gain</strong> controls the signal amplification. Adjust
-            both settings to find your optimal audio quality. 
-            <strong>Ringer Cycle Duration</strong> tunes the mechanical ringer frequency.
-            Changes take effect immediately.
-          </div>
-        </div>
-
-        <!-- Ring Pattern Settings -->
-        <div class="settings-group">
-          <div class="group-header">Ring Pattern</div>
-
-          <!-- Pattern Preset Selector -->
-          <div class="slider-item">
-            <label class="pattern-label" for="pattern-preset">
-              Select Preset
-            </label>
-            <select
-              id="pattern-preset"
-              class="pattern-select"
-              .value=${this._getCurrentPresetName()}
-              @change=${this._handlePatternPresetChange}
-            >
-              ${Object.entries(this._ringPatternPresets).map(
-                ([name, pattern]) => html`
-                  <option value=${name}>
-                    ${name}${pattern
-                      ? html` <span style="opacity: 0.6">— ${pattern}</span>`
-                      : html` <span style="opacity: 0.6">
-                          — device default
-                        </span>`}
-                  </option>
-                `
-              )}
-            </select>
-          </div>
-
-          <!-- Custom Pattern Input -->
-          <div class="slider-item">
-            <label class="pattern-label" for="pattern-custom">
-              Custom Pattern
-            </label>
-            <div class="pattern-input-container">
-              <div class="pattern-input-row">
-                <input
-                  id="pattern-custom"
-                  type="text"
-                  class="pattern-input ${this._patternError ? "error" : ""}"
-                  .value=${this._customPattern}
-                  @input=${this._handleCustomPatternChange}
-                  placeholder="e.g., 500,500,500 or 300,300x2"
-                  aria-label="Custom ring pattern"
-                />
-                <button
-                  class="save-button"
-                  @click=${this._handleSavePattern}
-                  ?disabled=${!!this._patternError ||
-                  this._customPattern === this._ringPattern}
-                >
-                  Save
-                </button>
-              </div>
-              ${this._patternError
-                ? html`<div class="pattern-error">${this._patternError}</div>`
-                : html`
-                    <div class="pattern-hint">
-                      Format: duration1,duration2,... (in ms). Use 'x' for
-                      repeats (e.g., 300,300x2). Even segments for repeats, odd
-                      for single.
-                    </div>
-                  `}
-            </div>
-          </div>
-
-          <!-- Test Button -->
-          <div class="slider-item">
-            <button
-              class="test-button"
-              @click=${this._handleTestRing}
-              ?disabled=${!!this._patternError || this._loading}
-              aria-label="Test ring pattern"
-            >
-              <ha-icon icon="mdi:bell-ring"></ha-icon>
-              <span>Test Ring Pattern</span>
-            </button>
+            both settings to find your optimal audio quality.
           </div>
         </div>
       </div>

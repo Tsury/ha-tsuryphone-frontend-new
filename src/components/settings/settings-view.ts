@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../../types/homeassistant";
 import "./dnd-settings";
 import "./audio-settings";
+import "./ringer-settings";
 import "./device-settings";
 import "./webhooks-settings";
 import "./statistics-settings";
@@ -29,7 +30,14 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
     id: "audio",
     title: "Audio",
     icon: "mdi:volume-high",
-    description: "Volume, gain, and ring pattern settings",
+    description: "Volume and gain settings",
+    category: "general",
+  },
+  {
+    id: "ringer",
+    title: "Ringer",
+    icon: "mdi:bell-ring",
+    description: "Calibration and ring patterns",
     category: "general",
   },
   
@@ -348,6 +356,16 @@ export class TsuryPhoneSettingsView extends LitElement {
           .entityId=${this.entityId}
           @navigate-back=${this._handleBackFromSettings}
         ></tsuryphone-audio-settings>
+      `;
+    }
+
+    if (this._activeSetting === "ringer") {
+      return html`
+        <tsuryphone-ringer-settings
+          .hass=${this.hass}
+          .entityId=${this.entityId}
+          @navigate-back=${this._handleBackFromSettings}
+        ></tsuryphone-ringer-settings>
       `;
     }
 
